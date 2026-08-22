@@ -172,6 +172,11 @@
         // ---------------------------------------------------------------
         // Measurement state
         // ---------------------------------------------------------------
+        function setPhase(phase) {
+          state.phase = phase;
+          window.__benchPhase = phase;
+        }
+
         const state = {
           phase: "loading",
           frameIndex: -1,
@@ -316,18 +321,18 @@
             Cesium.Cartesian3.fromDegrees(0, 0, 0),
             100.0,
           );
-          state.phase = "warmup";
+          setPhase("warmup");
           for (let i = 0; i < config.warmup; i++) {
             state.frameIndex = i;
             await waitFrames(1);
           }
-          state.phase = "measuring";
+          setPhase("measuring");
           state.lastFrameTime = 0;
           for (let i = 0; i < config.frames; i++) {
             state.frameIndex = config.warmup + i;
             await waitFrames(1);
           }
-          state.phase = "idle";
+          setPhase("idle");
           if (gpuTimer) {
             await gpuTimer.drain(2000);
           }
@@ -383,7 +388,7 @@
             scene.primitives.add(tileset);
             boundingSphere = tileset.boundingSphere;
 
-            state.phase = "warmup";
+            setPhase("warmup");
             state.frameIndex = 0;
             applyCamera(0);
 
@@ -406,13 +411,13 @@
               ? primitiveBeforeRun._splatDataGeneration
               : 0;
 
-            state.phase = "measuring";
+            setPhase("measuring");
             state.lastFrameTime = 0;
             for (let i = 0; i < config.frames; i++) {
               state.frameIndex = config.warmup + i;
               await waitFrames(1);
             }
-            state.phase = "idle";
+            setPhase("idle");
 
             if (gpuTimer) {
               await gpuTimer.drain(2000);
