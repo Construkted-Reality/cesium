@@ -45,6 +45,7 @@
           dollyFactor: Number(params.get("dolly") ?? 0.4),
           screenSpaceError: Number(params.get("sse") ?? 16),
           empty: params.get("empty") === "1",
+          capture: params.get("capture") === "1",
           loadTimeoutMs: Number(params.get("loadTimeout") ?? 180000),
           label: params.get("label") ?? "run",
         };
@@ -151,7 +152,11 @@
           requestRenderMode: false,
           useBrowserRecommendedResolution: false,
           contextOptions: {
-            webgl: { powerPreference: "high-performance" },
+            webgl: {
+              powerPreference: "high-performance",
+              // Capture runs read the drawing buffer after the frame ends.
+              preserveDrawingBuffer: params.get("capture") === "1",
+            },
           },
         });
 
@@ -251,6 +256,25 @@
             new Cesium.HeadingPitchRange(heading, pitch, range),
           );
           viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+        }
+
+        // Reads the drawing buffer as raw bytes. Used to compare renders
+        // before and after a change, without an image library.
+        function readDrawingBuffer() {
+          const width = scene.drawingBufferWidth;
+          const height = scene.drawingBufferHeight;
+          const pixels = new Uint8Array(width * height * 4);
+          gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+          gl.readPixels(0, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+          let binary = "";
+          const chunk = 0x8000;
+          for (let i = 0; i < pixels.length; i += chunk) {
+            binary += String.fromCharCode.apply(
+              null,
+              pixels.subarray(i, i + chunk),
+            );
+          }
+          return { width: width, height: height, base64: btoa(binary) };
         }
 
         // ---------------------------------------------------------------
@@ -489,6 +513,9 @@
                 gpuMs: gpuValues,
               },
             };
+            if (config.capture) {
+              window.__benchPixels = readDrawingBuffer();
+            }
             document.title = "DONE";
           } catch (error) {
             fail(error && error.stack ? error.stack : error);
