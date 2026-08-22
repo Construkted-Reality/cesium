@@ -193,6 +193,10 @@ const profiling = {
   },
 };
 
+// Identifies a set of positions held by the sort worker. Unique across every
+// primitive so two tilesets cannot collide.
+let nextSorterPositionsKey = 0;
+
 // Two stable frames avoids rebuilding during brief selected-tile jitter.
 const DEFAULT_STABLE_FRAMES = 2;
 // If selection keeps changing, force a rebuild after ~0.5s at 60fps to guarantee progress.
@@ -712,6 +716,7 @@ async function resolvePendingSnapshotSort(
     const currentCount = expectedCount;
     const sortedLen = sortedData?.length;
     if (expectedCount !== currentCount || sortedLen !== expectedCount) {
+      primitive._invalidateSorterPositions();
       primitive._pendingSortPromise = undefined;
       primitive._pendingSort = undefined;
       if (pendingSort.snapshot.state === SnapshotState.SORTING) {
@@ -729,6 +734,7 @@ async function resolvePendingSnapshotSort(
     primitive._pendingSnapshot = undefined;
     GaussianSplatPrimitive.buildGSplatDrawCommand(primitive, frameState);
   } catch (err) {
+    primitive._invalidateSorterPositions();
     if (
       !defined(pendingSort) ||
       pendingSort.snapshot !== primitive._pendingSnapshot
@@ -767,6 +773,7 @@ async function resolveSteadySort(primitive, activeSort, sortPromise) {
       expectedCount !== currentCount || sortedLen !== expectedCount;
     if (!isActive || isMismatch) {
       if (isActive) {
+        primitive._invalidateSorterPositions();
         primitive._sorterPromise = undefined;
         primitive._sorterState = GaussianSplatSortingState.IDLE;
       }
@@ -775,6 +782,7 @@ async function resolveSteadySort(primitive, activeSort, sortPromise) {
     primitive._indexes = sortedData;
     primitive._sorterState = GaussianSplatSortingState.SORTED;
   } catch (err) {
+    primitive._invalidateSorterPositions();
     if (!isActiveSort(primitive, activeSort)) {
       return;
     }
@@ -919,6 +927,20 @@ function GaussianSplatPrimitive(options) {
    * @private
    */
   this._scratchAggregateShBuffer = undefined;
+
+  /**
+   * Identifies the position set that the sort worker holds for this primitive,
+   * and the splat data generation it was built from. Zero means the worker
+   * holds nothing, so the next sort request must send the positions.
+   * @type {number}
+   * @private
+   */
+  this._sorterPositionsKey = 0;
+  /**
+   * @type {number}
+   * @private
+   */
+  this._sorterPositionsGeneration = -1;
   this._selectedTilesStableFrames = 0;
   this._needsSnapshotRebuild = false;
   this._snapshotRebuildStallFrames = 0;
@@ -1199,8 +1221,50 @@ GaussianSplatPrimitive.prototype._wrappedUpdate = function (frameState) {
  * Destroys the primitive and releases its resources in a deterministic manner.
  * @private
  */
+/**
+ * Returns the positions to send with the next sort request, or `undefined`
+ * when the worker already holds them.
+ *
+ * The worker keeps one copy of the positions per key. A copy is only made when
+ * the splat data generation changes, because the transfer detaches the buffer
+ * that is handed over.
+ *
+ * @param {number} dataGeneration The current splat data generation.
+ * @param {Float32Array} positions The current splat positions.
+ * @returns {Float32Array|undefined} A copy to send, or `undefined` to reuse the
+ *          copy held by the worker.
+ * @private
+ */
+GaussianSplatPrimitive.prototype._prepareSorterPositions = function (
+  dataGeneration,
+  positions,
+) {
+  if (
+    this._sorterPositionsGeneration === dataGeneration &&
+    this._sorterPositionsKey !== 0
+  ) {
+    return undefined;
+  }
+  this._sorterPositionsGeneration = dataGeneration;
+  this._sorterPositionsKey = ++nextSorterPositionsKey;
+  return new Float32Array(positions);
+};
+
+/**
+ * Forgets which position set the worker holds, so the next sort request sends
+ * the positions again. Called when a sort result is discarded, because a
+ * discarded result may mean the worker lost its copy.
+ *
+ * @private
+ */
+GaussianSplatPrimitive.prototype._invalidateSorterPositions = function () {
+  this._sorterPositionsGeneration = -1;
+  this._sorterPositionsKey = 0;
+};
+
 GaussianSplatPrimitive.prototype.destroy = function () {
   this._positions = undefined;
+  this._invalidateSorterPositions();
   this._rotations = undefined;
   this._scales = undefined;
   this._colors = undefined;
@@ -2069,7 +2133,10 @@ GaussianSplatPrimitive.prototype.update = function (frameState) {
           snapshot: pending,
         };
         const copyStart = profiling.begin();
-        const sortPositions = new Float32Array(pending.positions);
+        const sortPositions = this._prepareSorterPositions(
+          dataGeneration,
+          pending.positions,
+        );
         profiling.add("sortPositionCopy", copyStart);
         const scheduleStart = profiling.begin();
         const sortPromise = GaussianSplatSorter.radixSortIndexes({
@@ -2079,6 +2146,7 @@ GaussianSplatPrimitive.prototype.update = function (frameState) {
             count: pending.numSplats,
           },
           sortType: "Index",
+          positionsKey: this._sorterPositionsKey,
         });
         profiling.add("sortSchedule", scheduleStart);
         if (!defined(sortPromise)) {
@@ -2132,7 +2200,10 @@ GaussianSplatPrimitive.prototype.update = function (frameState) {
         expectedCount: expectedCount,
       };
       const copyStart = profiling.begin();
-      const sortPositions = new Float32Array(this._positions);
+      const sortPositions = this._prepareSorterPositions(
+        dataGeneration,
+        this._positions,
+      );
       profiling.add("sortPositionCopy", copyStart);
       const scheduleStart = profiling.begin();
       const rawPromise = GaussianSplatSorter.radixSortIndexes({
@@ -2142,6 +2213,7 @@ GaussianSplatPrimitive.prototype.update = function (frameState) {
           count: this._numSplats,
         },
         sortType: "Index",
+        positionsKey: this._sorterPositionsKey,
       });
       profiling.add("sortSchedule", scheduleStart);
       this._sorterPromise = rawPromise;
@@ -2171,7 +2243,10 @@ GaussianSplatPrimitive.prototype.update = function (frameState) {
         expectedCount: expectedCount,
       };
       const copyStart = profiling.begin();
-      const sortPositions = new Float32Array(this._positions);
+      const sortPositions = this._prepareSorterPositions(
+        dataGeneration,
+        this._positions,
+      );
       profiling.add("sortPositionCopy", copyStart);
       const scheduleStart = profiling.begin();
       const rawPromise = GaussianSplatSorter.radixSortIndexes({
@@ -2181,6 +2256,7 @@ GaussianSplatPrimitive.prototype.update = function (frameState) {
           count: this._numSplats,
         },
         sortType: "Index",
+        positionsKey: this._sorterPositionsKey,
       });
       profiling.add("sortSchedule", scheduleStart);
       this._sorterPromise = rawPromise;

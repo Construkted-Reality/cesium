@@ -51,6 +51,7 @@ GaussianSplatSorter._getSorterTaskProcessor = function () {
  *
  * @param {object} parameters - The parameters for sorting Gaussian splat indexes.
  * @param {object} parameters.primitive - The primitive containing positions and modelView matrices.
+ * @param {number} parameters.positionsKey - Identifies the position set held by the worker.
  * @returns {Promise|undefined} A promise that resolves to the sorted indexes or undefined if the task cannot be scheduled.
  * @exception {RuntimeError} Sorter could not be initialized.
  * @private
@@ -65,9 +66,11 @@ GaussianSplatSorter.radixSortIndexes = function (parameters) {
     return;
   }
 
-  return sorterTaskProcessor.scheduleTask(parameters, [
-    parameters.primitive.positions.buffer,
-  ]);
+  // Positions are only present on the first request for a position set. Later
+  // requests reuse the copy that the worker already holds.
+  const positions = parameters.primitive.positions;
+  const transferableObjects = defined(positions) ? [positions.buffer] : [];
+  return sorterTaskProcessor.scheduleTask(parameters, transferableObjects);
 };
 
 export default GaussianSplatSorter;
