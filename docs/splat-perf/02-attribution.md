@@ -1,27 +1,33 @@
 # Where the graphics time goes
 
-Date: 2026-08-21. Hardware and toolchain: see `00-environment.md`.
+Date: 2026-08-21, corrected 2026-08-22. Hardware and toolchain: see
+`00-environment.md`.
+
+## Correction notice
+
+An earlier version of this file said that a draw without instancing costs
+1.0 ms less than the instanced draw. That claim was wrong. See
+"The measurement that failed" at the end of this file. The vertex shader
+attribution below is unaffected, because every one of those variants used the
+instanced path.
 
 ## Summary
 
-The splat renderer is not fill bound. It is bound by the number of vertex
-invocations, and most of that cost is the structure of the draw, not the work
-inside the vertex shader.
-
-At 1.93 million splats, 1920 by 1080, screen space error 4, the graphics
-processor spends 4.14 ms per frame. Of that:
+The splat renderer is not fill bound. At 1.93 million splats, 1920 by 1080,
+screen space error 4, the graphics processor spends 4.14 ms per frame. Of that:
 
 | Part | Cost | Share |
 | --- | --- | --- |
-| Vertex invocations that write only a clip position | 2.55 ms | 62% |
+| A per pixel floor that no splat causes | 1.50 ms | 36% |
+| Vertex invocations that write only a clip position | 1.05 ms | 25% |
 | Rasterization and blending of the quads | 1.08 ms | 26% |
 | Everything the vertex shader computes | 0.51 ms | 12% |
 
 The last row includes the position fetch, the covariance fetch, the covariance
 maths and the whole spherical harmonics evaluation.
 
-An equivalent draw without instancing costs 1.51 ms instead of 2.51 ms. That
-is a saving of 1.0 ms, or 24% of the whole frame.
+The floor is the largest single item and it has nothing to do with splat
+geometry. See `03-the-floor.md`.
 
 ## Method
 
@@ -53,27 +59,9 @@ Three results stand out.
    work hides behind rasterization when the quads are large.
 2. The covariance maths is free. The position only variant and the null variant
    are within 0.07 ms of each other.
-3. The null variant still costs 2.55 ms. That is the price of 7.7 million
-   vertex invocations that produce a constant, before any useful work.
-
-## Draw structure variants
-
-These runs use the null vertex shader, so only the shape of the draw changes.
-
-| Variant | Vertices | Triangles | Graphics ms |
-| --- | --- | --- | --- |
-| 1.93 M instances of 4 vertices, strip | 7.7 M | 3.9 M | 2.51 |
-| 1.93 M instances of 2 vertices, strip | 3.9 M | 0 | 1.48 |
-| one draw of 7.7 M vertices, strip | 7.7 M | 7.7 M | 1.51 |
-| one draw of 11.6 M vertices, triangles | 11.6 M | 3.9 M | 1.51 |
-
-Halving the vertices per instance halves the cost, so the instanced path scales
-with vertex invocations and not with instance count.
-
-The two draws without instancing cost the same 1.51 ms, even though one shades
-50% more vertices and the other assembles twice as many triangles. Neither the
-vertex count nor the triangle count binds at that level. The instanced draw
-costs 1.0 ms more for the same geometry.
+3. The null variant still costs 2.55 ms. The floor accounts for 1.50 ms of
+   that. The other 1.05 ms is the price of 7.7 million vertex invocations that
+   produce a constant, before any useful work.
 
 ## What this rules out
 
@@ -93,22 +81,38 @@ pair as evidence that fill dominates. That reading was wrong. The two runs
 differed in splat count, and resolution also changes how many splats pass the
 two pixel size test in the vertex shader.
 
-## What this opens
+## The measurement that failed
 
-Draw the splats without instancing. The shape that keeps four vertex
-invocations per splat is:
+Four runs tried to price the draw structure. They used the null vertex shader
+and changed only the shape of the draw.
 
-1. A static index buffer with six entries per splat, holding
-   `splatSlot * 4 + corner` with corner taken from the list 0, 1, 2, 1, 3, 2.
-   The buffer never changes with the sort order, so it is built once.
-2. `drawElements` over that buffer. The post transform cache turns the six
-   indices into four vertex invocations per splat.
-3. The vertex shader reads `splatSlot` as `gl_VertexID >> 2` and the corner as
-   `gl_VertexID & 3`.
-4. The sorted splat index moves from an instanced vertex attribute to a texture,
-   read with one `texelFetch`. The upload per sort stays at 4 bytes per splat.
+| Variant | Vertices asked for | Graphics ms |
+| --- | --- | --- |
+| 1.93 M instances of 4 vertices, strip | 7.7 M | 2.51 |
+| 1.93 M instances of 2 vertices, strip | 3.9 M | 1.48 |
+| one draw of 7.7 M vertices, strip | 7.7 M | 1.51 |
+| one draw of 11.6 M vertices, triangles | 11.6 M | 1.51 |
 
-Expected result: 4.14 ms falls to about 3.1 ms, a saving of 25%.
+Rows three and four are invalid. `Context.js:1385` clamps a draw that has no
+index buffer:
+
+```js
+count = Math.min(count, va.numberOfVertices);
+```
+
+The vertex array holds 4 vertices, so both of those runs drew 4 vertices. They
+measured an empty scene. Their value of 1.51 ms is the per pixel floor, which
+`03-the-floor.md` measures independently as 1.50 ms. The agreement confirms the
+cause.
+
+Row two is a valid draw, but a triangle strip of 2 vertices makes no triangles.
+It rasterizes nothing, so it is not a clean half of row one.
+
+Only row one is usable. It says that 1.93 million instanced quads with a null
+vertex shader cost 2.51 ms, of which 1.50 ms is the floor.
+
+A retest of the non-instanced draw needs an index buffer, or a vertex array
+whose `numberOfVertices` is at least the draw count. That test has not run.
 
 ## A note on the headless browser
 
