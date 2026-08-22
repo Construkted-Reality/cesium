@@ -36,6 +36,9 @@ function parseArgs(argv) {
     mode: "orbit",
     sse: 16,
     empty: false,
+    msaa: 0,
+    nofxaa: false,
+    nohdr: false,
     pitch: -25,
     range: 1.6,
     step: 0.35,
@@ -59,6 +62,14 @@ function parseArgs(argv) {
       options.empty = true;
       continue;
     }
+    if (key === "nofxaa") {
+      options.nofxaa = true;
+      continue;
+    }
+    if (key === "nohdr") {
+      options.nohdr = true;
+      continue;
+    }
     const value = argv[++i];
     if (
       typeof options[key] === "number" ||
@@ -71,6 +82,7 @@ function parseArgs(argv) {
         "width",
         "height",
         "sse",
+        "msaa",
       ].includes(key)
     ) {
       options[key] = Number(value);
@@ -102,6 +114,15 @@ export async function runBenchmark(options) {
   });
   if (options.empty) {
     query.set("empty", "1");
+  }
+  if (options.msaa) {
+    query.set("msaa", String(options.msaa));
+  }
+  if (options.nofxaa) {
+    query.set("nofxaa", "1");
+  }
+  if (options.nohdr) {
+    query.set("nohdr", "1");
   }
   const url = `${options.server}/tools/splat-perf/harness.html?${query.toString()}`;
 

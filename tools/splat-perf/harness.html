@@ -168,6 +168,16 @@
         scene.moon.show = false;
         scene.fog.enabled = false;
         scene.backgroundColor = Cesium.Color.BLACK;
+        const msaa = Number(params.get("msaa") ?? "0");
+        if (msaa > 0) {
+          scene.msaaSamples = msaa;
+        }
+        if (params.get("nofxaa") === "1") {
+          scene.postProcessStages.fxaa.enabled = false;
+        }
+        if (params.get("nohdr") === "1") {
+          scene.highDynamicRange = false;
+        }
         scene.debugShowFramesPerSecond = false;
         viewer.resolutionScale = 1.0;
 
