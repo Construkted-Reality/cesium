@@ -63,6 +63,20 @@ export default [
     },
   },
   {
+    // Splat performance harness. These files run in Node but contain browser
+    // code inside page.evaluate callbacks, so they need both global sets.
+    files: ["tools/**/*.mjs", "tools/**/*.js"],
+    ...configCesium.configs.node,
+    languageOptions: {
+      ...configCesium.configs.node.languageOptions,
+      sourceType: "module",
+      globals: {
+        ...globals.node,
+        ...globals.browser,
+      },
+    },
+  },
+  {
     files: ["packages/**/*.js", "Apps/**/*.js", "Specs/**/*.js", "**/*.html"],
     ignores: ["packages/sandcastle/scripts/**/*.js"],
     ...configCesium.configs.browser,
