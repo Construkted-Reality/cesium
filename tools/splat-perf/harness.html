@@ -181,6 +181,17 @@
         const gl = scene.context._originalGLContext ?? scene.context._gl;
         const gpuTimer = createGpuTimer(gl);
 
+        // Count how many times the scene executes the splat draw command in a
+        // frame. Cesium splits the depth range into several frustums and runs
+        // the pass once per frustum, so a command can run more than once.
+        const drawCounts = { splat: 0, frames: 0 };
+        scene.debugCommandFilter = function (command) {
+          if (command.owner instanceof Cesium.GaussianSplatPrimitive) {
+            drawCounts.splat++;
+          }
+          return true;
+        };
+
         // ---------------------------------------------------------------
         // Measurement state
         // ---------------------------------------------------------------
@@ -219,6 +230,7 @@
           }
           const now = performance.now();
           if (state.phase === "measuring") {
+            drawCounts.frames++;
             state.cpuMs.push(now - state.cpuStart);
             if (state.lastFrameTime > 0) {
               state.frameMs.push(now - state.lastFrameTime);
@@ -358,6 +370,8 @@
             await waitFrames(1);
           }
           setPhase("measuring");
+          drawCounts.splat = 0;
+          drawCounts.frames = 0;
           state.lastFrameTime = 0;
           for (let i = 0; i < config.frames; i++) {
             state.frameIndex = config.warmup + i;
@@ -379,6 +393,9 @@
                 ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL)
                 : gl.getParameter(gl.RENDERER);
             })(),
+            splatDrawsPerFrame:
+              drawCounts.frames > 0 ? drawCounts.splat / drawCounts.frames : 0,
+            frustumCount: scene._view?.frustumCommandsList?.length ?? -1,
             viewport: {
               width: scene.drawingBufferWidth,
               height: scene.drawingBufferHeight,
@@ -446,6 +463,8 @@
               splatProfiling.reset();
             }
             setPhase("measuring");
+            drawCounts.splat = 0;
+            drawCounts.frames = 0;
             state.lastFrameTime = 0;
             for (let i = 0; i < config.frames; i++) {
               state.frameIndex = config.warmup + i;
@@ -462,7 +481,15 @@
             );
 
             const splatPrimitive = findSplatPrimitive(tileset);
+            // Debug hooks for one off probes that run after the benchmark.
+            window.__scene = scene;
+            window.__splatPrimitive = splatPrimitive;
             window.__benchResult = {
+              splatDrawsPerFrame:
+                drawCounts.frames > 0
+                  ? drawCounts.splat / drawCounts.frames
+                  : 0,
+              frustumCount: scene._view?.frustumCommandsList?.length ?? -1,
               label: config.label,
               config: config,
               renderer: (function () {

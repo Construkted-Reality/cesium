@@ -199,6 +199,7 @@ if (isMain) {
       `splats     ${result.splats?.numSplats ?? "unknown"} (SH degree ${result.splats?.sphericalHarmonicsDegree ?? "?"})`,
       `tiles      ${result.statistics.numberOfTilesTotal} total, ${result.statistics.selectedTiles} selected`,
       `sorts      ${result.splats?.sortRequestsDuringRun ?? "?"} requests, ${result.splats?.dataGenerationsDuringRun ?? "?"} rebuilds during run`,
+      `draws      ${result.splatDrawsPerFrame ?? "?"} splat commands per frame, ${result.frustumCount ?? "?"} frustums`,
       `tile load  ${result.tileLoadMs.toFixed(0)} ms`,
       `frame ms   ${formatMs(result.frameMs)}`,
       `cpu ms     ${formatMs(result.cpuMs)}`,
