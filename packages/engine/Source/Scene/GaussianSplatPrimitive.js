@@ -632,20 +632,26 @@ async function processGeneratedSplatTextureData(
     snapshot.lastTextureWidth = effectiveTextureData.width;
 
     if (defined(snapshot.shData) && snapshot.sphericalHarmonicsDegree > 0) {
+      const shRepackStart = profiling.begin();
       const oldTex = snapshot.sphericalHarmonicsTexture;
-      const width = ContextLimits.maximumTextureSize;
+      const maximumWidth = ContextLimits.maximumTextureSize;
       const dims = snapshot.shCoefficientCount / 3;
-      const splatsPerRow = Math.floor(width / dims);
-      const floatsPerRow = splatsPerRow * (dims * 2);
+      const splatsPerRow = Math.floor(maximumWidth / dims);
+
+      // Each splat needs dims texels, so a width that is a whole number of
+      // splats leaves no gap at the end of a row. The row stride then equals
+      // the packed stride and the aggregate buffer needs no repack. The shader
+      // reads the width with textureSize, so it follows this value.
+      const width = splatsPerRow * dims;
 
       const shHeight = Math.ceil(snapshot.numSplats / splatsPerRow);
 
       // SH texture width is already maxTex and cannot be widened further.
       // When height would exceed the GPU limit, gracefully disable SH for this
       // snapshot and fall back to base color rendering rather than crashing.
-      if (shHeight > width) {
+      if (shHeight > maximumWidth) {
         console.warn(
-          `[GaussianSplat][SHTexture] ${snapshot.numSplats} splats require SH height ${shHeight} > maxTex ${width}. ` +
+          `[GaussianSplat][SHTexture] ${snapshot.numSplats} splats require SH height ${shHeight} > maxTex ${maximumWidth}. ` +
             `Disabling spherical harmonics for this snapshot (color-only fallback).`,
         );
         snapshot.sphericalHarmonicsDegree = 0;
@@ -654,15 +660,22 @@ async function processGeneratedSplatTextureData(
         }
         snapshot.sphericalHarmonicsTexture = undefined;
       } else {
-        const texBuf = new Uint32Array(width * shHeight * 2);
+        const shData = snapshot.shData;
+        const texelCount = width * shHeight * 2;
 
-        let dataIndex = 0;
-        for (let i = 0; dataIndex < snapshot.shData.length; i += width * 2) {
-          texBuf.set(
-            snapshot.shData.subarray(dataIndex, dataIndex + floatsPerRow),
-            i,
-          );
-          dataIndex += floatsPerRow;
+        // The aggregate buffer carries one spare row, so the padded view costs
+        // no allocation and no copy. Only the tail past the real data needs a
+        // clear. At 1.9 million splats the old repack moved 231 MB.
+        let texBuf;
+        if (
+          shData.byteOffset === 0 &&
+          shData.buffer.byteLength >= texelCount * 4
+        ) {
+          texBuf = new Uint32Array(shData.buffer, 0, texelCount);
+          texBuf.fill(0, shData.length);
+        } else {
+          texBuf = new Uint32Array(texelCount);
+          texBuf.set(shData);
         }
         snapshot.sphericalHarmonicsTexture = createSphericalHarmonicsTexture(
           frameState.context,
@@ -676,6 +689,7 @@ async function processGeneratedSplatTextureData(
           oldTex.destroy();
         }
       }
+      profiling.add("shTextureBuild", shRepackStart);
     }
 
     profiling.add("textureProcess", textureProcessStart);
@@ -2010,7 +2024,11 @@ GaussianSplatPrimitive.prototype.update = function (frameState) {
           return undefined;
         }
 
-        const requiredLength = totalElements * (coefs * (2 / 3));
+        // One spare texture row, so the spherical harmonics texture can be a
+        // view over this buffer even when the last row is only part full.
+        const requiredLength =
+          totalElements * (coefs * (2 / 3)) +
+          2 * ContextLimits.maximumTextureSize;
 
         // Re-use the class-level scratch buffer when it is already large
         // enough, avoiding a fresh allocation (and eventual GC) every frame.
