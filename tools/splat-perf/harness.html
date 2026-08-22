@@ -166,6 +166,13 @@
         scene.debugShowFramesPerSecond = false;
         viewer.resolutionScale = 1.0;
 
+        // Turn on the timing counters inside GaussianSplatPrimitive. They are
+        // off by default and cost one boolean test per call site when off.
+        const splatProfiling = Cesium.GaussianSplatPrimitive?.profiling;
+        if (splatProfiling) {
+          splatProfiling.enabled = true;
+        }
+
         const gl = scene.context._originalGLContext ?? scene.context._gl;
         const gpuTimer = createGpuTimer(gl);
 
@@ -411,6 +418,9 @@
               ? primitiveBeforeRun._splatDataGeneration
               : 0;
 
+            if (splatProfiling) {
+              splatProfiling.reset();
+            }
             setPhase("measuring");
             state.lastFrameTime = 0;
             for (let i = 0; i < config.frames; i++) {
@@ -463,6 +473,9 @@
                       splatPrimitive._splatDataGeneration -
                       dataGenerationAtStart,
                   }
+                : undefined,
+              primitiveCounters: splatProfiling
+                ? JSON.parse(JSON.stringify(splatProfiling.counters))
                 : undefined,
               frameMs: summarize(state.frameMs),
               cpuMs: summarize(state.cpuMs),

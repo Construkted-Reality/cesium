@@ -207,6 +207,22 @@ if (isMain) {
       "",
     ].join("\n"),
   );
+  const counters = result.primitiveCounters;
+  if (counters && Object.keys(counters).length > 0) {
+    const names = Object.keys(counters).sort(
+      (a, b) => counters[b].totalMs - counters[a].totalMs,
+    );
+    process.stdout.write("primitive counters (total / calls / max):\n");
+    for (const name of names) {
+      const entry = counters[name];
+      process.stdout.write(
+        `  ${name.padEnd(20)} ${entry.totalMs.toFixed(1).padStart(8)} ms  ` +
+          `${String(entry.calls).padStart(4)} calls  ` +
+          `${(entry.totalMs / Math.max(entry.calls, 1)).toFixed(2).padStart(7)} ms avg  ` +
+          `${entry.maxMs.toFixed(2).padStart(7)} ms max\n`,
+      );
+    }
+  }
   if (result.consoleErrors.length > 0) {
     process.stdout.write(
       `console errors:\n  ${result.consoleErrors.slice(0, 10).join("\n  ")}\n`,

@@ -24,6 +24,7 @@ import BufferUsage from "../Renderer/BufferUsage.js";
 import RenderState from "../Renderer/RenderState.js";
 import clone from "../Core/clone.js";
 import defined from "../Core/defined.js";
+import getTimestamp from "../Core/getTimestamp.js";
 import DeveloperError from "../Core/DeveloperError.js";
 import VertexAttributeSemantic from "./VertexAttributeSemantic.js";
 import AttributeType from "./AttributeType.js";
@@ -143,6 +144,54 @@ const SnapshotState = {
  * @property {ArrayBufferView} data Packed unsigned integer texture data.
  * @private
  */
+
+/**
+ * Timing counters for splat performance work. Disabled by default, so the cost
+ * when off is one boolean test per call site.
+ *
+ * Turn the counters on with `GaussianSplatPrimitive.profiling.enabled = true`.
+ * Read them from `GaussianSplatPrimitive.profiling.counters`.
+ *
+ * @private
+ */
+const profiling = {
+  enabled: false,
+  counters: {},
+  /**
+   * @returns {number} A start timestamp, or 0 when profiling is off.
+   * @private
+   */
+  begin: function () {
+    return profiling.enabled ? getTimestamp() : 0;
+  },
+  /**
+   * Records the time since `startTime` under `name`.
+   * @param {string} name The counter name.
+   * @param {number} startTime The value returned by {@link profiling.begin}.
+   * @private
+   */
+  add: function (name, startTime) {
+    if (!profiling.enabled) {
+      return;
+    }
+    const elapsed = getTimestamp() - startTime;
+    let entry = profiling.counters[name];
+    if (!defined(entry)) {
+      entry = { calls: 0, totalMs: 0, maxMs: 0 };
+      profiling.counters[name] = entry;
+    }
+    entry.calls++;
+    entry.totalMs += elapsed;
+    entry.maxMs = Math.max(entry.maxMs, elapsed);
+  },
+  /**
+   * Clears every counter.
+   * @private
+   */
+  reset: function () {
+    profiling.counters = {};
+  },
+};
 
 // Two stable frames avoids rebuilding during brief selected-tile jitter.
 const DEFAULT_STABLE_FRAMES = 2;
@@ -480,6 +529,7 @@ async function processGeneratedSplatTextureData(
 ) {
   try {
     const splatTextureData = await promise;
+    const textureProcessStart = profiling.begin();
     const maxTex = ContextLimits.maximumTextureSize;
 
     // Use maximumTextureSize as the texture width; splatsPerRow = maxTex / 2
@@ -624,6 +674,7 @@ async function processGeneratedSplatTextureData(
       }
     }
 
+    profiling.add("textureProcess", textureProcessStart);
     snapshot.state = SnapshotState.TEXTURE_READY;
   } catch (error) {
     console.error("Error generating Gaussian splat texture:", error);
@@ -1471,6 +1522,7 @@ GaussianSplatPrimitive.buildGSplatDrawCommand = function (
   primitive,
   frameState,
 ) {
+  const drawCommandStart = profiling.begin();
   const tileset = primitive._tileset;
   const renderResources = new GaussianSplatRenderResources(primitive);
   const { shaderBuilder } = renderResources;
@@ -1668,6 +1720,7 @@ GaussianSplatPrimitive.buildGSplatDrawCommand = function (
   });
 
   primitive._drawCommand = command;
+  profiling.add("drawCommandBuild", drawCommandStart);
 };
 
 /**
@@ -1912,6 +1965,7 @@ GaussianSplatPrimitive.prototype.update = function (frameState) {
         return aggregate;
       };
 
+      const aggregateStart = profiling.begin();
       const positions = aggregateAttributeValues(
         "positions",
         ComponentDatatype.FLOAT,
@@ -1950,6 +2004,7 @@ GaussianSplatPrimitive.prototype.update = function (frameState) {
           ? tiles[0].content.sphericalHarmonicsCoefficientCount
           : 0;
       const shData = aggregateShData();
+      profiling.add("snapshotAggregate", aggregateStart);
 
       this._pendingSnapshot = {
         generation: this._splatDataGeneration,
@@ -2013,14 +2068,19 @@ GaussianSplatPrimitive.prototype.update = function (frameState) {
           expectedCount: pending.numSplats,
           snapshot: pending,
         };
+        const copyStart = profiling.begin();
+        const sortPositions = new Float32Array(pending.positions);
+        profiling.add("sortPositionCopy", copyStart);
+        const scheduleStart = profiling.begin();
         const sortPromise = GaussianSplatSorter.radixSortIndexes({
           primitive: {
-            positions: new Float32Array(pending.positions),
+            positions: sortPositions,
             modelView: Float32Array.from(scratchMatrix4A),
             count: pending.numSplats,
           },
           sortType: "Index",
         });
+        profiling.add("sortSchedule", scheduleStart);
         if (!defined(sortPromise)) {
           this._pendingSortPromise = undefined;
           this._pendingSort = undefined;
@@ -2071,14 +2131,19 @@ GaussianSplatPrimitive.prototype.update = function (frameState) {
         dataGeneration: dataGeneration,
         expectedCount: expectedCount,
       };
+      const copyStart = profiling.begin();
+      const sortPositions = new Float32Array(this._positions);
+      profiling.add("sortPositionCopy", copyStart);
+      const scheduleStart = profiling.begin();
       const rawPromise = GaussianSplatSorter.radixSortIndexes({
         primitive: {
-          positions: new Float32Array(this._positions),
+          positions: sortPositions,
           modelView: Float32Array.from(scratchMatrix4A),
           count: this._numSplats,
         },
         sortType: "Index",
       });
+      profiling.add("sortSchedule", scheduleStart);
       this._sorterPromise = rawPromise;
       if (defined(rawPromise)) {
         markSteadySortStart(this, frameState);
@@ -2105,14 +2170,19 @@ GaussianSplatPrimitive.prototype.update = function (frameState) {
         dataGeneration: dataGeneration,
         expectedCount: expectedCount,
       };
+      const copyStart = profiling.begin();
+      const sortPositions = new Float32Array(this._positions);
+      profiling.add("sortPositionCopy", copyStart);
+      const scheduleStart = profiling.begin();
       const rawPromise = GaussianSplatSorter.radixSortIndexes({
         primitive: {
-          positions: new Float32Array(this._positions),
+          positions: sortPositions,
           modelView: Float32Array.from(scratchMatrix4A),
           count: this._numSplats,
         },
         sortType: "Index",
       });
+      profiling.add("sortSchedule", scheduleStart);
       this._sorterPromise = rawPromise;
       if (defined(rawPromise)) {
         markSteadySortStart(this, frameState);
@@ -2143,5 +2213,7 @@ GaussianSplatPrimitive.prototype.update = function (frameState) {
 
   this._dirty = false;
 };
+
+GaussianSplatPrimitive.profiling = profiling;
 
 export default GaussianSplatPrimitive;
