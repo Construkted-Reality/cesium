@@ -178,6 +178,9 @@
         if (params.get("nohdr") === "1") {
           scene.highDynamicRange = false;
         }
+        if (params.get("nooit") === "1") {
+          scene.orderIndependentTranslucency = false;
+        }
         scene.debugShowFramesPerSecond = false;
         viewer.resolutionScale = 1.0;
 

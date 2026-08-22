@@ -39,6 +39,7 @@ function parseArgs(argv) {
     msaa: 0,
     nofxaa: false,
     nohdr: false,
+    nooit: false,
     pitch: -25,
     range: 1.6,
     step: 0.35,
@@ -64,6 +65,10 @@ function parseArgs(argv) {
     }
     if (key === "nofxaa") {
       options.nofxaa = true;
+      continue;
+    }
+    if (key === "nooit") {
+      options.nooit = true;
       continue;
     }
     if (key === "nohdr") {
@@ -123,6 +128,9 @@ export async function runBenchmark(options) {
   }
   if (options.nohdr) {
     query.set("nohdr", "1");
+  }
+  if (options.nooit) {
+    query.set("nooit", "1");
   }
   const url = `${options.server}/tools/splat-perf/harness.html?${query.toString()}`;
 

@@ -39,6 +39,7 @@ function parseArgs(argv) {
     width: 1280,
     height: 720,
     settleFrames: 240,
+    msaa: 0,
     out: undefined,
     compare: undefined,
   };
@@ -133,6 +134,9 @@ try {
       capture: "1",
       label: pose.name,
     });
+    if (options.msaa > 0) {
+      query.set("msaa", String(options.msaa));
+    }
     const page = await browser.newPage({
       viewport: { width: options.width, height: options.height },
       deviceScaleFactor: 1,
