@@ -941,6 +941,12 @@ function GaussianSplatPrimitive(options) {
    * @private
    */
   this._sorterPositionsGeneration = -1;
+  /**
+   * Scratch target for the camera position uniform.
+   * @type {Cartesian3}
+   * @private
+   */
+  this._cameraPositionWC = new Cartesian3();
   this._selectedTilesStableFrames = 0;
   this._needsSnapshotRebuild = false;
   this._snapshotRebuildStallFrames = 0;
@@ -1619,8 +1625,6 @@ GaussianSplatPrimitive.buildGSplatDrawCommand = function (
     ShaderDestination.VERTEX,
   );
 
-  shaderBuilder.addUniform("float", "u_splatScale", ShaderDestination.VERTEX);
-
   shaderBuilder.addUniform(
     "vec3",
     "u_cameraPositionWC",
@@ -1671,7 +1675,10 @@ GaussianSplatPrimitive.buildGSplatDrawCommand = function (
   };
 
   uniformMap.u_cameraPositionWC = function () {
-    return Cartesian3.clone(frameState.camera.positionWC);
+    return Cartesian3.clone(
+      frameState.camera.positionWC,
+      primitive._cameraPositionWC,
+    );
   };
 
   uniformMap.u_inverseModelRotation = function () {
@@ -1806,6 +1813,13 @@ GaussianSplatPrimitive.prototype.update = function (frameState) {
     return;
   }
 
+  if (frameState.passes.pick === true) {
+    // Splats carry no pick identifier. Scene executes the base command when a
+    // command has no picking derived command, which draws splat colours into
+    // the pick framebuffer. Skip the pass instead.
+    return;
+  }
+
   if (this._drawCommand) {
     frameState.commandList.push(this._drawCommand);
   }
@@ -1815,10 +1829,6 @@ GaussianSplatPrimitive.prototype.update = function (frameState) {
     return;
   }
   const hasRootTransform = defined(this._rootTransform);
-
-  if (frameState.passes.pick === true) {
-    return;
-  }
 
   if (this.splitDirection !== tileset.splitDirection) {
     this.splitDirection = tileset.splitDirection;
