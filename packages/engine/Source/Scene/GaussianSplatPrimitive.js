@@ -203,6 +203,15 @@ const DEFAULT_STABLE_FRAMES = 2;
 // Lower values react faster but can thrash on noisy LOD transitions.
 // Higher values reduce rebuild churn but keep stale snapshots visible longer.
 const DEFAULT_MAX_SNAPSHOT_STALL_FRAMES = 30;
+// The share of the committed snapshot that the tileset must still select for
+// that snapshot to count as a fair picture of the view. Below this share the
+// camera has turned away from what is drawn, so waiting for the selection to
+// settle leaves the user looking at a blank screen.
+//
+// Measured on a 235 tile splat tileset at 1080p. An orbit never falls below
+// 0.21. A 150 degree turn in place that blanks the screen sits at 0.08, and it
+// crosses this threshold 169 ms before the first blank frame.
+const DEFAULT_MIN_SNAPSHOT_RETENTION = 0.15;
 // Minimum delay between steady re-sort requests once the camera is moving.
 const DEFAULT_SORT_MIN_FRAME_INTERVAL = 3;
 // ~0.5 degree camera direction change threshold before triggering steady re-sort.
@@ -1873,6 +1882,21 @@ GaussianSplatPrimitive.prototype.update = function (frameState) {
       !defined(this._snapshot) &&
       !defined(this._pendingSnapshot) &&
       !defined(this._drawCommand);
+
+    // Count the tiles of the committed snapshot that the tileset still selects.
+    // When that count collapses, the snapshot no longer covers the view. Waiting
+    // for the selection to settle then costs the user a blank screen, because
+    // the selection cannot settle until every new tile has loaded.
+    const snapshotTiles = this._selectedTileSet;
+    let retainedTiles = 0;
+    for (let i = 0; i < tileset._selectedTiles.length; i++) {
+      if (snapshotTiles.has(tileset._selectedTiles[i])) {
+        retainedTiles++;
+      }
+    }
+    const snapshotIsStale =
+      snapshotTiles.size > 0 &&
+      retainedTiles / snapshotTiles.size < DEFAULT_MIN_SNAPSHOT_RETENTION;
     // This prevents an indefinite wait if selected tiles never settle completely.
     // In practice, this is the upper bound on "wait-for-stability" before forcing
     // a rebuild to avoid visible starvation.
@@ -1881,10 +1905,20 @@ GaussianSplatPrimitive.prototype.update = function (frameState) {
     } else {
       this._snapshotRebuildStallFrames = 0;
     }
-    const allowRebuild =
+    const wantsRebuild =
       isStable ||
       isBootstrap ||
+      snapshotIsStale ||
       this._snapshotRebuildStallFrames >= DEFAULT_MAX_SNAPSHOT_STALL_FRAMES;
+
+    // Starting a rebuild throws away the one that is already in flight. While
+    // tiles keep landing, each new tile sets the dirty flag and restarts the
+    // build, so nothing ever reaches the screen. Let a build in flight finish
+    // and rebuild again after it commits. Preempt it only when the camera has
+    // turned away from what that build covers, which snapshotIsStale reports,
+    // because _selectedTileSet already holds the tiles of the build in flight.
+    const allowRebuild =
+      wantsRebuild && (!defined(this._pendingSnapshot) || snapshotIsStale);
     const hasPendingWork =
       this._dirty ||
       this._needsSnapshotRebuild ||

@@ -22,6 +22,7 @@ const options = {
   heading: 0,
   turn: 180,
   turnMs: 300,
+  orbit: 0,
   watchMs: 5000,
   out: "/mnt/data2/cesium-splat-perf/turn",
 };
@@ -140,6 +141,21 @@ try {
       scene.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
     }
 
+    // Orbit phase: circle the model and keep it in view. This is the motion
+    // that the orbit benchmark uses. It never blanks the screen, so it gives
+    // the overlap distribution for the case that must stay lazy.
+    function orbitPlace(degrees) {
+      scene.camera.lookAt(
+        centre,
+        new Cesium.HeadingPitchRange(
+          Cesium.Math.toRadians(cfg.heading + degrees),
+          Cesium.Math.toRadians(cfg.pitch),
+          radius * cfg.range,
+        ),
+      );
+      scene.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+    }
+
     // Turn phase: hold the camera where it is and rotate the view direction.
     // This is what a user does when they turn to look somewhere else. An
     // orbit keeps the model in view and never reproduces the symptom.
@@ -161,6 +177,10 @@ try {
         return;
       }
       const elapsed = now - probe.turnStart;
+      if (cfg.orbit > 0) {
+        orbitPlace((cfg.orbit * elapsed) / 1000);
+        return;
+      }
       const fraction = Math.min(1, elapsed / cfg.turnMs);
       turnPlace(cfg.turn * fraction);
     });
@@ -188,16 +208,39 @@ try {
         stallFrames: primitive._snapshotRebuildStallFrames,
         readyTiles: 0,
         readySplats: 0,
+        overlapTiles: 1,
+        overlapSplats: 1,
+        retention: 1,
       };
 
       // How much loaded geometry the tileset had selected but the snapshot did
       // not draw. This separates "the data was missing" from "we refused to
       // draw the data we had".
+      //
+      // The overlap is the share of that geometry that the committed snapshot
+      // already holds. A high overlap means the snapshot still represents the
+      // view. A low overlap means it does not, and the screen is going blank.
+      const snapshotSet = primitive._selectedTileSet;
+      let sharedTiles = 0;
+      let sharedSplats = 0;
       for (const tile of tileset._selectedTiles) {
         if (tile.contentReady && tile.content && tile.content.pointsLength > 0) {
           row.readyTiles++;
           row.readySplats += tile.content.pointsLength;
+          if (snapshotSet && snapshotSet.has(tile)) {
+            sharedTiles++;
+            sharedSplats += tile.content.pointsLength;
+          }
         }
+      }
+      if (row.readyTiles > 0) {
+        row.overlapTiles = sharedTiles / row.readyTiles;
+        row.overlapSplats = sharedSplats / row.readySplats;
+      }
+      // The share of the committed snapshot that the tileset still selects.
+      // This falls to zero when the camera turns away from what is drawn.
+      if (snapshotSet && snapshotSet.size > 0) {
+        row.retention = sharedTiles / snapshotSet.size;
       }
 
       if (probe.turnStart === undefined) {

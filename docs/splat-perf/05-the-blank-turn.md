@@ -83,3 +83,75 @@ rotates the view direction in place, and records one row per frame for 5 seconds
 It changes no renderer code.
 
 Raw data: `rows.json` and the saved frames in the output directory.
+
+## The fix
+
+Two changes to `GaussianSplatPrimitive`, 30 lines, no removals.
+
+1. A retention gate. `DEFAULT_MIN_SNAPSHOT_RETENTION` is 0.15. The gate counts
+   the tiles of the committed snapshot that the tileset still selects. Below
+   the threshold the snapshot no longer covers the view, so the primitive
+   rebuilds at once instead of waiting for the selection to settle.
+
+   The threshold comes from measurement, not from a guess. Six scenarios on the
+   base build:
+
+   | scenario | lowest retention | does the screen blank |
+   | --- | --- | --- |
+   | orbit, range 0.15, pitch -5 | 0.229 | no |
+   | orbit, range 0.25, pitch -20 | 0.211 | no |
+   | orbit, range 0.10, pitch -5 | 0.325 | no |
+   | turn 60 degrees | 0.417 | no |
+   | turn 90 degrees | 0.125 | no |
+   | turn 150 degrees | 0.083 | yes |
+
+   No orbit falls below 0.211. The turn that blanks the screen sits at 0.083 and
+   crosses 0.15 at 243 ms, which is 169 ms before the first blank frame.
+
+2. A rebuild in flight is allowed to finish. The rebuild path destroys the
+   pending snapshot. Every tile that lands sets the dirty flag and restarts the
+   build, so nothing reaches the screen while tiles keep arriving. The gate now
+   preempts a build in flight only when the camera turns away from that build
+   as well.
+
+## Result of the fix
+
+| scenario | base | with the fix |
+| --- | --- | --- |
+| turn 150, blank span | 1252 ms | 844 ms |
+| turn 150, blank frames | 35 | 4 |
+| turn 150, rebuilds | 1 | 3 |
+| turn 90, blank | none | none |
+| turn 60, blank | none | none |
+| orbit, blank | none | none |
+
+Orbit benchmark, three interleaved pairs to cancel thermal drift, 400 frames,
+screen space error 4, 1.93 million splats:
+
+| | base | with the fix |
+| --- | --- | --- |
+| rebuilds during run | 1, 1, 1 | 1, 1, 1 |
+| frame p95, mean of 3 | 13.17 ms | 13.20 ms |
+| cpu mean, mean of 3 | 1.49 ms | 1.45 ms |
+
+There is no regression.
+
+## What still costs 844 ms
+
+The rebuild starts at 434 ms and commits at 1277 ms. It aggregates 337288
+splats. The orbit counters price that work at about 19 ms. It took 843 ms.
+
+The difference is contention. Cesium processes tile content on the main thread,
+and during this period the main thread stalls in blocks of 180 to 230 ms. Only
+16 frames render in 1246 ms. The rebuild waits behind that processing.
+
+No change to the rebuild gate can improve this further. The next lever is the
+cost of tile content processing, or a renderer that draws each tile with its own
+command so that a ready tile appears without a rebuild.
+
+## Note on the test machine
+
+The RTX A4000 throttles under a long measurement session. Over six interleaved
+runs the temperature rose from 82 to 89 degrees, the graphics clock fell from
+1875 to 1860 MHz, and the graphics time rose from 4.25 to 4.62 ms on identical
+geometry. Compare arms in interleaved pairs, never in sequence.
