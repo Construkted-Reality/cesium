@@ -263,6 +263,10 @@
           if (!boundingSphere || frameIndex < 0) {
             return;
           }
+          // A probe that runs after the benchmark can take the camera over.
+          if (window.__probeOwnsCamera) {
+            return;
+          }
           const index = Math.max(frameIndex, 0);
           let heading = Cesium.Math.toRadians(config.headingDegrees);
           let range = boundingSphere.radius * config.rangeFactor;
