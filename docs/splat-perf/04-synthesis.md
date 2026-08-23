@@ -1,136 +1,137 @@
-# Synthesis: the budget, the ideas, and the order to run them
+# Synthesis: the budget, the ideas, and what is left
 
-Date: 2026-08-22. This file merges the measurements in `01` to `03` with the
-two agent reviews in `docs/agents/`. It supersedes the idea lists in those
-reviews where a measurement now contradicts them.
+Date: 2026-08-22. This file merges the measurements in `00` to `03` with the two
+agent reviews in `docs/agents/`. It supersedes the idea lists in those reviews
+wherever a measurement contradicts them.
+
+## The one sentence
+
+The splat renderer is fill bound. Fragment work costs about 4.2 ms and hides the
+whole 2.98 ms vertex pipeline. Cut fill, or cut splat count, or nothing changes.
 
 ## The budget
 
-At 1920 by 1080, 1.93 million splats, degree 3 spherical harmonics, screen
-space error 4, orbiting camera, four times multisampling.
+At 1920 by 1080, 1.93 million splats, degree 3 spherical harmonics, screen space
+error 4, orbiting camera, four times multisampling, locked 1875 MHz.
 
-| Bucket | Graphics ms | Share | Source |
-| --- | --- | --- | --- |
-| Scene floor, per pixel, no splat causes it | 1.50 | 36% | `03-the-floor.md` |
-| Vertex invocations, 7.7 million, null shader | 1.05 | 25% | `02-attribution.md` |
-| Rasterization and blending of the quads | 1.08 | 26% | `02-attribution.md` |
-| Vertex shader compute | 0.51 | 12% | `02-attribution.md` |
-| Total | 4.14 | 100% | |
+| Number | Value |
+| --- | --- |
+| Frame period | 11.00 ms |
+| Graphics time inside CesiumJS | 4.23 ms |
+| Processor time inside CesiumJS | 1.00 ms |
+| Frame period with no splat draw | 6.90 ms |
 
-The floor splits into 0.40 ms of multisampling and 1.10 ms of Cesium frame
-composition.
+Graphics time passes into frame time one for one. The 6.9 ms remainder is
+browser work and has never been investigated.
 
-The processor side costs 1.50 ms mean and 2.45 ms at the 95th percentile, after
-the four optimizations that already shipped. A snapshot rebuild stalls for
-about 105 ms, of which about 58 ms is aggregation and about 47 ms is texture
-build.
+The graphics time splits into two pipelines. The frame takes the larger.
+
+| Pipeline | Cost |
+| --- | --- |
+| Fragment, that is fill and blending | about 4.2 ms |
+| Vertex, all of it, hidden today | 2.98 ms |
+
+Cost is proportional to splat count at **2.18 ms per million splats**, intercept
+0.03 ms.
+
+The processor side costs 1.00 ms median and 2.40 ms at the 95th percentile,
+after the three optimizations that shipped. A snapshot rebuild stalls for about
+110 ms: 61.7 ms to aggregate and 49.3 ms to build textures.
 
 ## What each idea attacks
 
-Every idea from both reviews maps onto one bucket. An idea that attacks no
-bucket cannot help the steady frame, whatever else it does.
-
-### The floor, 1.50 ms
+### Fill, about 4.2 ms, the only thing that binds
 
 | Idea | Expected | State |
 | --- | --- | --- |
-| `msaaSamples = 1` | 0.47 ms | measured, image check in progress |
-| Order independent translucency off | 0 ms | measured, free |
-| Fast approximate antialiasing off | 0 ms | measured, free |
-| High dynamic range off | 0 ms | measured, free |
-| The other 1.10 ms | unknown | Cesium frame composition, out of scope |
+| `msaaSamples = 1` | 1.03 ms | measured, and it changes the image |
+| `msaaSamples = 2` | unknown | not measured at a locked clock |
+| Half resolution splat layer | up to 2.4 ms | untested, softens the image |
+| Overdraw reduction with early termination | unknown | needs the histogram |
+| Tighter alpha cutoff inside the quad | small | bounded by the 2.98 ms vertex floor |
 
-### Vertex invocations, 1.05 ms
+Fill reduction alone cannot take the frame below 2.98 ms.
+
+### Vertex, 2.98 ms, worth nothing until fill drops below it
+
+| Idea | Value today | Value after fill drops |
+| --- | --- | --- |
+| Remove spherical harmonics | 0.04 ms | 1.23 ms |
+| Lower the harmonics degree | 0.01 to 0.07 ms | up to 1.23 ms |
+| Indexed draw without instancing | 0 | at most 1.54 ms |
+| `gl.POINTS` | negative, it raises fill | up to 1.5 ms |
+| Covariance in the vertex shader | 0 | 0 |
+
+### Splat count, which moves both pipelines at once
 
 | Idea | Expected | State |
 | --- | --- | --- |
-| Indexed draw without instancing | unknown, at most 1.05 ms | the earlier price was invalid |
-| `gl.POINTS`, four times fewer invocations | at most 1.05 ms, and fill grows | untested |
-| Fewer splats, by any route | proportional | see below |
-
-### Rasterization and blending, 1.08 ms
-
-| Idea | Expected | State |
-| --- | --- | --- |
-| Half resolution splat layer | 0.6 to 0.9 ms | untested, softens the image |
-| Tighter alpha cutoff inside the quad | small | bounded by 1.08 ms |
-| Fewer splats, by any route | proportional | see below |
-
-### Vertex shader compute, 0.51 ms
-
-Nothing here is worth doing. Spherical harmonics cost 0.01 ms. The covariance
-maths costs nothing measurable.
+| Prune at import time in the Construkted tiler | 2.18 ms per million removed | untested, zero renderer risk |
+| Motion adaptive prefix draw | proportional while moving | untested |
+| Motion adaptive screen space error | proportional while moving | needs incremental snapshots |
 
 ### Outside the steady frame
 
 | Idea | Expected | What it changes |
 | --- | --- | --- |
-| Freeze the frame when the camera is still | 4.1 ms to 0.1 ms while idle | viewer setting, not the renderer |
+| Freeze the frame when the camera is still | 4.2 ms to 0.1 ms while idle | viewer setting |
 | Covariance in the vertex shader | 20 to 40 ms off each rebuild | deletes the WebAssembly texture generator |
-| Index upload through a pixel buffer object | 0.2 to 0.4 ms while moving | smooths the 95th percentile |
-| Hashed stochastic alpha | deletes the sort, about 1.5 ms of processor time | dithers the image |
-| Motion adaptive screen space error | 1 to 2 ms while moving | needs incremental snapshots first |
-
-## The multiplier
-
-Four of the five buckets scale with the number of splats. Anything that cuts
-the splat count cuts vertex invocations, fill, vertex compute, sort time, index
-upload, texture memory and download size at the same time.
-
-At 30% fewer splats the graphics frame falls by about 0.8 ms and the processor
-frame by about 0.5 ms, with no renderer change at all. Published pruning work
-removes 50% to 90% with fine tuning and 15% to 40% without it.
-
-This is the highest return for the lowest renderer risk on the whole list, and
-it does not live in CesiumJS. It lives in the Construkted tiling pipeline.
+| Index upload through a pixel buffer object | smooths the 95th percentile | untested |
+| Hashed stochastic alpha | deletes the sort | dithers the image |
+| Look at `drawCommandBuild` | 1.42 ms per sort, 81 ms per run | never investigated |
 
 ## What is closed
 
-Do not spend more time on these.
-
 | Closed idea | Why |
 | --- | --- |
-| Instancing is expensive | the measurement was clamped to 4 vertices and is invalid |
-| A fixed cost per draw explains the floor | the floor is per pixel, intercept near zero |
+| Instancing is expensive | the measurement was clamped to 4 vertices |
+| A fixed cost per draw or a 1.50 ms floor | it was 0.11 ms, the clock was not locked |
+| The renderer is not fill bound | it is fill bound |
+| Spherical harmonics evaluation is free | it costs 1.23 ms, and it is hidden |
 | Order independent translucency, antialiasing, high dynamic range | all measured free |
 | Frustum culling in the sort worker | 100.0% of splats pass at the benchmark viewpoint |
-| Spherical harmonics evaluation | 0.01 ms |
-| Covariance maths in the vertex shader | free, and it hides behind rasterization |
 | Weighted sum sort free rendering | needs the asset retrained, wrong layer |
 | Per pixel k buffer transparency | needs atomics that WebGL 2 does not have |
 
 ## Run order
 
-Ordered by what unblocks other work, then by how hard the result is to confirm.
+1. **Overdraw histogram.** The most valuable measurement left. It says how much
+   fill is removable, and it prices the half resolution layer, the prefix clamp,
+   stochastic alpha and a tiled rasterizer at once.
+2. **Multisampling at 2 samples**, at a locked clock, with an image check.
+3. **Sort worker time.** The last completely unmeasured subsystem.
+4. **Spec suite baseline** at the base commit. Owed since the start, and it
+   blocks any upstream pull request.
+5. **Half resolution splat layer.** The largest single fill lever.
+6. **Prune splats at import time.** Highest return per unit of renderer risk,
+   because the risk is zero, and it lives in the Construkted tiler.
+7. **`requestRenderMode` in the product viewer.** Free, and it removes the whole
+   frame cost whenever the camera stops.
+8. **Investigate the 6.9 ms of frame time that no rendering causes.**
+9. **Investigate `drawCommandBuild`**, 1.42 ms per sort.
+10. **Repeat the attribution on Windows and macOS**, before committing to any
+    graphics side design.
+11. **Benchmark a WebGPU splat renderer**, to price the ceiling.
 
-1. **Set `msaaSamples = 1`.** One line. 0.47 ms, which is 11% of the frame. The
-   image check is running now. Ship it if the check passes.
-2. **Measure the overdraw histogram.** A counting pass that reports, per pixel,
-   how many splats blend and how many blend before alpha saturates. It prices
-   four separate ideas at once: the prefix clamp, the half resolution layer,
-   stochastic alpha, and a tiled rasterizer. Measurement only, no risk.
-3. **Price the prefix clamp.** Clamp the instance count to the front half of
-   the sorted list and record an orbit. One hour. It prices the whole motion
-   adaptive direction without any shipping code.
-4. **Move the covariance into the vertex shader.** Pixel identical to within
-   half precision rounding. It deletes the WebAssembly texture generator and
-   one worker round trip, and takes 20 to 40 ms off every rebuild stall. Two
-   files change and the check is a golden image diff.
-5. **Prune splats at import time in the Construkted tiler.** Highest return,
-   zero renderer risk, and the quality gate sits in an offline tool where it can
-   be set per asset. Verify by rendering pruned assets through the unmodified
-   viewer.
-6. **Turn on `requestRenderMode` in the product viewer.** Free, and it removes
-   the whole frame cost whenever the camera stops. Worth more than the rest of
-   this list for a real session mix.
-7. **Benchmark a WebGPU splat renderer on the same asset and the same machine.**
-   It prices the ceiling of all WebGL 2 work before anyone commits to a large
-   design. One to two days, no integration.
-8. **Repeat the attribution on Windows and macOS.** Every number here comes
-   from ANGLE on Vulkan. Do this before committing to any graphics side design.
-9. **Retest the indexed draw without instancing.** It needs an index buffer, or
-   a vertex array whose vertex count is at least the draw count. The payoff is
-   bounded by 1.05 ms and is unknown inside that bound.
+## The shipped work
 
-Items 1 to 3 are cheap and each one either pays or closes a direction. Items 4
-to 6 are the real work. Items 7 and 8 protect the next large decision.
+Three changes, all processor side, all verified pixel identical over four fixed
+camera poses.
+
+| Change | Yield |
+| --- | --- |
+| Cache the sort positions in the worker, and transfer results | `sortPositionCopy` 8.67 ms → 0.17 ms per sort |
+| Build the harmonics texture without a repack | `textureProcess` 127.2 ms → 49.3 ms per rebuild |
+| Do not draw splats in the pick pass | a correctness fix; the pick framebuffer held splat colours |
+
+Aggregate, before against after:
+
+| | Before | After |
+| --- | --- | --- |
+| Processor 95th percentile | 10.80 ms | 2.40 ms |
+| Processor mean | 3.22 ms | 1.45 ms |
+| Frame 95th percentile | 23.40 ms | 12.70 ms |
+
+Graphics time did not change. An earlier claim of 5.16 ms falling to 4.13 ms was
+wrong: the two runs had different splat counts and an unlocked graphics clock,
+and none of the three changes touches a draw call, a shader or a render state.
