@@ -4,7 +4,8 @@ import defined from "../Core/defined.js";
 import RuntimeError from "../Core/RuntimeError.js";
 import ResourceLoader from "./ResourceLoader.js";
 import ResourceLoaderState from "./ResourceLoaderState.js";
-import { loadSpz } from "@spz-loader/core";
+import SpzDecoder from "./SpzDecoder.js";
+import { getPackedSphericalHarmonicsDegree } from "./packSpzSphericalHarmonics.js";
 
 // Cumulative number of SH coefficient floats per splat per channel for each
 // degree. Degree 0 has no extra SH data (base color is stored separately in
@@ -234,9 +235,10 @@ class GltfSpzLoader extends ResourceLoader {
       }
     }
 
-    const decodePromise = loadSpz(this._bufferViewTypedArray, {
-      unpackOptions: { coordinateSystem: "UNSPECIFIED" },
-    });
+    const decodePromise = SpzDecoder.decode(
+      this._bufferViewTypedArray,
+      getPackedSphericalHarmonicsDegree(this._primitive.attributes ?? {}),
+    );
 
     if (!defined(decodePromise)) {
       return false;
@@ -299,16 +301,14 @@ function handleError(spzLoader, error) {
 
 async function processDecode(loader, decodePromise) {
   try {
-    const gcloud = await decodePromise;
+    const decoded = await decodePromise;
     if (loader.isDestroyed()) {
       return;
     }
 
     loader.unload();
 
-    loader._decodedData = {
-      gcloud: gcloud,
-    };
+    loader._decodedData = decoded;
     loader._state = ResourceLoaderState.READY;
     return loader._baseResource;
   } catch (error) {
