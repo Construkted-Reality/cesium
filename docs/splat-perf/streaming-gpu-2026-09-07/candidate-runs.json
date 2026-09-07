@@ -1,0 +1,62 @@
+[
+  {
+    "label": "upload-base-0",
+    "probe": "base",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "mode": "static",
+    "frames": "720",
+    "rebuildEvery": "90",
+    "capture": "1"
+  },
+  {
+    "label": "upload-immutable-0",
+    "probe": "immutable",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "mode": "static",
+    "frames": "720",
+    "rebuildEvery": "90",
+    "capture": "1"
+  },
+  {
+    "label": "upload-immutable-1",
+    "probe": "immutable",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "mode": "static",
+    "frames": "720",
+    "rebuildEvery": "90",
+    "capture": "1"
+  },
+  {
+    "label": "upload-base-1",
+    "probe": "base",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "mode": "static",
+    "frames": "720",
+    "rebuildEvery": "90",
+    "capture": "1"
+  },
+  {
+    "label": "upload-base-2",
+    "probe": "base",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "mode": "static",
+    "frames": "720",
+    "rebuildEvery": "90",
+    "capture": "1"
+  },
+  {
+    "label": "upload-immutable-2",
+    "probe": "immutable",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "mode": "static",
+    "frames": "720",
+    "rebuildEvery": "90",
+    "capture": "1"
+  }
+]

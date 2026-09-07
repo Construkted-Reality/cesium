@@ -14,6 +14,9 @@ resource-lifetime fixes. The [rendering performance follow-up](render-performanc
 adds exact sort suppression, command reuse, a byte-budgeted worker cache, and
 dense harmonics packing.
 
+The [streaming and GPU tests](streaming-gpu-2026-09-07/RESULTS.md) validate PR #2
+under cache pressure and identify the next optimization targets.
+
 The remaining sections record the original optimization round. Their file
 counts, cache policy, and test status refer to that historical baseline. Read
 the follow-up results for the current changes and validation.

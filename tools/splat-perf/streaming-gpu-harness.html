@@ -1,0 +1,650 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Splat performance harness</title>
+    <script src="/Build/CesiumUnminified/Cesium.js"></script>
+    <script src="/tools/splat-perf/streaming-gpu-hooks.js"></script>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <style>
+      html,
+      body,
+      #cesiumContainer {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background: #000;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="cesiumContainer"></div>
+    <script>
+      // Deterministic benchmark for Gaussian splat rendering.
+      //
+      // The page loads one 3D Tiles splat tileset, waits for the tiles to load,
+      // runs a fixed camera path, and records three times for each frame:
+      //   frameMs  wall clock time between animation frames
+      //   cpuMs    time inside the CesiumJS update and render call
+      //   gpuMs    graphics processor time, from EXT_disjoint_timer_query_webgl2
+      //
+      // The driver in tools/splat-perf/bench.mjs reads window.__benchResult.
+      /* global Cesium */
+      (function () {
+        const params = new URLSearchParams(window.location.search);
+        const config = {
+          tileset: params.get("tileset"),
+          frames: Number(params.get("frames") ?? 300),
+          warmup: Number(params.get("warmup") ?? 120),
+          mode: params.get("mode") ?? "orbit",
+          headingDegrees: Number(params.get("heading") ?? 0),
+          pitchDegrees: Number(params.get("pitch") ?? -25),
+          rangeFactor: Number(params.get("range") ?? 1.6),
+          stepDegrees: Number(params.get("step") ?? 0.35),
+          dollyFactor: Number(params.get("dolly") ?? 0.4),
+          screenSpaceError: Number(params.get("sse") ?? 16),
+          empty: params.get("empty") === "1",
+          capture: params.get("capture") === "1",
+          loadTimeoutMs: Number(params.get("loadTimeout") ?? 180000),
+          label: params.get("label") ?? "run",
+        };
+
+        function fail(message) {
+          window.__benchError = String(message);
+          document.title = "ERROR";
+        }
+
+        if (!config.tileset) {
+          fail("missing tileset query parameter");
+          return;
+        }
+
+        // ---------------------------------------------------------------
+        // Graphics processor timing
+        // ---------------------------------------------------------------
+        function createGpuTimer(gl) {
+          const ext = gl.getExtension("EXT_disjoint_timer_query_webgl2");
+          if (!ext) {
+            return undefined;
+          }
+          const freeQueries = [];
+          const pending = [];
+          const samples = new Map();
+          let active;
+
+          return {
+            begin(frameIndex) {
+              if (active) {
+                return;
+              }
+              const query = freeQueries.pop() ?? gl.createQuery();
+              gl.beginQuery(ext.TIME_ELAPSED_EXT, query);
+              active = { query: query, frameIndex: frameIndex };
+            },
+            end() {
+              if (!active) {
+                return;
+              }
+              gl.endQuery(ext.TIME_ELAPSED_EXT);
+              pending.push(active);
+              active = undefined;
+            },
+            poll() {
+              while (pending.length > 0) {
+                const entry = pending[0];
+                const available = gl.getQueryParameter(
+                  entry.query,
+                  gl.QUERY_RESULT_AVAILABLE,
+                );
+                if (!available) {
+                  return;
+                }
+                const disjoint = gl.getParameter(ext.GPU_DISJOINT_EXT);
+                const nanoseconds = gl.getQueryParameter(
+                  entry.query,
+                  gl.QUERY_RESULT,
+                );
+                pending.shift();
+                freeQueries.push(entry.query);
+                if (!disjoint) {
+                  samples.set(entry.frameIndex, nanoseconds / 1e6);
+                }
+              }
+            },
+            drain(deadlineMs) {
+              const start = performance.now();
+              return new Promise((resolve) => {
+                const tick = () => {
+                  this.poll();
+                  if (
+                    pending.length === 0 ||
+                    performance.now() - start > deadlineMs
+                  ) {
+                    resolve();
+                    return;
+                  }
+                  requestAnimationFrame(tick);
+                };
+                tick();
+              });
+            },
+            samples: samples,
+          };
+        }
+
+        // ---------------------------------------------------------------
+        // Viewer
+        // ---------------------------------------------------------------
+        const viewer = new Cesium.Viewer("cesiumContainer", {
+          baseLayer: false,
+          baseLayerPicker: false,
+          geocoder: false,
+          homeButton: false,
+          sceneModePicker: false,
+          navigationHelpButton: false,
+          animation: false,
+          timeline: false,
+          fullscreenButton: false,
+          selectionIndicator: false,
+          infoBox: false,
+          shouldAnimate: false,
+          requestRenderMode: false,
+          useBrowserRecommendedResolution: false,
+          contextOptions: {
+            webgl: {
+              powerPreference: "high-performance",
+              // Capture runs read the drawing buffer after the frame ends.
+              preserveDrawingBuffer: params.get("capture") === "1",
+            },
+          },
+        });
+
+        const scene = viewer.scene;
+        window.__scene = scene;
+        window.__viewer = viewer;
+        scene.renderError.addEventListener((scene, error) =>
+          fail(error.stack || error),
+        );
+        scene.globe.show = false;
+        scene.skyBox.show = false;
+        scene.skyAtmosphere.show = false;
+        scene.sun.show = false;
+        scene.moon.show = false;
+        scene.fog.enabled = false;
+        scene.backgroundColor = Cesium.Color.BLACK;
+        const msaa = Number(params.get("msaa") ?? "0");
+        if (msaa > 0) {
+          scene.msaaSamples = msaa;
+        }
+        if (params.get("nofxaa") === "1") {
+          scene.postProcessStages.fxaa.enabled = false;
+        }
+        if (params.get("nohdr") === "1") {
+          scene.highDynamicRange = false;
+        }
+        if (params.get("nooit") === "1") {
+          scene.orderIndependentTranslucency = false;
+        }
+        if (params.get("logdepth") === "0") {
+          scene.logarithmicDepthBuffer = false;
+        }
+        if (params.get("frustumratio")) {
+          scene.farToNearRatio = Number(params.get("frustumratio"));
+        }
+        scene.debugShowFramesPerSecond = false;
+        viewer.resolutionScale = 1.0;
+
+        // Turn on the timing counters inside GaussianSplatPrimitive. They are
+        // off by default and cost one boolean test per call site when off.
+        const splatProfiling = Cesium.GaussianSplatPrimitive?.profiling;
+        if (splatProfiling) {
+          splatProfiling.enabled = true;
+        }
+
+        const gl = scene.context._originalGLContext ?? scene.context._gl;
+        const gpuTimer = createGpuTimer(gl);
+
+        // Count how many times the scene executes the splat draw command in a
+        // frame. Cesium splits the depth range into several frustums and runs
+        // the pass once per frustum, so a command can run more than once.
+        const drawCounts = { splat: 0, frames: 0 };
+        scene.debugCommandFilter = function (command) {
+          if (command.owner instanceof Cesium.GaussianSplatPrimitive) {
+            drawCounts.splat++;
+            if (params.get("probe") === "nodraw") {
+              return false;
+            }
+          }
+          return true;
+        };
+
+        // ---------------------------------------------------------------
+        // Measurement state
+        // ---------------------------------------------------------------
+        function setPhase(phase) {
+          state.phase = phase;
+          window.__benchPhase = phase;
+        }
+
+        const state = {
+          phase: "loading",
+          frameIndex: -1,
+          lastFrameTime: 0,
+          cpuStart: 0,
+          frameMs: [],
+          cpuMs: [],
+          measuredFrames: [],
+          splatCounts: [],
+        };
+
+        scene.preUpdate.addEventListener(function () {
+          state.cpuStart = performance.now();
+          if (state.phase !== "idle") {
+            applyCamera(state.frameIndex);
+          }
+        });
+
+        scene.preRender.addEventListener(function () {
+          if (gpuTimer && state.phase === "measuring") {
+            gpuTimer.begin(state.frameIndex);
+          }
+        });
+
+        scene.postRender.addEventListener(function () {
+          if (gpuTimer) {
+            gpuTimer.end();
+            gpuTimer.poll();
+          }
+          const now = performance.now();
+          if (state.phase === "measuring") {
+            drawCounts.frames++;
+            state.cpuMs.push(now - state.cpuStart);
+            if (state.lastFrameTime > 0) {
+              state.frameMs.push(now - state.lastFrameTime);
+            } else {
+              state.frameMs.push(NaN);
+            }
+            state.measuredFrames.push(state.frameIndex);
+            if (Number(params.get("multi") || 1) > 1) {
+              state.splatCounts.push(
+                window.__round2Tilesets.map(
+                  (t) => t.gaussianSplatPrimitive?._numSplats || 0,
+                ),
+              );
+            }
+          }
+          state.lastFrameTime = now;
+        });
+
+        // ---------------------------------------------------------------
+        // Camera path
+        // ---------------------------------------------------------------
+        let boundingSphere;
+        function applyCamera(frameIndex) {
+          if (!boundingSphere || frameIndex < 0) {
+            return;
+          }
+          // A probe that runs after the benchmark can take the camera over.
+          if (window.__probeOwnsCamera) {
+            return;
+          }
+          const index = Math.max(frameIndex, 0);
+          if (
+            params.get("rebuildEvery") &&
+            state.phase === "measuring" &&
+            index % Number(params.get("rebuildEvery")) === 0 &&
+            window.__lastForcedRebuild !== index
+          ) {
+            window.__lastForcedRebuild = index;
+            for (const t of window.__round2Tilesets) {
+              t.gaussianSplatPrimitive._dirty = true;
+            }
+          }
+
+          let heading = Cesium.Math.toRadians(config.headingDegrees);
+          let range = boundingSphere.radius * config.rangeFactor;
+          const pitch = Cesium.Math.toRadians(config.pitchDegrees);
+
+          if (config.mode === "stress") {
+            const segment = Math.floor(index / 90) % 6;
+            heading += Cesium.Math.toRadians(
+              [0, 150, -90, 30, 180, 0][segment],
+            );
+            range *= [1.6, 0.35, 0.7, 0.25, 2.0, 0.6][segment];
+          } else if (config.mode === "orbit") {
+            heading += Cesium.Math.toRadians(config.stepDegrees * index);
+          } else if (config.mode === "dolly") {
+            const total = config.warmup + config.frames;
+            const phase = Math.sin((index / total) * Math.PI * 2.0);
+            range *= 1.0 + config.dollyFactor * phase;
+          }
+
+          viewer.camera.lookAt(
+            boundingSphere.center,
+            new Cesium.HeadingPitchRange(heading, pitch, range),
+          );
+          viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+        }
+
+        // Reads the drawing buffer as raw bytes. Used to compare renders
+        // before and after a change, without an image library.
+        function readDrawingBuffer() {
+          const width = scene.drawingBufferWidth;
+          const height = scene.drawingBufferHeight;
+          const pixels = new Uint8Array(width * height * 4);
+          gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+          gl.readPixels(0, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+          let binary = "";
+          const chunk = 0x8000;
+          for (let i = 0; i < pixels.length; i += chunk) {
+            binary += String.fromCharCode.apply(
+              null,
+              pixels.subarray(i, i + chunk),
+            );
+          }
+          return { width: width, height: height, base64: btoa(binary) };
+        }
+
+        // ---------------------------------------------------------------
+        // Statistics
+        // ---------------------------------------------------------------
+        function summarize(values) {
+          const clean = values.filter((value) => Number.isFinite(value));
+          if (clean.length === 0) {
+            return { count: 0 };
+          }
+          const sorted = clean.slice().sort((a, b) => a - b);
+          const sum = sorted.reduce((total, value) => total + value, 0);
+          const quantile = (q) =>
+            sorted[Math.min(sorted.length - 1, Math.floor(q * sorted.length))];
+          return {
+            count: sorted.length,
+            mean: sum / sorted.length,
+            median: quantile(0.5),
+            p95: quantile(0.95),
+            p99: quantile(0.99),
+            min: sorted[0],
+            max: sorted[sorted.length - 1],
+          };
+        }
+
+        function findSplatPrimitive(tileset) {
+          // The primitive is private. Search a few known field names so the
+          // harness keeps working if the field is renamed.
+          const candidates = [
+            "gaussianSplatPrimitive",
+            "_gaussianSplatPrimitive",
+            "_splatPrimitive",
+          ];
+          for (const name of candidates) {
+            if (Cesium.defined(tileset[name])) {
+              return tileset[name];
+            }
+          }
+          return undefined;
+        }
+
+        // ---------------------------------------------------------------
+        // Run
+        // ---------------------------------------------------------------
+        function waitFrames(count) {
+          return new Promise((resolve) => {
+            let remaining = count;
+            const tick = () => {
+              remaining--;
+              if (remaining <= 0) {
+                resolve();
+                return;
+              }
+              requestAnimationFrame(tick);
+            };
+            requestAnimationFrame(tick);
+          });
+        }
+
+        async function waitForTiles(tileset) {
+          const start = performance.now();
+          while (performance.now() - start < config.loadTimeoutMs) {
+            if (tileset.tilesLoaded) {
+              return performance.now() - start;
+            }
+            await waitFrames(5);
+          }
+          throw new Error("timed out waiting for tiles to load");
+        }
+
+        // Control run with no tileset. Measures the animation frame cadence of
+        // the browser so a frame rate cap cannot be mistaken for render cost.
+        async function runEmptyControl(loadStart) {
+          boundingSphere = new Cesium.BoundingSphere(
+            Cesium.Cartesian3.fromDegrees(0, 0, 0),
+            100.0,
+          );
+          setPhase("warmup");
+          for (let i = 0; i < config.warmup; i++) {
+            state.frameIndex = i;
+            await waitFrames(1);
+          }
+          window.__round2Start?.();
+          setPhase("measuring");
+          drawCounts.splat = 0;
+          drawCounts.frames = 0;
+          state.lastFrameTime = 0;
+          for (let i = 0; i < config.frames; i++) {
+            state.frameIndex = config.warmup + i;
+            await waitFrames(1);
+          }
+          setPhase("idle");
+          if (gpuTimer) {
+            await gpuTimer.drain(2000);
+          }
+          const gpuValues = state.measuredFrames.map((frameIndex) =>
+            gpuTimer ? (gpuTimer.samples.get(frameIndex) ?? NaN) : NaN,
+          );
+          window.__benchResult = {
+            allSplatCountsByFrame: state.splatCounts,
+            label: config.label,
+            config: config,
+            renderer: (function () {
+              const dbg = gl.getExtension("WEBGL_debug_renderer_info");
+              return dbg
+                ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL)
+                : gl.getParameter(gl.RENDERER);
+            })(),
+            splatDrawsPerFrame:
+              drawCounts.frames > 0 ? drawCounts.splat / drawCounts.frames : 0,
+            frustumCount: scene._view?.frustumCommandsList?.length ?? -1,
+            viewport: {
+              width: scene.drawingBufferWidth,
+              height: scene.drawingBufferHeight,
+            },
+            tileLoadMs: 0,
+            totalLoadMs: performance.now() - loadStart,
+            statistics: {
+              numberOfTilesTotal: 0,
+              selectedTiles: 0,
+              geometryByteLength: 0,
+            },
+            splats: undefined,
+            frameMs: summarize(state.frameMs),
+            cpuMs: summarize(state.cpuMs),
+            gpuMs: summarize(gpuValues),
+            gpuSampleCount: gpuValues.filter((value) => Number.isFinite(value))
+              .length,
+            raw: {
+              frameMs: state.frameMs,
+              cpuMs: state.cpuMs,
+              gpuMs: gpuValues,
+            },
+          };
+          document.title = "DONE";
+        }
+
+        (async function run() {
+          try {
+            const loadStart = performance.now();
+            if (config.empty) {
+              await runEmptyControl(loadStart);
+              return;
+            }
+            const tileset = await Cesium.Cesium3DTileset.fromUrl(
+              config.tileset,
+              {
+                maximumScreenSpaceError: config.screenSpaceError,
+                cacheBytes: Number(params.get("tileCache") || 536870912),
+                maximumCacheOverflowBytes: Number(
+                  params.get("tileOverflow") || 536870912,
+                ),
+              },
+            );
+            scene.primitives.add(tileset);
+            const extraTilesets = [];
+            for (let i = 1; i < Number(params.get("multi") || 1); i++) {
+              const extra = await Cesium.Cesium3DTileset.fromUrl(
+                config.tileset,
+                {
+                  maximumScreenSpaceError: config.screenSpaceError,
+                  cacheBytes: Number(params.get("tileCache") || 536870912),
+                  maximumCacheOverflowBytes: Number(
+                    params.get("tileOverflow") || 536870912,
+                  ),
+                },
+              );
+              scene.primitives.add(extra);
+              extraTilesets.push(extra);
+            }
+            window.__round2Tilesets = [tileset, ...extraTilesets];
+            window.__installTelemetry(scene, window.__round2Tilesets);
+            boundingSphere = tileset.boundingSphere;
+
+            setPhase("warmup");
+            state.frameIndex = 0;
+            applyCamera(0);
+
+            const tileLoadMs = await waitForTiles(tileset);
+            for (const extra of extraTilesets) {
+              await waitForTiles(extra);
+            }
+            const totalLoadMs = performance.now() - loadStart;
+
+            // Warm up: run the camera path without recording so shader
+            // compilation, texture upload and the first sort do not pollute
+            // the measured window.
+            for (let i = 0; i < config.warmup; i++) {
+              state.frameIndex = i;
+              await waitFrames(1);
+            }
+
+            if (params.get("freeze") === "1") {
+              for (const item of [tileset, ...extraTilesets]) {
+                item.debugFreezeFrame = true;
+              }
+            }
+            if (params.get("settleFrozen")) {
+              await waitFrames(Number(params.get("settleFrozen")));
+            }
+            const primitiveBeforeRun = findSplatPrimitive(tileset);
+            const sortRequestsAtStart = primitiveBeforeRun
+              ? primitiveBeforeRun._sortRequestId
+              : 0;
+            const dataGenerationAtStart = primitiveBeforeRun
+              ? primitiveBeforeRun._splatDataGeneration
+              : 0;
+
+            if (splatProfiling) {
+              splatProfiling.reset();
+            }
+            window.__round2Start?.();
+            setPhase("measuring");
+            drawCounts.splat = 0;
+            drawCounts.frames = 0;
+            state.lastFrameTime = 0;
+            for (let i = 0; i < config.frames; i++) {
+              state.frameIndex = config.warmup + i;
+              await waitFrames(1);
+            }
+            setPhase("idle");
+
+            if (gpuTimer) {
+              await gpuTimer.drain(2000);
+            }
+
+            const gpuValues = state.measuredFrames.map((frameIndex) =>
+              gpuTimer ? (gpuTimer.samples.get(frameIndex) ?? NaN) : NaN,
+            );
+
+            const splatPrimitive = findSplatPrimitive(tileset);
+            // Debug hooks for one off probes that run after the benchmark.
+            window.__scene = scene;
+            window.__splatPrimitive = splatPrimitive;
+            window.__benchResult = {
+              allSplatCountsByFrame: state.splatCounts,
+              splatDrawsPerFrame:
+                drawCounts.frames > 0
+                  ? drawCounts.splat / drawCounts.frames
+                  : 0,
+              frustumCount: scene._view?.frustumCommandsList?.length ?? -1,
+              label: config.label,
+              config: config,
+              renderer: (function () {
+                const dbg = gl.getExtension("WEBGL_debug_renderer_info");
+                return dbg
+                  ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL)
+                  : gl.getParameter(gl.RENDERER);
+              })(),
+              viewport: {
+                width: scene.drawingBufferWidth,
+                height: scene.drawingBufferHeight,
+              },
+              tileLoadMs: tileLoadMs,
+              totalLoadMs: totalLoadMs,
+              statistics: {
+                numberOfTilesTotal: tileset.statistics.numberOfTilesTotal,
+                selectedTiles: tileset.statistics.selected,
+                pointsLength: tileset.statistics.pointsLength,
+                geometryByteLength: tileset.statistics.geometryByteLength,
+              },
+              splats: Cesium.defined(splatPrimitive)
+                ? {
+                    numSplats:
+                      splatPrimitive._numSplats ?? splatPrimitive.numSplats,
+                    sphericalHarmonicsDegree:
+                      splatPrimitive._sphericalHarmonicsDegree,
+                    textureWidth: splatPrimitive._lastTextureWidth,
+                    textureHeight: splatPrimitive._lastTextureHeight,
+                    sortRequestsDuringRun:
+                      splatPrimitive._sortRequestId - sortRequestsAtStart,
+                    dataGenerationsDuringRun:
+                      splatPrimitive._splatDataGeneration -
+                      dataGenerationAtStart,
+                  }
+                : undefined,
+              primitiveCounters: splatProfiling
+                ? JSON.parse(JSON.stringify(splatProfiling.counters))
+                : undefined,
+              frameMs: summarize(state.frameMs),
+              cpuMs: summarize(state.cpuMs),
+              gpuMs: summarize(gpuValues),
+              gpuSampleCount: gpuValues.filter((value) =>
+                Number.isFinite(value),
+              ).length,
+              raw: {
+                frameMs: state.frameMs,
+                cpuMs: state.cpuMs,
+                gpuMs: gpuValues,
+              },
+            };
+            if (config.capture) {
+              window.__benchPixels = readDrawingBuffer();
+            }
+            document.title = "DONE";
+          } catch (error) {
+            fail(error && error.stack ? error.stack : error);
+          }
+        })();
+      })();
+    </script>
+  </body>
+</html>
