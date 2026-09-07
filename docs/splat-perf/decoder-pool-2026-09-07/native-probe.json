@@ -1,0 +1,15 @@
+[
+  {
+    "label": "native-heap-probe",
+    "production": "candidate",
+    "mode": "static",
+    "sse": "8",
+    "frames": "30",
+    "warmup": "60",
+    "width": "960",
+    "height": "540",
+    "lifecycle": "1",
+    "cycles": "4",
+    "wasmProbe": "1"
+  }
+]

@@ -1,0 +1,11 @@
+[
+  {
+    "label": "retry-profile",
+    "production": "candidate",
+    "mode": "static",
+    "frames": "30",
+    "warmup": "60",
+    "profileLoading": "1",
+    "capture": "1"
+  }
+]

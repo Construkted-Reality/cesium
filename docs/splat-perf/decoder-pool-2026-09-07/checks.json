@@ -1,0 +1,37 @@
+[
+  {
+    "file": "specs-SpzDecoder.log",
+    "successfulTests": 5,
+    "sha256": "2fd1c9c9dbc45c71e2f6c8ebf75c7687ddb3c050aa8a6a72d845320f8ae0858b"
+  },
+  {
+    "file": "final-specs-SpzDecoder.log",
+    "successfulTests": 5,
+    "sha256": "89635dead611cc1bef5f8125cd47b26d04e3af6c67178d8094e93ce97bd6e590"
+  },
+  {
+    "file": "final-specs-GltfSpzLoader.log",
+    "successfulTests": 9,
+    "sha256": "4d52030bb161533020f9380e87bdc3529134cb5ce33c4e0728f162f81ead565b"
+  },
+  {
+    "file": "final-specs-SplatLoading.log",
+    "successfulTests": 13,
+    "sha256": "c099be4002f33385b71779d0e173c096db5176e3afb4fdfe3ea61877b06f0c11"
+  },
+  {
+    "file": "final-specs-Gltf.log",
+    "successfulTests": 350,
+    "sha256": "cb08d204f693686d9d4258b2d14782b70fcd81b02f09ee5c90e650873688de10"
+  },
+  {
+    "file": "final-specs-ResourceCache.log",
+    "successfulTests": 163,
+    "sha256": "53b49ff199abb6ddfb713cfff8548b8d10712d20a679b04222de2507caffff4a"
+  },
+  {
+    "file": "final-specs-GaussianSplat.log",
+    "successfulTests": 34,
+    "sha256": "0612414ff83f46d8c3b7518cdad29793445e2a865836cc03e492af22a440fa77"
+  }
+]

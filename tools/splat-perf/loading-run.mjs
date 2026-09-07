@@ -81,6 +81,15 @@ for (const run of runs) {
         this.__lastExperimentSnapshot = performance.now();
         this._splatDataGeneration++;`);
       }
+      if (run.production === "candidate" && run.wasmProbe === "1") {
+        const inline=/globalThis.CESIUM_WORKERS = atob\("([A-Za-z0-9+/=]+)"\)/.exec(body);
+        if(!inline){throw new Error("Missing inline worker payload");}
+        let workerBody=Buffer.from(inline[1],"base64").toString("utf8");
+        const anchor=/return xr\((\w+), (\w+)\), (\w+);/;
+        if(!anchor.test(workerBody)){throw new Error("Missing inline SPZ heap probe anchor");}
+        workerBody=workerBody.replace(anchor,(whole,module)=>`globalThis.__decoderHeapPeak=Math.max(globalThis.__decoderHeapPeak||0,${module}.HEAPU8.byteLength); ${whole}`);
+        body=body.replace(inline[0],`globalThis.CESIUM_WORKERS = atob("${Buffer.from(workerBody).toString("base64")}")`);
+      }
       await route.fulfill({response,body});
     });
     await context.route("**/Workers/decodeSpz.js", route => {
