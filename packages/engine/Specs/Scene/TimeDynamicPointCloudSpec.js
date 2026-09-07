@@ -211,6 +211,40 @@ describe(
       }).toThrowDeveloperError();
     });
 
+    it("uploads style properties only when first used", async function () {
+      const pointCloud = createTimeDynamicPointCloud();
+      await loadFrame(pointCloud);
+      const frame = pointCloud._frames[0].pointCloud;
+      const attributes = frame._styleableShaderAttributes;
+      expect(attributes.temperature.typedArray).toBeDefined();
+      expect(attributes.secondaryColor.typedArray).toBeDefined();
+      const bytes = frame.geometryByteLength;
+      pointCloud.style = new Cesium3DTileStyle({
+        color: 'color("red")',
+        pointSize: 10,
+        show: "${temperature} >= 0",
+      });
+      expect(scene).toRender([255, 0, 0, 255]);
+      expect(attributes.temperature.typedArray).toBeUndefined();
+      expect(attributes.secondaryColor.typedArray).toBeDefined();
+      expect(frame.geometryByteLength).toBe(bytes);
+      const vertexArray = frame._drawCommand.vertexArray;
+      pointCloud.style = new Cesium3DTileStyle({
+        color: 'color("red")',
+        pointSize: 10,
+      });
+      expect(scene).toRender([255, 0, 0, 255]);
+      pointCloud.style = new Cesium3DTileStyle({
+        color: 'color("red")',
+        pointSize: 10,
+        show: "${temperature} >= 0",
+      });
+      expect(scene).toRender([255, 0, 0, 255]);
+      expect(frame._drawCommand.vertexArray).toBe(vertexArray);
+      scene.primitives.remove(pointCloud);
+      expect(frame._styleableShaderAttributes).toBeUndefined();
+    });
+
     it("renders in 3D", function () {
       const pointCloud = createTimeDynamicPointCloud();
       return loadFrame(pointCloud).then(function () {
