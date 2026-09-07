@@ -1,3 +1,4 @@
+import GltfTextureStorage from "./GltfTextureStorage.js";
 import Check from "../Core/Check.js";
 import CesiumMath from "../Core/Math.js";
 import Frozen from "../Core/Frozen.js";
@@ -29,6 +30,7 @@ class GltfTextureLoader extends ResourceLoader {
    * @param {Resource} options.gltfResource The {@link Resource} containing the glTF.
    * @param {Resource} options.baseResource The {@link Resource} that paths in the glTF JSON are relative to.
    * @param {SupportedImageFormats} options.supportedImageFormats The supported image formats.
+   * @param {string} [options.textureStorageCacheKey] The shared image key.
    * @param {string} [options.cacheKey] The cache key of the resource.
    * @param {boolean} [options.asynchronous=true] Determines if WebGL resource creation will be spread out over several frames or block until all WebGL resources are created.
    */
@@ -71,6 +73,7 @@ class GltfTextureLoader extends ResourceLoader {
     this._gltfResource = gltfResource;
     this._baseResource = baseResource;
     this._cacheKey = cacheKey;
+    this._textureStorageCacheKey = options.textureStorageCacheKey;
     this._asynchronous = asynchronous;
     this._imageLoader = undefined;
     this._image = undefined;
@@ -164,6 +167,7 @@ class GltfTextureLoader extends ResourceLoader {
         this._image,
         this._mipLevels,
         frameState.context,
+        this._textureStorageCacheKey,
       );
       const jobScheduler = frameState.jobScheduler;
       if (!jobScheduler.execute(textureJob, JobType.TEXTURE)) {
@@ -179,6 +183,7 @@ class GltfTextureLoader extends ResourceLoader {
         this._image,
         this._mipLevels,
         frameState.context,
+        this._textureStorageCacheKey,
       );
     }
 
@@ -222,7 +227,8 @@ class CreateTextureJob {
     this.texture = undefined;
   }
 
-  set(gltf, textureInfo, textureId, image, mipLevels, context) {
+  set(gltf, textureInfo, textureId, image, mipLevels, context, storageKey) {
+    this.storageKey = storageKey;
     this.gltf = gltf;
     this.textureInfo = textureInfo;
     this.textureId = textureId;
@@ -239,6 +245,7 @@ class CreateTextureJob {
       this.image,
       this.mipLevels,
       this.context,
+      this.storageKey,
     );
   }
 }
@@ -250,6 +257,7 @@ function createTexture(
   image,
   mipLevels,
   context,
+  storageKey,
 ) {
   // internalFormat is only defined for CompressedTextureBuffer
   const internalFormat = image.internalFormat;
@@ -297,6 +305,20 @@ function createTexture(
     !CesiumMath.isPowerOfTwo(image.height);
 
   const requiresResize = requiresPowerOfTwo && nonPowerOfTwo;
+
+  if (context.webgl2 && defined(storageKey) && !defined(internalFormat)) {
+    const key = `${storageKey}-resize-${requiresResize}-mipmap-${generateMipmap}`;
+    return GltfTextureStorage.getOrCreate(key, sampler, function () {
+      return createTexture(
+        gltf,
+        textureInfo,
+        textureId,
+        image,
+        mipLevels,
+        context,
+      );
+    });
+  }
 
   let texture;
   if (defined(internalFormat)) {

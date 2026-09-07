@@ -12,9 +12,11 @@ import {
   Resource,
   ResourceCache,
   ResourceCacheKey,
+  Sampler,
   SupportedImageFormats,
 } from "../../index.js";
 import concatTypedArrays from "../../../../Specs/concatTypedArrays.js";
+import waitForLoaderProcess from "../../../../Specs/waitForLoaderProcess.js";
 import createScene from "../../../../Specs/createScene.js";
 
 describe("ResourceCache", function () {
@@ -216,6 +218,57 @@ describe("ResourceCache", function () {
 
   afterEach(function () {
     ResourceCache.clearForSpecs();
+  });
+
+  [false, true].forEach(function (reverse) {
+    it(`shares compatible image storage, reverse=${reverse}`, async function () {
+      spyOn(Resource.prototype, "fetchImage").and.returnValue(
+        Promise.resolve(image),
+      );
+      const gltf = {
+        images: [{ uri: "shared.png" }],
+        textures: [
+          { source: 0, sampler: 0 },
+          { source: 0, sampler: 1 },
+        ],
+        samplers: [{ wrapS: 10497 }, { wrapS: 33071 }],
+      };
+      const options = {
+        gltf: gltf,
+        gltfResource: gltfResource,
+        baseResource: gltfResource,
+        frameState: scene.frameState,
+        supportedImageFormats: new SupportedImageFormats(),
+      };
+      const first = ResourceCache.getTextureLoader({
+        ...options,
+        textureInfo: { index: reverse ? 1 : 0 },
+      });
+      const second = ResourceCache.getTextureLoader({
+        ...options,
+        textureInfo: { index: reverse ? 0 : 1 },
+      });
+      await Promise.all([first.load(), second.load()]);
+      await waitForLoaderProcess(first, scene);
+      await waitForLoaderProcess(second, scene);
+      const firstTexture = first.texture;
+      const secondTexture = second.texture;
+      expect(firstTexture).not.toBe(secondTexture);
+      if (scene.context.webgl2) {
+        expect(firstTexture._texture).toBe(secondTexture._texture);
+        expect(ResourceCache.statistics.texturesByteLength).toBe(
+          firstTexture.sizeInBytes,
+        );
+      }
+      const originalSampler = secondTexture.sampler;
+      firstTexture.sampler = new Sampler({ wrapS: 33648 });
+      expect(secondTexture.sampler).toBe(originalSampler);
+      ResourceCache.unload(first);
+      expect(secondTexture.isDestroyed()).toBe(false);
+      ResourceCache.unload(second);
+      expect(secondTexture.isDestroyed()).toBe(true);
+      expect(ResourceCache.statistics.texturesByteLength).toBe(0);
+    });
   });
 
   it("adds resource", function () {

@@ -31,6 +31,8 @@ function ResourceCacheStatistics() {
   // removeLoader() can decrement the counts correctly.
   this._geometrySizes = {};
   this._textureSizes = {};
+  this._textureObjects = {};
+  this._textureReferences = new Map();
 }
 
 /**
@@ -44,6 +46,8 @@ ResourceCacheStatistics.prototype.clear = function () {
 
   this._geometrySizes = {};
   this._textureSizes = {};
+  this._textureObjects = {};
+  this._textureReferences = new Map();
 };
 
 /**
@@ -116,7 +120,13 @@ ResourceCacheStatistics.prototype.addTextureLoader = function (loader) {
 
   this._textureSizes[cacheKey] = 0;
   const totalSize = loader.texture.sizeInBytes;
-  this.texturesByteLength += loader.texture.sizeInBytes;
+  const texture = loader.texture._texture ?? loader.texture;
+  const references = this._textureReferences.get(texture) ?? 0;
+  if (references === 0) {
+    this.texturesByteLength += totalSize;
+  }
+  this._textureReferences.set(texture, references + 1);
+  this._textureObjects[cacheKey] = texture;
   this._textureSizes[cacheKey] = totalSize;
 };
 
@@ -146,7 +156,15 @@ ResourceCacheStatistics.prototype.removeLoader = function (loader) {
   delete this._textureSizes[cacheKey];
 
   if (defined(textureSize)) {
-    this.texturesByteLength -= textureSize;
+    const texture = this._textureObjects[cacheKey];
+    delete this._textureObjects[cacheKey];
+    const references = this._textureReferences.get(texture);
+    if (references === 1) {
+      this.texturesByteLength -= textureSize;
+      this._textureReferences.delete(texture);
+    } else {
+      this._textureReferences.set(texture, references - 1);
+    }
   }
 };
 

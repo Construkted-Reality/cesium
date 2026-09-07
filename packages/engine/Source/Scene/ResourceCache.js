@@ -772,6 +772,9 @@ ResourceCache.getTextureLoader = function (options) {
     baseResource: baseResource,
     supportedImageFormats: supportedImageFormats,
     cacheKey: cacheKey,
+    textureStorageCacheKey: frameState.context.webgl2
+      ? ResourceCacheKey.getTextureCacheKey({ ...options, ignoreSampler: true })
+      : undefined,
     asynchronous: asynchronous,
   });
 
