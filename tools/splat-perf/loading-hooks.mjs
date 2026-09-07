@@ -3,37 +3,45 @@ import {prepareCloud} from "./loading-kernels.mjs";
 const params=new URLSearchParams(location.search);
 const mode=params.get("loading") || "base";
 const stats=window.__loadingStats={mode,started:0,completed:0,cancelled:0,queuedPeak:0,inputBytes:0,outputBytes:0,decodeMs:0,packMs:0,mainMs:0,failures:0};
-let worker, active, id=0;
+let id=0;
+const workerCount=Number(params.get("workers")||1);
+if(!Number.isInteger(workerCount)||workerCount<1||workerCount>4){throw new Error("workers must be an integer from 1 through 4");}
+const slots=Array.from({length:workerCount},()=>({worker:undefined,active:undefined}));
 const queue=[];
-function ensureWorker() {
-    if(!worker) {
-      worker=new Worker("/tools/splat-perf/loading-worker.mjs",{type:"module"});
-      worker.onmessage=event=> {
-        const job=active; active=undefined;
-        if(event.data.id!==job.id){throw new Error("Worker result mismatch");}
-        if(event.data.error) {stats.failures++;worker.terminate();worker=undefined;job.reject(new Error(event.data.error));}
-        else {stats.completed++;if(job.owner.isDestroyed()){stats.cancelled++;}stats.decodeMs+=event.data.decodeMs;stats.packMs+=event.data.packMs;stats.outputBytes+=event.data.outputBytes;job.resolve(event.data.cloud);}
-        dispatch();
-      };
-      worker.onerror=event=> {
-        const error=new Error(event.message);stats.failures++;
-        active?.reject(error);active=undefined;
-        for(const job of queue){job.reject(error);}queue.length=0;
-        worker.terminate();worker=undefined;
-      };
+function ensureWorker(slot) {
+  if(slot.worker){return;}
+  slot.worker=new Worker("/tools/splat-perf/loading-worker.mjs",{type:"module"});
+  slot.worker.onmessage=event=> {
+    const job=slot.active;slot.active=undefined;
+    if(event.data.id!==job.id){throw new Error("Worker result mismatch");}
+    if(event.data.error){stats.failures++;slot.worker.terminate();slot.worker=undefined;job.reject(new Error(event.data.error));}
+    else {
+      stats.completed++;if(job.owner.isDestroyed()){stats.cancelled++;}
+      stats.decodeMs+=event.data.decodeMs;stats.packMs+=event.data.packMs;stats.outputBytes+=event.data.outputBytes;
+      if(params.get("workerJobs")==="1") {
+        (stats.jobs ||= []).push({id:job.id,slot:slots.indexOf(slot),asset:job.owner._gltfResource?.url?.match(/oracle-run\/([^/]+)/)?.[1],queuedMs:job.started-job.queued,elapsedMs:performance.now()-job.started,decodeMs:event.data.decodeMs,packMs:event.data.packMs});
+      }
+      job.resolve(event.data.cloud);
     }
+    dispatch();
+  };
+  slot.worker.onerror=event=> {
+    stats.failures++;slot.active?.reject(new Error(event.message));slot.active=undefined;
+    slot.worker.terminate();slot.worker=undefined;dispatch();
+  };
 }
 function dispatch() {
-  if(active){return;}
-  while(queue.length) {
-    const job=queue.shift();
-    if(job.owner.isDestroyed()) {stats.cancelled++;job.reject(new Error("Queued loader destroyed"));continue;}
-    active=job;
-    ensureWorker();
-    const input=new Uint8Array(job.input);
-    stats.inputBytes+=input.byteLength;stats.started++;
-    worker.postMessage({id:job.id,input,options:job.options,schema:job.schema},[input.buffer]);
-    return;
+  for(const slot of slots) {
+    if(slot.active){continue;}
+    while(queue.length) {
+      const job=queue.shift();
+      if(job.owner.isDestroyed()){stats.cancelled++;job.reject(new Error("Queued loader destroyed"));continue;}
+      slot.active=job;ensureWorker(slot);
+      const input=new Uint8Array(job.input);job.started=performance.now();
+      stats.inputBytes+=input.byteLength;stats.started++;
+      slot.worker.postMessage({id:job.id,input,options:job.options,schema:job.schema},[input.buffer]);
+      break;
+    }
   }
 }
 window.__loadingDecode=(input,options,owner,decode)=> {
@@ -41,7 +49,7 @@ window.__loadingDecode=(input,options,owner,decode)=> {
     const m=/SH_DEGREE_(\d+)_COEF_(\d+)/.exec(k);return m?`${m[1]}:${m[2]}`:"invalid";
   });
   if(mode==="worker"){return new Promise((resolve,reject)=> {
-    queue.push({id:++id,input,options,owner,schema,resolve,reject});stats.queuedPeak=Math.max(stats.queuedPeak,queue.length);dispatch();
+    queue.push({id:++id,input,options,owner,schema,resolve,reject,queued:performance.now()});stats.queuedPeak=Math.max(stats.queuedPeak,queue.length);dispatch();
   });}
   const started=performance.now();stats.started++;
   return decode(input,options).then(cloud=> {
@@ -50,7 +58,7 @@ window.__loadingDecode=(input,options,owner,decode)=> {
     stats.packMs+=performance.now()-decoded;stats.completed++;return cloud;
   });
 };
-window.__loadingQueueState=()=>({active:!!active,queued:queue.length});
+window.__loadingQueueState=()=>({active:slots.some(slot=>!!slot.active),activeCount:slots.filter(slot=>slot.active).length,queued:queue.length});
 window.__setPositionBudget=bytes=> {
   if(params.has("production")) { Cesium.GaussianSplatPrimitive.maximumCacheByteLength=bytes; return; }
   if(!Number.isSafeInteger(bytes)||bytes<0||bytes>1024*1024*1024){throw new Error("Budget must be an integer from 0 to 1 GiB");}
