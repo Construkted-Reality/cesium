@@ -17,3 +17,7 @@ Production comparisons preserve exact pixels. Geo complete-view time improves 60
 retained main-thread arrays decrease 1.422 to 0.923 GB. The production integration preserves the prototype benefit.
 The first lifecycle configuration specified cycles but omitted lifecycle=1. The validator rejected the missing cycle data.
 The corrected run enables lifecycle explicitly. The harness now rejects that incomplete configuration before launching.
+
+Review finds an empty-array edge case in cache disabling. Zero-length entries survive a byte-count-only eviction loop,
+and new empty arrays fit a zero-byte budget. A regression test fails both assertions before the fix.
+Disabling now clears all entries and refuses all new entries, including empty arrays.
