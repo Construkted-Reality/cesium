@@ -1,0 +1,25 @@
+[
+  {
+    "label": "runtime-budget",
+    "mode": "orbit",
+    "frames": "480",
+    "warmup": "120",
+    "multi": "6",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "budgetChanges": "1",
+    "budgetValidation": "1"
+  },
+  {
+    "label": "backend-gl",
+    "backend": "gl",
+    "mode": "static",
+    "frames": "90",
+    "warmup": "60",
+    "width": "960",
+    "height": "540",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "capture": "1"
+  }
+]

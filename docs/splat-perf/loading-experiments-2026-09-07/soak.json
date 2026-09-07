@@ -1,0 +1,50 @@
+[
+  {
+    "label": "soak-geo-newdefault-base",
+    "tileset": "/splat-data/oracle-run/geo-newdefault/tileset.json",
+    "loading": "base",
+    "mode": "static",
+    "frames": "60",
+    "warmup": "120",
+    "width": "960",
+    "height": "540",
+    "sse": "8",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "lifecycle": "1",
+    "cycles": "24",
+    "multi": "1"
+  },
+  {
+    "label": "soak-geo-newdefault-worker",
+    "tileset": "/splat-data/oracle-run/geo-newdefault/tileset.json",
+    "loading": "worker",
+    "mode": "static",
+    "frames": "60",
+    "warmup": "120",
+    "width": "960",
+    "height": "540",
+    "sse": "8",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "lifecycle": "1",
+    "cycles": "24",
+    "multi": "1"
+  },
+  {
+    "label": "soak-bike-newdefault-worker",
+    "tileset": "/splat-data/oracle-run/bike-newdefault/tileset.json",
+    "loading": "worker",
+    "mode": "static",
+    "frames": "60",
+    "warmup": "120",
+    "width": "960",
+    "height": "540",
+    "sse": "8",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "lifecycle": "1",
+    "cycles": "24",
+    "multi": "1"
+  }
+]

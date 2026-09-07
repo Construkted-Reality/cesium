@@ -1,0 +1,188 @@
+[
+  {
+    "label": "stream-geo-newdefault-base-0",
+    "tileset": "/splat-data/oracle-run/geo-newdefault/tileset.json",
+    "loading": "base",
+    "mode": "stress",
+    "frames": "1080",
+    "warmup": "90",
+    "tileCache": "33554432",
+    "tileOverflow": "67108864"
+  },
+  {
+    "label": "stream-geo-newdefault-direct-0",
+    "tileset": "/splat-data/oracle-run/geo-newdefault/tileset.json",
+    "loading": "direct",
+    "mode": "stress",
+    "frames": "1080",
+    "warmup": "90",
+    "tileCache": "33554432",
+    "tileOverflow": "67108864"
+  },
+  {
+    "label": "stream-geo-newdefault-worker-0",
+    "tileset": "/splat-data/oracle-run/geo-newdefault/tileset.json",
+    "loading": "worker",
+    "mode": "stress",
+    "frames": "1080",
+    "warmup": "90",
+    "tileCache": "33554432",
+    "tileOverflow": "67108864"
+  },
+  {
+    "label": "stream-geo-newdefault-worker-1",
+    "tileset": "/splat-data/oracle-run/geo-newdefault/tileset.json",
+    "loading": "worker",
+    "mode": "stress",
+    "frames": "1080",
+    "warmup": "90",
+    "tileCache": "33554432",
+    "tileOverflow": "67108864"
+  },
+  {
+    "label": "stream-geo-newdefault-direct-1",
+    "tileset": "/splat-data/oracle-run/geo-newdefault/tileset.json",
+    "loading": "direct",
+    "mode": "stress",
+    "frames": "1080",
+    "warmup": "90",
+    "tileCache": "33554432",
+    "tileOverflow": "67108864"
+  },
+  {
+    "label": "stream-geo-newdefault-base-1",
+    "tileset": "/splat-data/oracle-run/geo-newdefault/tileset.json",
+    "loading": "base",
+    "mode": "stress",
+    "frames": "1080",
+    "warmup": "90",
+    "tileCache": "33554432",
+    "tileOverflow": "67108864"
+  },
+  {
+    "label": "image-geo-newdefault-base",
+    "tileset": "/splat-data/oracle-run/geo-newdefault/tileset.json",
+    "loading": "base",
+    "mode": "static",
+    "frames": "120",
+    "warmup": "120",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "capture": "1"
+  },
+  {
+    "label": "image-geo-newdefault-direct",
+    "tileset": "/splat-data/oracle-run/geo-newdefault/tileset.json",
+    "loading": "direct",
+    "mode": "static",
+    "frames": "120",
+    "warmup": "120",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "capture": "1"
+  },
+  {
+    "label": "image-geo-newdefault-worker",
+    "tileset": "/splat-data/oracle-run/geo-newdefault/tileset.json",
+    "loading": "worker",
+    "mode": "static",
+    "frames": "120",
+    "warmup": "120",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "capture": "1"
+  },
+  {
+    "label": "stream-bike-newdefault-base-0",
+    "tileset": "/splat-data/oracle-run/bike-newdefault/tileset.json",
+    "loading": "base",
+    "mode": "stress",
+    "frames": "1080",
+    "warmup": "90",
+    "tileCache": "33554432",
+    "tileOverflow": "67108864"
+  },
+  {
+    "label": "stream-bike-newdefault-direct-0",
+    "tileset": "/splat-data/oracle-run/bike-newdefault/tileset.json",
+    "loading": "direct",
+    "mode": "stress",
+    "frames": "1080",
+    "warmup": "90",
+    "tileCache": "33554432",
+    "tileOverflow": "67108864"
+  },
+  {
+    "label": "stream-bike-newdefault-worker-0",
+    "tileset": "/splat-data/oracle-run/bike-newdefault/tileset.json",
+    "loading": "worker",
+    "mode": "stress",
+    "frames": "1080",
+    "warmup": "90",
+    "tileCache": "33554432",
+    "tileOverflow": "67108864"
+  },
+  {
+    "label": "stream-bike-newdefault-worker-1",
+    "tileset": "/splat-data/oracle-run/bike-newdefault/tileset.json",
+    "loading": "worker",
+    "mode": "stress",
+    "frames": "1080",
+    "warmup": "90",
+    "tileCache": "33554432",
+    "tileOverflow": "67108864"
+  },
+  {
+    "label": "stream-bike-newdefault-direct-1",
+    "tileset": "/splat-data/oracle-run/bike-newdefault/tileset.json",
+    "loading": "direct",
+    "mode": "stress",
+    "frames": "1080",
+    "warmup": "90",
+    "tileCache": "33554432",
+    "tileOverflow": "67108864"
+  },
+  {
+    "label": "stream-bike-newdefault-base-1",
+    "tileset": "/splat-data/oracle-run/bike-newdefault/tileset.json",
+    "loading": "base",
+    "mode": "stress",
+    "frames": "1080",
+    "warmup": "90",
+    "tileCache": "33554432",
+    "tileOverflow": "67108864"
+  },
+  {
+    "label": "image-bike-newdefault-base",
+    "tileset": "/splat-data/oracle-run/bike-newdefault/tileset.json",
+    "loading": "base",
+    "mode": "static",
+    "frames": "120",
+    "warmup": "120",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "capture": "1"
+  },
+  {
+    "label": "image-bike-newdefault-direct",
+    "tileset": "/splat-data/oracle-run/bike-newdefault/tileset.json",
+    "loading": "direct",
+    "mode": "static",
+    "frames": "120",
+    "warmup": "120",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "capture": "1"
+  },
+  {
+    "label": "image-bike-newdefault-worker",
+    "tileset": "/splat-data/oracle-run/bike-newdefault/tileset.json",
+    "loading": "worker",
+    "mode": "static",
+    "frames": "120",
+    "warmup": "120",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "capture": "1"
+  }
+]

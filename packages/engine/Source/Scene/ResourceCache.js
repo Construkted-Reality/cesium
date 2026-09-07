@@ -484,6 +484,7 @@ ResourceCache.getVertexBufferLoader = function (options) {
     dequantize = false,
     loadBuffer = false,
     loadTypedArray = false,
+    packedSphericalHarmonicsDegree,
   } = options;
 
   //>>includeStart('debug', pragmas.debug);
@@ -550,6 +551,7 @@ ResourceCache.getVertexBufferLoader = function (options) {
     dequantize: dequantize,
     loadBuffer: loadBuffer,
     loadTypedArray: loadTypedArray,
+    packedSphericalHarmonicsDegree: packedSphericalHarmonicsDegree,
   });
 
   let vertexBufferLoader = ResourceCache.get(cacheKey);
@@ -573,6 +575,7 @@ ResourceCache.getVertexBufferLoader = function (options) {
     dequantize: dequantize,
     loadBuffer: loadBuffer,
     loadTypedArray: loadTypedArray,
+    packedSphericalHarmonicsDegree: packedSphericalHarmonicsDegree,
   });
 
   return ResourceCache.add(vertexBufferLoader);

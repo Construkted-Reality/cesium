@@ -10,6 +10,18 @@ class GaussianSplatPositionCache {
     this._entries = new Map();
   }
 
+  resize(maximumByteLength) {
+    this.maximumByteLength = maximumByteLength;
+    if (maximumByteLength === 0) {
+      this._entries.clear();
+      this.byteLength = 0;
+      return;
+    }
+    while (this.byteLength > maximumByteLength) {
+      this.remove(this._entries.keys().next().value);
+    }
+  }
+
   remove(key) {
     const positions = this._entries.get(key);
     if (defined(positions)) {
@@ -22,7 +34,10 @@ class GaussianSplatPositionCache {
     this.remove(key);
     // Count backing storage, including any bytes outside a subarray view.
     // Oversized inputs can be sorted directly without evicting resident sets.
-    if (positions.buffer.byteLength > this.maximumByteLength) {
+    if (
+      this.maximumByteLength === 0 ||
+      positions.buffer.byteLength > this.maximumByteLength
+    ) {
       return;
     }
     while (

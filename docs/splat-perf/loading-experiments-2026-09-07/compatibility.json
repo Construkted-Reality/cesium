@@ -1,0 +1,72 @@
+[
+  {
+    "label": "software-base",
+    "loading": "base",
+    "backend": "gl",
+    "mode": "static",
+    "frames": "15",
+    "warmup": "15",
+    "sse": "256",
+    "width": "256",
+    "height": "256",
+    "freeze": "1",
+    "settleFrozen": "30",
+    "capture": "1"
+  },
+  {
+    "label": "software-worker",
+    "loading": "worker",
+    "backend": "gl",
+    "mode": "static",
+    "frames": "15",
+    "warmup": "15",
+    "sse": "256",
+    "width": "256",
+    "height": "256",
+    "freeze": "1",
+    "settleFrozen": "30",
+    "capture": "1"
+  },
+  {
+    "label": "degree0-base",
+    "loading": "base",
+    "tileset": "/splat-data/oracle-run/geo-newflat/tileset.json",
+    "mode": "static",
+    "frames": "30",
+    "warmup": "60",
+    "sse": "8",
+    "width": "960",
+    "height": "540",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "capture": "1"
+  },
+  {
+    "label": "degree0-direct",
+    "loading": "direct",
+    "tileset": "/splat-data/oracle-run/geo-newflat/tileset.json",
+    "mode": "static",
+    "frames": "30",
+    "warmup": "60",
+    "sse": "8",
+    "width": "960",
+    "height": "540",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "capture": "1"
+  },
+  {
+    "label": "degree0-worker",
+    "loading": "worker",
+    "tileset": "/splat-data/oracle-run/geo-newflat/tileset.json",
+    "mode": "static",
+    "frames": "30",
+    "warmup": "60",
+    "sse": "8",
+    "width": "960",
+    "height": "540",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "capture": "1"
+  }
+]

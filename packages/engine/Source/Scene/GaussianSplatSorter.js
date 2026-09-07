@@ -1,3 +1,4 @@
+import DeveloperError from "../Core/DeveloperError.js";
 import defined from "../Core/defined.js";
 import GaussianSplatPositionCache from "../Core/GaussianSplatPositionCache.js";
 import FeatureDetection from "../Core/FeatureDetection.js";
@@ -11,15 +12,33 @@ import TaskProcessor from "../Core/TaskProcessor.js";
  */
 function GaussianSplatSorter() {}
 
-GaussianSplatSorter.maximumCacheByteLength =
-  GaussianSplatPositionCache.maximumByteLength;
+let maximumCacheByteLength = GaussianSplatPositionCache.maximumByteLength;
+let budgetDirty = false;
+Object.defineProperty(GaussianSplatSorter, "maximumCacheByteLength", {
+  get() {
+    return maximumCacheByteLength;
+  },
+  set(value) {
+    if (!Number.isSafeInteger(value) || value < 0) {
+      throw new DeveloperError(
+        "maximumCacheByteLength must be a nonnegative safe integer.",
+      );
+    }
+    if (value === maximumCacheByteLength) {
+      return;
+    }
+    maximumCacheByteLength = value;
+    budgetDirty = true;
+    flushReleasedPositions();
+  },
+});
 const pendingReleases = new Set();
 let releaseInFlight = false;
 
 function flushReleasedPositions() {
   if (
     releaseInFlight ||
-    pendingReleases.size === 0 ||
+    (pendingReleases.size === 0 && !budgetDirty) ||
     !GaussianSplatSorter._taskProcessorReady
   ) {
     return;
@@ -27,6 +46,7 @@ function flushReleasedPositions() {
   const keys = Array.from(pendingReleases);
   const promise = GaussianSplatSorter._sorterTaskProcessor.scheduleTask({
     releaseKeys: keys,
+    cacheByteBudget: maximumCacheByteLength,
   });
   if (!defined(promise)) {
     return;
@@ -34,6 +54,7 @@ function flushReleasedPositions() {
   for (const key of keys) {
     pendingReleases.delete(key);
   }
+  budgetDirty = false;
   releaseInFlight = true;
   promise
     .catch(() => {})
@@ -72,6 +93,7 @@ GaussianSplatSorter._getSorterTaskProcessor = function () {
       .then(function (result) {
         if (result) {
           GaussianSplatSorter._taskProcessorReady = true;
+          flushReleasedPositions();
         } else {
           GaussianSplatSorter._error = new RuntimeError(
             "Gaussian splat sorter could not be initialized.",
@@ -112,11 +134,13 @@ GaussianSplatSorter.radixSortIndexes = function (parameters) {
   const positions = parameters.primitive.positions;
   const transferableObjects = defined(positions) ? [positions.buffer] : [];
   parameters.releaseKeys = Array.from(pendingReleases);
+  parameters.cacheByteBudget = maximumCacheByteLength;
   const promise = sorterTaskProcessor.scheduleTask(
     parameters,
     transferableObjects,
   );
   if (defined(promise)) {
+    budgetDirty = false;
     for (const key of parameters.releaseKeys) {
       pendingReleases.delete(key);
     }

@@ -85,6 +85,10 @@ ResourceCacheStatistics.prototype.addGeometryLoader = function (loader) {
     totalSize += typedArray.byteLength;
   }
 
+  if (defined(loader.packedSphericalHarmonics)) {
+    totalSize += loader.packedSphericalHarmonics.byteLength;
+  }
+
   this.geometryByteLength += totalSize;
   this._geometrySizes[cacheKey] = totalSize;
 };
