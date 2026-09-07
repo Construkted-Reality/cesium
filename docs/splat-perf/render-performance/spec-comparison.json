@@ -1,0 +1,30 @@
+{
+  "totals": "TOTAL: 6 FAILED, 15749 SUCCESS",
+  "failures": [
+    {
+      "name": "has czm_pass and czm_passOverlay",
+      "suite": "Renderer/AutomaticUniforms"
+    },
+    {
+      "name": "applies color style to a tileset with translucent tiles",
+      "suite": "Scene/Cesium3DTileset"
+    },
+    {
+      "name": "produces radiance values with mainly blue direct light",
+      "suite": "Scene/DynamicEnvironmentMapManager render tests with static lighting at surface"
+    },
+    {
+      "name": "produces radiance values with mainly blue direct light",
+      "suite": "Scene/DynamicEnvironmentMapManager render tests with dynamic lighting in philadelphia"
+    },
+    {
+      "name": "produces radiance values with more light reflected from the ground",
+      "suite": "Scene/DynamicEnvironmentMapManager render tests with groundAlbedo property"
+    },
+    {
+      "name": "picks based on batchId",
+      "suite": "Scene/Model/Model3DTileContent pnts"
+    }
+  ],
+  "newFailures": []
+}

@@ -1,0 +1,261 @@
+{
+  "dolly": {
+    "base": {
+      "frameMedianMs": 15.049999982118607,
+      "frameP95Ms": 18.05000001192093,
+      "cpuMeanMs": 0.8648750006780028,
+      "cpuP95Ms": 2.6000000089406967,
+      "gpuMedianMs": 6.428672,
+      "sorts": [
+        61,
+        57
+      ],
+      "positionBytes": [
+        0,
+        0
+      ],
+      "cacheMisses": [
+        0,
+        0
+      ],
+      "harmonicsBytes": [
+        220933440,
+        220933440
+      ],
+      "drawBuilds": [
+        60,
+        56
+      ],
+      "drawReuses": [
+        0,
+        0
+      ]
+    },
+    "new": {
+      "frameMedianMs": 14.349999994039536,
+      "frameP95Ms": 16.299999982118607,
+      "cpuMeanMs": 0.6195000003650785,
+      "cpuP95Ms": 2.25,
+      "gpuMedianMs": 6.42304,
+      "sorts": [
+        25,
+        25
+      ],
+      "positionBytes": [
+        0,
+        0
+      ],
+      "cacheMisses": [
+        0,
+        0
+      ],
+      "harmonicsBytes": [
+        176904000,
+        176904000
+      ],
+      "drawBuilds": [
+        0,
+        0
+      ],
+      "drawReuses": [
+        24,
+        24
+      ]
+    }
+  },
+  "orbit": {
+    "base": {
+      "frameMedianMs": 14.299999982118607,
+      "frameP95Ms": 16.450000002980232,
+      "cpuMeanMs": 0.9383749999478459,
+      "cpuP95Ms": 2.8499999791383743,
+      "gpuMedianMs": 5.730816,
+      "sorts": [
+        58,
+        63
+      ],
+      "positionBytes": [
+        0,
+        0
+      ],
+      "cacheMisses": [
+        0,
+        0
+      ],
+      "harmonicsBytes": [
+        241375680,
+        241375680
+      ],
+      "drawBuilds": [
+        57,
+        62
+      ],
+      "drawReuses": [
+        0,
+        0
+      ]
+    },
+    "new": {
+      "frameMedianMs": 14.200000002980232,
+      "frameP95Ms": 16.0,
+      "cpuMeanMs": 0.879624999910593,
+      "cpuP95Ms": 2.7000000029802322,
+      "gpuMedianMs": 5.725696,
+      "sorts": [
+        57,
+        58
+      ],
+      "positionBytes": [
+        0,
+        0
+      ],
+      "cacheMisses": [
+        0,
+        0
+      ],
+      "harmonicsBytes": [
+        193152960,
+        193152960
+      ],
+      "drawBuilds": [
+        0,
+        0
+      ],
+      "drawReuses": [
+        57,
+        58
+      ]
+    }
+  },
+  "multi": {
+    "base": {
+      "frameMedianMs": 33.75,
+      "frameP95Ms": 45.69999998807907,
+      "cpuMeanMs": 4.343833332856496,
+      "cpuP95Ms": 15.549999997019768,
+      "gpuMedianMs": 22.091776,
+      "sorts": [
+        50,
+        52
+      ],
+      "positionBytes": [
+        1181880588,
+        1254240624
+      ],
+      "cacheMisses": [
+        49,
+        52
+      ],
+      "harmonicsBytes": [
+        241375680,
+        241375680
+      ],
+      "drawBuilds": [
+        147,
+        154
+      ],
+      "drawReuses": [
+        0,
+        0
+      ]
+    },
+    "new": {
+      "frameMedianMs": 33.5,
+      "frameP95Ms": 35.6499999910593,
+      "cpuMeanMs": 2.5769999995827675,
+      "cpuP95Ms": 4.950000017881393,
+      "gpuMedianMs": 22.084608,
+      "sorts": [
+        39,
+        38
+      ],
+      "positionBytes": [
+        0,
+        0
+      ],
+      "cacheMisses": [
+        0,
+        0
+      ],
+      "harmonicsBytes": [
+        193152960,
+        193152960
+      ],
+      "drawBuilds": [
+        0,
+        0
+      ],
+      "drawReuses": [
+        149,
+        148
+      ]
+    }
+  },
+  "images": [
+    {
+      "pose": "wide",
+      "identical": true,
+      "sha256": "e0c0457f89318f590eee6827b294274b8133b04bb75b4aca7f2a4a210ee95d52"
+    },
+    {
+      "pose": "close",
+      "identical": true,
+      "sha256": "4ab11c2789c8eeac11f04b821242973ce2bf9c2aec68e1b6d83dc002b6544ca8"
+    },
+    {
+      "pose": "dolly",
+      "identical": true,
+      "sha256": "4b91211863ce9a09990bd813a7264c8e0abdbcc40a207732258a744387576e7f"
+    }
+  ],
+  "transitions": [
+    {
+      "step": 0,
+      "identical": true,
+      "baseHash": "9e2da4bed9ffee59104723c3e9131a8b7097c38cc3c2cb372e7c44d03d7ad860",
+      "newHash": "9e2da4bed9ffee59104723c3e9131a8b7097c38cc3c2cb372e7c44d03d7ad860"
+    },
+    {
+      "step": 1,
+      "identical": true,
+      "baseHash": "4bb7a481bf43d9eec8e761b1964902674525eb07ec9063e5f90f803f4ca609e5",
+      "newHash": "4bb7a481bf43d9eec8e761b1964902674525eb07ec9063e5f90f803f4ca609e5"
+    },
+    {
+      "step": 2,
+      "identical": true,
+      "baseHash": "9e2da4bed9ffee59104723c3e9131a8b7097c38cc3c2cb372e7c44d03d7ad860",
+      "newHash": "9e2da4bed9ffee59104723c3e9131a8b7097c38cc3c2cb372e7c44d03d7ad860"
+    },
+    {
+      "step": 3,
+      "identical": true,
+      "baseHash": "9132c94665423c93f16b2fd7ca796d687231b5c17705db25628cbf8c37a6b661",
+      "newHash": "9132c94665423c93f16b2fd7ca796d687231b5c17705db25628cbf8c37a6b661"
+    },
+    {
+      "step": 4,
+      "identical": true,
+      "baseHash": "62dbc1ac1890876f2787b5664da5104166153c13c6167155f7aa540da8f8de73",
+      "newHash": "62dbc1ac1890876f2787b5664da5104166153c13c6167155f7aa540da8f8de73"
+    },
+    {
+      "step": 5,
+      "identical": true,
+      "baseHash": "d52c44de94f64d5aca8b20e662b280b3737fa99062dca580c095fd93948fc3eb",
+      "newHash": "d52c44de94f64d5aca8b20e662b280b3737fa99062dca580c095fd93948fc3eb"
+    },
+    {
+      "step": 6,
+      "identical": true,
+      "baseHash": "c915b0820f3d0932d105ee53ebf37390eb3e0115bb3cd490a7a356418da50de8",
+      "newHash": "c915b0820f3d0932d105ee53ebf37390eb3e0115bb3cd490a7a356418da50de8"
+    },
+    {
+      "step": 7,
+      "identical": true,
+      "baseHash": "727679d16cfb6ef4415e6940b5c423c2c320adabe3cac9679cfaf2d8d8ad6ab2",
+      "newHash": "727679d16cfb6ef4415e6940b5c423c2c320adabe3cac9679cfaf2d8d8ad6ab2"
+    }
+  ]
+}

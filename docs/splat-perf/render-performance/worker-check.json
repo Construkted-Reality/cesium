@@ -1,0 +1,7 @@
+{
+  "realWasm": true,
+  "workerBudgetBytes": 32,
+  "cacheMiss": true,
+  "explicitRelease": true,
+  "oversizeSortedWithoutEvictingResident": true
+}

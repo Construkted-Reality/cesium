@@ -5,10 +5,18 @@ behaves. Read this file first. The numbered files in this directory are the
 record of the investigation, not instructions.
 
 - Fork base: `9fda7ab97a`, CesiumJS version 1.144.0.
-- Branch: `feature/splat-perf`.
+- Base branch: `feature/splat-perf`.
 - Upstream remote: `origin`, `https://github.com/CesiumGS/cesium.git`.
 
-Nothing on this branch is pushed to a public remote.
+The public fork is [Construkted-Reality/cesium](https://github.com/Construkted-Reality/cesium).
+[PR #1](https://github.com/Construkted-Reality/cesium/pull/1) adds recovery and
+resource-lifetime fixes. The [rendering performance follow-up](render-performance/RESULTS.md)
+adds exact sort suppression, command reuse, a byte-budgeted worker cache, and
+dense harmonics packing.
+
+The remaining sections record the original optimization round. Their file
+counts, cache policy, and test status refer to that historical baseline. Read
+the follow-up results for the current changes and validation.
 
 ## What changes in the product code
 

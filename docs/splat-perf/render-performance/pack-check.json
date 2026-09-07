@@ -1,0 +1,173 @@
+[
+  {
+    "degree": 1,
+    "count": 262144,
+    "beforeBytes": 6291456,
+    "afterBytes": 6291456,
+    "halfValuesIdentical": true,
+    "times": [
+      {
+        "repeat": 0,
+        "label": "baseline",
+        "ms": 20.902754999999843,
+        "bytes": 6291456
+      },
+      {
+        "repeat": 0,
+        "label": "dense",
+        "ms": 19.697357999999895,
+        "bytes": 6291456
+      },
+      {
+        "repeat": 1,
+        "label": "baseline",
+        "ms": 19.927348999999822,
+        "bytes": 6291456
+      },
+      {
+        "repeat": 1,
+        "label": "dense",
+        "ms": 19.6597569999999,
+        "bytes": 6291456
+      },
+      {
+        "repeat": 2,
+        "label": "baseline",
+        "ms": 20.50879299999997,
+        "bytes": 6291456
+      },
+      {
+        "repeat": 2,
+        "label": "dense",
+        "ms": 19.75166800000011,
+        "bytes": 6291456
+      },
+      {
+        "repeat": 3,
+        "label": "baseline",
+        "ms": 19.652066999999988,
+        "bytes": 6291456
+      },
+      {
+        "repeat": 3,
+        "label": "dense",
+        "ms": 19.296965,
+        "bytes": 6291456
+      }
+    ]
+  },
+  {
+    "degree": 2,
+    "count": 262144,
+    "beforeBytes": 16777216,
+    "afterBytes": 12582912,
+    "halfValuesIdentical": true,
+    "times": [
+      {
+        "repeat": 0,
+        "label": "baseline",
+        "ms": 57.38840200000004,
+        "bytes": 16777216
+      },
+      {
+        "repeat": 0,
+        "label": "dense",
+        "ms": 61.4960480000002,
+        "bytes": 12582912
+      },
+      {
+        "repeat": 1,
+        "label": "baseline",
+        "ms": 57.521412000000055,
+        "bytes": 16777216
+      },
+      {
+        "repeat": 1,
+        "label": "dense",
+        "ms": 32.48102999999992,
+        "bytes": 12582912
+      },
+      {
+        "repeat": 2,
+        "label": "baseline",
+        "ms": 57.82169399999975,
+        "bytes": 16777216
+      },
+      {
+        "repeat": 2,
+        "label": "dense",
+        "ms": 32.36805000000004,
+        "bytes": 12582912
+      },
+      {
+        "repeat": 3,
+        "label": "baseline",
+        "ms": 60.55671200000006,
+        "bytes": 16777216
+      },
+      {
+        "repeat": 3,
+        "label": "dense",
+        "ms": 29.016118000000006,
+        "bytes": 12582912
+      }
+    ]
+  },
+  {
+    "degree": 3,
+    "count": 262144,
+    "beforeBytes": 31457280,
+    "afterBytes": 25165824,
+    "halfValuesIdentical": true,
+    "times": [
+      {
+        "repeat": 0,
+        "label": "baseline",
+        "ms": 106.53152999999975,
+        "bytes": 31457280
+      },
+      {
+        "repeat": 0,
+        "label": "dense",
+        "ms": 68.53374299999996,
+        "bytes": 25165824
+      },
+      {
+        "repeat": 1,
+        "label": "baseline",
+        "ms": 72.85394199999973,
+        "bytes": 31457280
+      },
+      {
+        "repeat": 1,
+        "label": "dense",
+        "ms": 70.37510699999984,
+        "bytes": 25165824
+      },
+      {
+        "repeat": 2,
+        "label": "baseline",
+        "ms": 78.65846099999999,
+        "bytes": 31457280
+      },
+      {
+        "repeat": 2,
+        "label": "dense",
+        "ms": 74.36698100000012,
+        "bytes": 25165824
+      },
+      {
+        "repeat": 3,
+        "label": "baseline",
+        "ms": 72.44200900000033,
+        "bytes": 31457280
+      },
+      {
+        "repeat": 3,
+        "label": "dense",
+        "ms": 69.48655000000008,
+        "bytes": 25165824
+      }
+    ]
+  }
+]
