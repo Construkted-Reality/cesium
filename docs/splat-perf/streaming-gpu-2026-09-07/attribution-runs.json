@@ -1,0 +1,23 @@
+[
+  {
+    "label": "streaming-attribution-retry",
+    "mode": "stress",
+    "frames": "1080",
+    "warmup": "90",
+    "tileCache": "33554432",
+    "tileOverflow": "67108864",
+    "profileCPU": "1"
+  },
+  {
+    "label": "streaming-default-0",
+    "mode": "stress",
+    "frames": "1080",
+    "warmup": "90"
+  },
+  {
+    "label": "streaming-default-1",
+    "mode": "stress",
+    "frames": "1080",
+    "warmup": "90"
+  }
+]

@@ -1,0 +1,46 @@
+[
+  {
+    "label": "cache-base-0",
+    "probe": "base",
+    "multi": "6",
+    "frames": "400",
+    "warmup": "120",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "mode": "orbit",
+    "capture": "1"
+  },
+  {
+    "label": "cache-cache256-0",
+    "probe": "cache256",
+    "multi": "6",
+    "frames": "400",
+    "warmup": "120",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "mode": "orbit",
+    "capture": "1"
+  },
+  {
+    "label": "cache-cache256-1",
+    "probe": "cache256",
+    "multi": "6",
+    "frames": "400",
+    "warmup": "120",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "mode": "orbit",
+    "capture": "1"
+  },
+  {
+    "label": "cache-base-1",
+    "probe": "base",
+    "multi": "6",
+    "frames": "400",
+    "warmup": "120",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "mode": "orbit",
+    "capture": "1"
+  }
+]

@@ -1,0 +1,82 @@
+[
+  {
+    "label": "profile-base-0",
+    "probe": "base",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "mode": "static",
+    "frames": "400"
+  },
+  {
+    "label": "profile-nospherical-0",
+    "probe": "nospherical",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "mode": "static",
+    "frames": "400"
+  },
+  {
+    "label": "profile-flatfragment-0",
+    "probe": "flatfragment",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "mode": "static",
+    "frames": "400"
+  },
+  {
+    "label": "profile-tiny-0",
+    "probe": "tiny",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "mode": "static",
+    "frames": "400"
+  },
+  {
+    "label": "profile-nodraw-0",
+    "probe": "nodraw",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "mode": "static",
+    "frames": "400"
+  },
+  {
+    "label": "profile-nodraw-1",
+    "probe": "nodraw",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "mode": "static",
+    "frames": "400"
+  },
+  {
+    "label": "profile-tiny-1",
+    "probe": "tiny",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "mode": "static",
+    "frames": "400"
+  },
+  {
+    "label": "profile-flatfragment-1",
+    "probe": "flatfragment",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "mode": "static",
+    "frames": "400"
+  },
+  {
+    "label": "profile-nospherical-1",
+    "probe": "nospherical",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "mode": "static",
+    "frames": "400"
+  },
+  {
+    "label": "profile-base-1",
+    "probe": "base",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "mode": "static",
+    "frames": "400"
+  }
+]

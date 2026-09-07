@@ -1,0 +1,27 @@
+[
+  {
+    "label": "streaming-0",
+    "mode": "stress",
+    "frames": "1080",
+    "warmup": "90",
+    "tileCache": "33554432",
+    "tileOverflow": "67108864"
+  },
+  {
+    "label": "streaming-1",
+    "mode": "stress",
+    "frames": "1080",
+    "warmup": "90",
+    "tileCache": "33554432",
+    "tileOverflow": "67108864"
+  },
+  {
+    "label": "lifecycle-six",
+    "multi": "6",
+    "frames": "300",
+    "warmup": "120",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "lifecycle": "1"
+  }
+]

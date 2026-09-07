@@ -1,0 +1,2198 @@
+{
+  "baseline": "826734d9158ca6f9515f43eb213ffac89505e697",
+  "streamingPressure": {
+    "streaming-0": {
+      "frameMs": {
+        "count": 1079,
+        "mean": 30.341427247429248,
+        "median": 15.899999976158142,
+        "p95": 175.5,
+        "p99": 205.10000002384186,
+        "min": 8.699999988079071,
+        "max": 369.60000002384186
+      },
+      "cpuMs": {
+        "count": 1080,
+        "mean": 7.4764814818346945,
+        "median": 1,
+        "p95": 57.80000001192093,
+        "p99": 84.5,
+        "min": 0.3999999761581421,
+        "max": 356.5
+      },
+      "gpuMs": {
+        "count": 1080,
+        "mean": 6.653952000000001,
+        "median": 7.533568,
+        "p95": 9.47712,
+        "p99": 14.98624,
+        "min": 2.192384,
+        "max": 36.974592
+      },
+      "splats": {
+        "numSplats": 1539286,
+        "sphericalHarmonicsDegree": 3,
+        "textureWidth": 32768,
+        "textureHeight": 94,
+        "sortRequestsDuringRun": 23,
+        "dataGenerationsDuringRun": 13
+      },
+      "worker": [
+        {
+          "bytes": 18471432,
+          "keys": 1,
+          "peak": 35291892,
+          "sets": 15,
+          "releases": 18,
+          "budget": 134217728
+        }
+      ],
+      "tileLoads": 635,
+      "tileUnloads": 545,
+      "primitiveCounters": {
+        "sortPositionCopy": {
+          "calls": 23,
+          "totalMs": 137.60000002384186,
+          "maxMs": 15.400000035762787
+        },
+        "sortSchedule": {
+          "calls": 23,
+          "totalMs": 0.5000000596046448,
+          "maxMs": 0.10000002384185791
+        },
+        "drawCommandReuse": {
+          "calls": 20,
+          "totalMs": 36.49999988079071,
+          "maxMs": 2.800000011920929
+        },
+        "snapshotAggregate": {
+          "calls": 13,
+          "totalMs": 835.5,
+          "maxMs": 145.10000002384186
+        },
+        "shTextureBuild": {
+          "calls": 13,
+          "totalMs": 621.1000000238419,
+          "maxMs": 168.20000004768372
+        },
+        "textureProcess": {
+          "calls": 13,
+          "totalMs": 1047.5999999046326,
+          "maxMs": 215
+        },
+        "drawCommandBuild": {
+          "calls": 3,
+          "totalMs": 10.399999916553497,
+          "maxMs": 4
+        }
+      }
+    },
+    "streaming-1": {
+      "frameMs": {
+        "count": 1079,
+        "mean": 30.388229842479856,
+        "median": 16,
+        "p95": 175.79999995231628,
+        "p99": 210.4000000357628,
+        "min": 8.599999964237213,
+        "max": 382.19999998807907
+      },
+      "cpuMs": {
+        "count": 1080,
+        "mean": 7.553981481382141,
+        "median": 1,
+        "p95": 59.30000001192093,
+        "p99": 88.60000002384186,
+        "min": 0.3999999761581421,
+        "max": 369.19999998807907
+      },
+      "gpuMs": {
+        "count": 1080,
+        "mean": 6.654731377777775,
+        "median": 7.524352,
+        "p95": 9.468928,
+        "p99": 14.606336,
+        "min": 2.19136,
+        "max": 37.705728
+      },
+      "splats": {
+        "numSplats": 1599629,
+        "sphericalHarmonicsDegree": 3,
+        "textureWidth": 32768,
+        "textureHeight": 98,
+        "sortRequestsDuringRun": 23,
+        "dataGenerationsDuringRun": 13
+      },
+      "worker": [
+        {
+          "bytes": 19195548,
+          "keys": 1,
+          "peak": 35291892,
+          "sets": 15,
+          "releases": 19,
+          "budget": 134217728
+        }
+      ],
+      "tileLoads": 633,
+      "tileUnloads": 539,
+      "primitiveCounters": {
+        "sortPositionCopy": {
+          "calls": 23,
+          "totalMs": 134.89999997615814,
+          "maxMs": 15.300000011920929
+        },
+        "sortSchedule": {
+          "calls": 23,
+          "totalMs": 1,
+          "maxMs": 0.10000002384185791
+        },
+        "drawCommandReuse": {
+          "calls": 20,
+          "totalMs": 37.500000059604645,
+          "maxMs": 3.300000011920929
+        },
+        "snapshotAggregate": {
+          "calls": 13,
+          "totalMs": 848.3999999761581,
+          "maxMs": 143.10000002384186
+        },
+        "shTextureBuild": {
+          "calls": 13,
+          "totalMs": 621.6000000834465,
+          "maxMs": 165.30000001192093
+        },
+        "textureProcess": {
+          "calls": 13,
+          "totalMs": 1072.1999999284744,
+          "maxMs": 211.10000002384186
+        },
+        "drawCommandBuild": {
+          "calls": 3,
+          "totalMs": 10.5,
+          "maxMs": 3.700000047683716
+        }
+      }
+    }
+  },
+  "streamingDefault": {
+    "streaming-default-0": {
+      "frameMs": {
+        "count": 1079,
+        "mean": 19.89091751617453,
+        "median": 15.5,
+        "p95": 51.5,
+        "p99": 180.9000000357628,
+        "min": 8.600000023841858,
+        "max": 293.89999997615814
+      },
+      "cpuMs": {
+        "count": 1080,
+        "mean": 3.2464814819119594,
+        "median": 0.8999999761581421,
+        "p95": 4.5,
+        "p99": 74,
+        "min": 0.30000001192092896,
+        "max": 280.0999999642372
+      },
+      "gpuMs": {
+        "count": 1080,
+        "mean": 6.662663585185191,
+        "median": 7.494656,
+        "p95": 10.051584,
+        "p99": 11.85792,
+        "min": 2.190336,
+        "max": 38.475776
+      },
+      "splats": {
+        "numSplats": 1840345,
+        "sphericalHarmonicsDegree": 3,
+        "textureWidth": 32768,
+        "textureHeight": 113,
+        "sortRequestsDuringRun": 22,
+        "dataGenerationsDuringRun": 12
+      },
+      "worker": [
+        {
+          "bytes": 22084140,
+          "keys": 1,
+          "peak": 35291892,
+          "sets": 14,
+          "releases": 18,
+          "budget": 134217728
+        }
+      ],
+      "tileLoads": 228,
+      "tileUnloads": 0,
+      "primitiveCounters": {
+        "sortPositionCopy": {
+          "calls": 22,
+          "totalMs": 122.80000001192093,
+          "maxMs": 14.599999964237213
+        },
+        "sortSchedule": {
+          "calls": 22,
+          "totalMs": 0.40000009536743164,
+          "maxMs": 0.10000002384185791
+        },
+        "drawCommandReuse": {
+          "calls": 19,
+          "totalMs": 37.00000011920929,
+          "maxMs": 3.600000023841858
+        },
+        "snapshotAggregate": {
+          "calls": 12,
+          "totalMs": 797.6999999880791,
+          "maxMs": 138.80000001192093
+        },
+        "shTextureBuild": {
+          "calls": 12,
+          "totalMs": 600.3999999165535,
+          "maxMs": 164.5
+        },
+        "textureProcess": {
+          "calls": 12,
+          "totalMs": 1011.5999999046326,
+          "maxMs": 210.39999997615814
+        },
+        "drawCommandBuild": {
+          "calls": 3,
+          "totalMs": 10.399999976158142,
+          "maxMs": 4.399999976158142
+        }
+      }
+    },
+    "streaming-default-1": {
+      "frameMs": {
+        "count": 1079,
+        "mean": 19.90305838742888,
+        "median": 15.600000023841858,
+        "p95": 51.59999996423721,
+        "p99": 191,
+        "min": 8.799999952316284,
+        "max": 302.39999997615814
+      },
+      "cpuMs": {
+        "count": 1080,
+        "mean": 3.2997222223767526,
+        "median": 0.9000000357627869,
+        "p95": 4,
+        "p99": 76.89999997615814,
+        "min": 0.3999999761581421,
+        "max": 288.10000002384186
+      },
+      "gpuMs": {
+        "count": 1080,
+        "mean": 6.662216059259261,
+        "median": 7.494656,
+        "p95": 10.051584,
+        "p99": 12.239872,
+        "min": 2.189312,
+        "max": 37.518336
+      },
+      "splats": {
+        "numSplats": 1840345,
+        "sphericalHarmonicsDegree": 3,
+        "textureWidth": 32768,
+        "textureHeight": 113,
+        "sortRequestsDuringRun": 22,
+        "dataGenerationsDuringRun": 12
+      },
+      "worker": [
+        {
+          "bytes": 22084140,
+          "keys": 1,
+          "peak": 35291892,
+          "sets": 14,
+          "releases": 18,
+          "budget": 134217728
+        }
+      ],
+      "tileLoads": 228,
+      "tileUnloads": 0,
+      "primitiveCounters": {
+        "sortPositionCopy": {
+          "calls": 22,
+          "totalMs": 122.00000005960464,
+          "maxMs": 14.399999976158142
+        },
+        "sortSchedule": {
+          "calls": 22,
+          "totalMs": 0.8999999761581421,
+          "maxMs": 0.19999998807907104
+        },
+        "drawCommandReuse": {
+          "calls": 19,
+          "totalMs": 36.49999988079071,
+          "maxMs": 3.600000023841858
+        },
+        "snapshotAggregate": {
+          "calls": 12,
+          "totalMs": 798.8000000119209,
+          "maxMs": 138.30000001192093
+        },
+        "shTextureBuild": {
+          "calls": 12,
+          "totalMs": 594.8000000119209,
+          "maxMs": 164.70000004768372
+        },
+        "textureProcess": {
+          "calls": 12,
+          "totalMs": 1014.5999999642372,
+          "maxMs": 211.30000001192093
+        },
+        "drawCommandBuild": {
+          "calls": 3,
+          "totalMs": 10.199999928474426,
+          "maxMs": 3.899999976158142
+        }
+      }
+    }
+  },
+  "gpuControls": {
+    "profile-base-0": {
+      "frameMs": {
+        "count": 399,
+        "mean": 12.68496240589553,
+        "median": 12.600000023841858,
+        "p95": 13.299999952316284,
+        "p99": 15.100000023841858,
+        "min": 11.699999988079071,
+        "max": 18.69999998807907
+      },
+      "cpuMs": {
+        "count": 400,
+        "mean": 0.525500001013279,
+        "median": 0.5,
+        "p95": 0.699999988079071,
+        "p99": 1,
+        "min": 0.2999999523162842,
+        "max": 5.300000011920929
+      },
+      "gpuMs": {
+        "count": 400,
+        "mean": 5.66052863999997,
+        "median": 5.660672,
+        "p95": 5.663744,
+        "p99": 5.665792,
+        "min": 5.654528,
+        "max": 5.671936
+      },
+      "splats": {
+        "numSplats": 2087136,
+        "sphericalHarmonicsDegree": 3,
+        "textureWidth": 32768,
+        "textureHeight": 128,
+        "sortRequestsDuringRun": 0,
+        "dataGenerationsDuringRun": 0
+      },
+      "worker": [
+        {
+          "bytes": 25045632,
+          "keys": 1,
+          "peak": 25045632,
+          "sets": 2,
+          "releases": 7,
+          "budget": 134217728
+        }
+      ],
+      "tileLoads": 139,
+      "tileUnloads": 0,
+      "primitiveCounters": {}
+    },
+    "profile-base-1": {
+      "frameMs": {
+        "count": 399,
+        "mean": 12.787969924901661,
+        "median": 12.800000011920929,
+        "p95": 13.400000035762787,
+        "p99": 14.299999952316284,
+        "min": 12,
+        "max": 14.599999964237213
+      },
+      "cpuMs": {
+        "count": 400,
+        "mean": 0.5172499997913838,
+        "median": 0.5,
+        "p95": 0.699999988079071,
+        "p99": 0.9000000357627869,
+        "min": 0.2999999523162842,
+        "max": 2.099999964237213
+      },
+      "gpuMs": {
+        "count": 400,
+        "mean": 5.663720959999967,
+        "median": 5.660672,
+        "p95": 5.697536,
+        "p99": 5.701632,
+        "min": 5.654528,
+        "max": 5.876736
+      },
+      "splats": {
+        "numSplats": 2087136,
+        "sphericalHarmonicsDegree": 3,
+        "textureWidth": 32768,
+        "textureHeight": 128,
+        "sortRequestsDuringRun": 0,
+        "dataGenerationsDuringRun": 0
+      },
+      "worker": [
+        {
+          "bytes": 25045632,
+          "keys": 1,
+          "peak": 25045632,
+          "sets": 2,
+          "releases": 7,
+          "budget": 134217728
+        }
+      ],
+      "tileLoads": 139,
+      "tileUnloads": 0,
+      "primitiveCounters": {}
+    },
+    "profile-nospherical-0": {
+      "frameMs": {
+        "count": 399,
+        "mean": 12.904761904761905,
+        "median": 12.900000035762787,
+        "p95": 13.5,
+        "p99": 14,
+        "min": 12,
+        "max": 15.099999964237213
+      },
+      "cpuMs": {
+        "count": 400,
+        "mean": 0.574750000089407,
+        "median": 0.5999999642372131,
+        "p95": 0.800000011920929,
+        "p99": 1,
+        "min": 0.2999999523162842,
+        "max": 2
+      },
+      "gpuMs": {
+        "count": 400,
+        "mean": 5.650864639999986,
+        "median": 5.650432,
+        "p95": 5.653504,
+        "p99": 5.6832,
+        "min": 5.645312,
+        "max": 5.687296
+      },
+      "splats": {
+        "numSplats": 2087136,
+        "sphericalHarmonicsDegree": 3,
+        "textureWidth": 32768,
+        "textureHeight": 128,
+        "sortRequestsDuringRun": 0,
+        "dataGenerationsDuringRun": 0
+      },
+      "worker": [
+        {
+          "bytes": 25045632,
+          "keys": 1,
+          "peak": 25045632,
+          "sets": 2,
+          "releases": 6,
+          "budget": 134217728
+        }
+      ],
+      "tileLoads": 139,
+      "tileUnloads": 0,
+      "primitiveCounters": {}
+    },
+    "profile-nospherical-1": {
+      "frameMs": {
+        "count": 399,
+        "mean": 12.871929824651035,
+        "median": 12.899999976158142,
+        "p95": 13.400000035762787,
+        "p99": 14.699999988079071,
+        "min": 11.899999976158142,
+        "max": 19.80000001192093
+      },
+      "cpuMs": {
+        "count": 400,
+        "mean": 0.5667500007152557,
+        "median": 0.5999999642372131,
+        "p95": 0.7000000476837158,
+        "p99": 1,
+        "min": 0.2999999523162842,
+        "max": 2.199999988079071
+      },
+      "gpuMs": {
+        "count": 400,
+        "mean": 5.661652480000008,
+        "median": 5.651456,
+        "p95": 5.685248,
+        "p99": 5.687296,
+        "min": 5.644288,
+        "max": 5.68832
+      },
+      "splats": {
+        "numSplats": 2087136,
+        "sphericalHarmonicsDegree": 3,
+        "textureWidth": 32768,
+        "textureHeight": 128,
+        "sortRequestsDuringRun": 0,
+        "dataGenerationsDuringRun": 0
+      },
+      "worker": [
+        {
+          "bytes": 25045632,
+          "keys": 1,
+          "peak": 25045632,
+          "sets": 2,
+          "releases": 7,
+          "budget": 134217728
+        }
+      ],
+      "tileLoads": 139,
+      "tileUnloads": 0,
+      "primitiveCounters": {}
+    },
+    "profile-flatfragment-0": {
+      "frameMs": {
+        "count": 399,
+        "mean": 12.645363408521304,
+        "median": 12.600000023841858,
+        "p95": 13.300000011920929,
+        "p99": 14,
+        "min": 11.699999988079071,
+        "max": 15.5
+      },
+      "cpuMs": {
+        "count": 400,
+        "mean": 0.5239999994635582,
+        "median": 0.5,
+        "p95": 0.699999988079071,
+        "p99": 1,
+        "min": 0.2999999523162842,
+        "max": 2.399999976158142
+      },
+      "gpuMs": {
+        "count": 400,
+        "mean": 5.648010240000014,
+        "median": 5.64736,
+        "p95": 5.650432,
+        "p99": 5.654528,
+        "min": 5.643264,
+        "max": 5.658624
+      },
+      "splats": {
+        "numSplats": 2087136,
+        "sphericalHarmonicsDegree": 3,
+        "textureWidth": 32768,
+        "textureHeight": 128,
+        "sortRequestsDuringRun": 0,
+        "dataGenerationsDuringRun": 0
+      },
+      "worker": [
+        {
+          "bytes": 25045632,
+          "keys": 1,
+          "peak": 25045632,
+          "sets": 2,
+          "releases": 7,
+          "budget": 134217728
+        }
+      ],
+      "tileLoads": 139,
+      "tileUnloads": 0,
+      "primitiveCounters": {}
+    },
+    "profile-flatfragment-1": {
+      "frameMs": {
+        "count": 399,
+        "mean": 12.685964912250824,
+        "median": 12.699999988079071,
+        "p95": 13.300000011920929,
+        "p99": 13.900000035762787,
+        "min": 11.800000011920929,
+        "max": 15.200000047683716
+      },
+      "cpuMs": {
+        "count": 400,
+        "mean": 0.5254999996721744,
+        "median": 0.5,
+        "p95": 0.7000000476837158,
+        "p99": 1,
+        "min": 0.2999999523162842,
+        "max": 2.200000047683716
+      },
+      "gpuMs": {
+        "count": 400,
+        "mean": 5.651540480000014,
+        "median": 5.648384,
+        "p95": 5.689344,
+        "p99": 5.69344,
+        "min": 5.643264,
+        "max": 5.705728
+      },
+      "splats": {
+        "numSplats": 2087136,
+        "sphericalHarmonicsDegree": 3,
+        "textureWidth": 32768,
+        "textureHeight": 128,
+        "sortRequestsDuringRun": 0,
+        "dataGenerationsDuringRun": 0
+      },
+      "worker": [
+        {
+          "bytes": 25045632,
+          "keys": 1,
+          "peak": 25045632,
+          "sets": 3,
+          "releases": 8,
+          "budget": 134217728
+        }
+      ],
+      "tileLoads": 139,
+      "tileUnloads": 0,
+      "primitiveCounters": {}
+    },
+    "profile-tiny-0": {
+      "frameMs": {
+        "count": 399,
+        "mean": 9.381704260681506,
+        "median": 9.299999952316284,
+        "p95": 10,
+        "p99": 13.099999964237213,
+        "min": 8.599999964237213,
+        "max": 18.5
+      },
+      "cpuMs": {
+        "count": 400,
+        "mean": 0.5477499988675117,
+        "median": 0.5,
+        "p95": 0.699999988079071,
+        "p99": 1,
+        "min": 0.30000001192092896,
+        "max": 5.699999988079071
+      },
+      "gpuMs": {
+        "count": 400,
+        "mean": 2.5497267200000007,
+        "median": 2.548736,
+        "p95": 2.55488,
+        "p99": 2.557952,
+        "min": 2.54464,
+        "max": 2.642944
+      },
+      "splats": {
+        "numSplats": 2087136,
+        "sphericalHarmonicsDegree": 3,
+        "textureWidth": 32768,
+        "textureHeight": 128,
+        "sortRequestsDuringRun": 0,
+        "dataGenerationsDuringRun": 0
+      },
+      "worker": [
+        {
+          "bytes": 25045632,
+          "keys": 1,
+          "peak": 25045632,
+          "sets": 2,
+          "releases": 6,
+          "budget": 134217728
+        }
+      ],
+      "tileLoads": 139,
+      "tileUnloads": 0,
+      "primitiveCounters": {}
+    },
+    "profile-tiny-1": {
+      "frameMs": {
+        "count": 399,
+        "mean": 9.607518796932727,
+        "median": 9.599999964237213,
+        "p95": 10.300000011920929,
+        "p99": 10.900000035762787,
+        "min": 8.800000011920929,
+        "max": 12.800000011920929
+      },
+      "cpuMs": {
+        "count": 400,
+        "mean": 0.5162499985098838,
+        "median": 0.5,
+        "p95": 0.699999988079071,
+        "p99": 1,
+        "min": 0.2999999523162842,
+        "max": 2.5
+      },
+      "gpuMs": {
+        "count": 400,
+        "mean": 2.561873919999997,
+        "median": 2.561024,
+        "p95": 2.566144,
+        "p99": 2.599936,
+        "min": 2.55488,
+        "max": 2.671616
+      },
+      "splats": {
+        "numSplats": 2087136,
+        "sphericalHarmonicsDegree": 3,
+        "textureWidth": 32768,
+        "textureHeight": 128,
+        "sortRequestsDuringRun": 0,
+        "dataGenerationsDuringRun": 0
+      },
+      "worker": [
+        {
+          "bytes": 25045632,
+          "keys": 1,
+          "peak": 25045632,
+          "sets": 2,
+          "releases": 7,
+          "budget": 134217728
+        }
+      ],
+      "tileLoads": 139,
+      "tileUnloads": 0,
+      "primitiveCounters": {}
+    },
+    "profile-nodraw-0": {
+      "frameMs": {
+        "count": 399,
+        "mean": 7.858646616601107,
+        "median": 7.699999988079071,
+        "p95": 8.400000035762787,
+        "p99": 10.900000035762787,
+        "min": 7.199999988079071,
+        "max": 13.399999976158142
+      },
+      "cpuMs": {
+        "count": 400,
+        "mean": 0.49150000110268594,
+        "median": 0.5,
+        "p95": 0.6000000238418579,
+        "p99": 0.7000000476837158,
+        "min": 0.2999999523162842,
+        "max": 2.100000023841858
+      },
+      "gpuMs": {
+        "count": 400,
+        "mean": 0.3337728000000025,
+        "median": 0.333824,
+        "p95": 0.336896,
+        "p99": 0.34304,
+        "min": 0.331776,
+        "max": 0.346112
+      },
+      "splats": {
+        "numSplats": 2087136,
+        "sphericalHarmonicsDegree": 3,
+        "textureWidth": 32768,
+        "textureHeight": 128,
+        "sortRequestsDuringRun": 0,
+        "dataGenerationsDuringRun": 0
+      },
+      "worker": [
+        {
+          "bytes": 25045632,
+          "keys": 1,
+          "peak": 25045632,
+          "sets": 2,
+          "releases": 7,
+          "budget": 134217728
+        }
+      ],
+      "tileLoads": 139,
+      "tileUnloads": 0,
+      "primitiveCounters": {}
+    },
+    "profile-nodraw-1": {
+      "frameMs": {
+        "count": 399,
+        "mean": 7.43984962406015,
+        "median": 7.399999976158142,
+        "p95": 8.300000011920929,
+        "p99": 9.599999964237213,
+        "min": 6.899999976158142,
+        "max": 11.399999976158142
+      },
+      "cpuMs": {
+        "count": 400,
+        "mean": 0.468999999165535,
+        "median": 0.5,
+        "p95": 0.6000000238418579,
+        "p99": 0.7999999523162842,
+        "min": 0.2999999523162842,
+        "max": 1.9000000357627869
+      },
+      "gpuMs": {
+        "count": 400,
+        "mean": 0.33362688000000246,
+        "median": 0.3328,
+        "p95": 0.336896,
+        "p99": 0.342016,
+        "min": 0.330752,
+        "max": 0.346112
+      },
+      "splats": {
+        "numSplats": 2087136,
+        "sphericalHarmonicsDegree": 3,
+        "textureWidth": 32768,
+        "textureHeight": 128,
+        "sortRequestsDuringRun": 0,
+        "dataGenerationsDuringRun": 0
+      },
+      "worker": [
+        {
+          "bytes": 25045632,
+          "keys": 1,
+          "peak": 25045632,
+          "sets": 2,
+          "releases": 7,
+          "budget": 134217728
+        }
+      ],
+      "tileLoads": 139,
+      "tileUnloads": 0,
+      "primitiveCounters": {}
+    }
+  },
+  "visibility": {
+    "width": 640,
+    "height": 360,
+    "frames": 1080,
+    "blankFrames": 0,
+    "minimumVisiblePixels": 11202
+  },
+  "lifecycle": [
+    {
+      "cycle": 0,
+      "stage": "loaded",
+      "worker": [
+        {
+          "bytes": 120600060,
+          "keys": 5,
+          "peak": 130492176,
+          "sets": 103,
+          "releases": 121,
+          "budget": 134217728
+        }
+      ],
+      "heap": {
+        "usedSize": 27038896,
+        "totalSize": 28618752,
+        "embedderHeapUsedSize": 1182680,
+        "backingStorageSize": 5309749313
+      },
+      "state": {
+        "gl": {
+          "createTexture": 350,
+          "createRenderbuffer": 2,
+          "createFramebuffer": 522,
+          "createBuffer": 74,
+          "createVertexArray": 37,
+          "createProgram": 8,
+          "deleteFramebuffer": 516,
+          "deleteTexture": 324,
+          "deleteBuffer": 60,
+          "deleteVertexArray": 30,
+          "deleteProgram": 3
+        },
+        "tiles": [
+          {
+            "count": 2010001,
+            "bytes": 44844023.69539521
+          },
+          {
+            "count": 2010001,
+            "bytes": 82312165.70220043
+          },
+          {
+            "count": 2010001,
+            "bytes": 89396823.50545454
+          },
+          {
+            "count": 2010001,
+            "bytes": 82281340.0508168
+          },
+          {
+            "count": 2010001,
+            "bytes": 86088057.88263772
+          },
+          {
+            "count": 2010001,
+            "bytes": 77852395.68011902
+          }
+        ]
+      }
+    },
+    {
+      "cycle": 0,
+      "stage": "removed",
+      "worker": [
+        {
+          "bytes": 0,
+          "keys": 0,
+          "peak": 130492176,
+          "sets": 103,
+          "releases": 127,
+          "budget": 134217728
+        }
+      ],
+      "heap": {
+        "usedSize": 15414608,
+        "totalSize": 18657280,
+        "embedderHeapUsedSize": 1118896,
+        "backingStorageSize": 22622601
+      },
+      "state": {
+        "gl": {
+          "createTexture": 350,
+          "createRenderbuffer": 2,
+          "createFramebuffer": 522,
+          "createBuffer": 74,
+          "createVertexArray": 37,
+          "createProgram": 8,
+          "deleteFramebuffer": 516,
+          "deleteTexture": 342,
+          "deleteBuffer": 72,
+          "deleteVertexArray": 36,
+          "deleteProgram": 4
+        }
+      }
+    },
+    {
+      "cycle": 1,
+      "stage": "loaded",
+      "worker": [
+        {
+          "bytes": 119302032,
+          "keys": 4,
+          "peak": 132702816,
+          "sets": 151,
+          "releases": 169,
+          "budget": 134217728
+        }
+      ],
+      "heap": {
+        "usedSize": 29432396,
+        "totalSize": 31502336,
+        "embedderHeapUsedSize": 1708224,
+        "backingStorageSize": 6276462815
+      },
+      "state": {
+        "gl": {
+          "createTexture": 710,
+          "createRenderbuffer": 2,
+          "createFramebuffer": 1038,
+          "createBuffer": 156,
+          "createVertexArray": 78,
+          "createProgram": 12,
+          "deleteFramebuffer": 1032,
+          "deleteTexture": 684,
+          "deleteBuffer": 142,
+          "deleteVertexArray": 71,
+          "deleteProgram": 7
+        },
+        "tiles": [
+          {
+            "count": 2485459,
+            "bytes": 93001603.16849716
+          },
+          {
+            "count": 2485459,
+            "bytes": 112449286.70743638
+          },
+          {
+            "count": 2485459,
+            "bytes": 106428886.03224342
+          },
+          {
+            "count": 2485459,
+            "bytes": 119895730.28416052
+          },
+          {
+            "count": 2485459,
+            "bytes": 123314893.33500488
+          },
+          {
+            "count": 2485459,
+            "bytes": 124195061.67439875
+          }
+        ]
+      }
+    },
+    {
+      "cycle": 1,
+      "stage": "removed",
+      "worker": [
+        {
+          "bytes": 0,
+          "keys": 0,
+          "peak": 132702816,
+          "sets": 151,
+          "releases": 175,
+          "budget": 134217728
+        }
+      ],
+      "heap": {
+        "usedSize": 15806520,
+        "totalSize": 19443712,
+        "embedderHeapUsedSize": 1694272,
+        "backingStorageSize": 22626673
+      },
+      "state": {
+        "gl": {
+          "createTexture": 710,
+          "createRenderbuffer": 2,
+          "createFramebuffer": 1038,
+          "createBuffer": 156,
+          "createVertexArray": 78,
+          "createProgram": 12,
+          "deleteFramebuffer": 1032,
+          "deleteTexture": 702,
+          "deleteBuffer": 154,
+          "deleteVertexArray": 77,
+          "deleteProgram": 8
+        }
+      }
+    },
+    {
+      "cycle": 2,
+      "stage": "loaded",
+      "worker": [
+        {
+          "bytes": 119302032,
+          "keys": 4,
+          "peak": 133403520,
+          "sets": 195,
+          "releases": 213,
+          "budget": 134217728
+        }
+      ],
+      "heap": {
+        "usedSize": 29545824,
+        "totalSize": 31240192,
+        "embedderHeapUsedSize": 2233832,
+        "backingStorageSize": 6288307923
+      },
+      "state": {
+        "gl": {
+          "createTexture": 1062,
+          "createRenderbuffer": 2,
+          "createFramebuffer": 1554,
+          "createBuffer": 236,
+          "createVertexArray": 118,
+          "createProgram": 16,
+          "deleteFramebuffer": 1548,
+          "deleteTexture": 1036,
+          "deleteBuffer": 222,
+          "deleteVertexArray": 111,
+          "deleteProgram": 11
+        },
+        "tiles": [
+          {
+            "count": 2485459,
+            "bytes": 100287439.18603665
+          },
+          {
+            "count": 2485459,
+            "bytes": 107156095.15923983
+          },
+          {
+            "count": 2485459,
+            "bytes": 104861457.49001488
+          },
+          {
+            "count": 2485459,
+            "bytes": 116162887.10275945
+          },
+          {
+            "count": 2485459,
+            "bytes": 106845404.06661335
+          },
+          {
+            "count": 2485459,
+            "bytes": 114262343.72891453
+          }
+        ]
+      }
+    },
+    {
+      "cycle": 2,
+      "stage": "removed",
+      "worker": [
+        {
+          "bytes": 0,
+          "keys": 0,
+          "peak": 133403520,
+          "sets": 195,
+          "releases": 219,
+          "budget": 134217728
+        }
+      ],
+      "heap": {
+        "usedSize": 15909128,
+        "totalSize": 18657280,
+        "embedderHeapUsedSize": 2240160,
+        "backingStorageSize": 22626601
+      },
+      "state": {
+        "gl": {
+          "createTexture": 1062,
+          "createRenderbuffer": 2,
+          "createFramebuffer": 1554,
+          "createBuffer": 236,
+          "createVertexArray": 118,
+          "createProgram": 16,
+          "deleteFramebuffer": 1548,
+          "deleteTexture": 1054,
+          "deleteBuffer": 234,
+          "deleteVertexArray": 117,
+          "deleteProgram": 12
+        }
+      }
+    },
+    {
+      "cycle": 3,
+      "stage": "loaded",
+      "worker": [
+        {
+          "bytes": 119302032,
+          "keys": 4,
+          "peak": 133403520,
+          "sets": 237,
+          "releases": 255,
+          "budget": 134217728
+        }
+      ],
+      "heap": {
+        "usedSize": 29597576,
+        "totalSize": 30978048,
+        "embedderHeapUsedSize": 2929736,
+        "backingStorageSize": 6322865347
+      },
+      "state": {
+        "gl": {
+          "createTexture": 1410,
+          "createRenderbuffer": 2,
+          "createFramebuffer": 2070,
+          "createBuffer": 314,
+          "createVertexArray": 157,
+          "createProgram": 22,
+          "deleteFramebuffer": 2064,
+          "deleteTexture": 1384,
+          "deleteBuffer": 300,
+          "deleteVertexArray": 150,
+          "deleteProgram": 17
+        },
+        "tiles": [
+          {
+            "count": 2485459,
+            "bytes": 102784728.4591899
+          },
+          {
+            "count": 2485459,
+            "bytes": 110275282.91866317
+          },
+          {
+            "count": 2485459,
+            "bytes": 107548182.6118633
+          },
+          {
+            "count": 2485459,
+            "bytes": 118328104.41306055
+          },
+          {
+            "count": 2485459,
+            "bytes": 118169291.45881535
+          },
+          {
+            "count": 2485459,
+            "bytes": 123292237.55088112
+          }
+        ]
+      }
+    },
+    {
+      "cycle": 3,
+      "stage": "removed",
+      "worker": [
+        {
+          "bytes": 0,
+          "keys": 0,
+          "peak": 133403520,
+          "sets": 237,
+          "releases": 261,
+          "budget": 134217728
+        }
+      ],
+      "heap": {
+        "usedSize": 15973484,
+        "totalSize": 18395136,
+        "embedderHeapUsedSize": 2952760,
+        "backingStorageSize": 22626673
+      },
+      "state": {
+        "gl": {
+          "createTexture": 1410,
+          "createRenderbuffer": 2,
+          "createFramebuffer": 2070,
+          "createBuffer": 314,
+          "createVertexArray": 157,
+          "createProgram": 22,
+          "deleteFramebuffer": 2064,
+          "deleteTexture": 1402,
+          "deleteBuffer": 312,
+          "deleteVertexArray": 156,
+          "deleteProgram": 18
+        }
+      }
+    }
+  ],
+  "immutable": {
+    "upload-base-0": {
+      "frameMs": {
+        "count": 719,
+        "mean": 15.504589707944257,
+        "median": 12.399999976158142,
+        "p95": 18.899999976158142,
+        "p99": 99.10000002384186,
+        "min": 11.699999988079071,
+        "max": 173.19999998807907
+      },
+      "cpuMs": {
+        "count": 720,
+        "mean": 1.6330555558204651,
+        "median": 0.5,
+        "p95": 0.9000000357627869,
+        "p99": 86.29999995231628,
+        "min": 0.2999999523162842,
+        "max": 103.29999995231628
+      },
+      "gpuMs": {
+        "count": 720,
+        "mean": 5.868899555555567,
+        "median": 5.6576,
+        "p95": 5.69856,
+        "p99": 23.538688,
+        "min": 5.651456,
+        "max": 24.4992
+      },
+      "splats": {
+        "numSplats": 2087136,
+        "sphericalHarmonicsDegree": 3,
+        "textureWidth": 32768,
+        "textureHeight": 128,
+        "sortRequestsDuringRun": 8,
+        "dataGenerationsDuringRun": 8
+      },
+      "worker": [
+        {
+          "bytes": 25045632,
+          "keys": 1,
+          "peak": 25045632,
+          "sets": 10,
+          "releases": 15,
+          "budget": 134217728
+        }
+      ],
+      "tileLoads": 139,
+      "tileUnloads": 0,
+      "primitiveCounters": {
+        "snapshotAggregate": {
+          "calls": 8,
+          "totalMs": 423.3999999165535,
+          "maxMs": 65.79999995231628
+        },
+        "shTextureBuild": {
+          "calls": 8,
+          "totalMs": 345.80000001192093,
+          "maxMs": 117
+        },
+        "textureProcess": {
+          "calls": 8,
+          "totalMs": 616.7000001072884,
+          "maxMs": 150.4000000357628
+        },
+        "sortPositionCopy": {
+          "calls": 8,
+          "totalMs": 81.09999996423721,
+          "maxMs": 11.600000023841858
+        },
+        "sortSchedule": {
+          "calls": 8,
+          "totalMs": 0.30000001192092896,
+          "maxMs": 0.10000002384185791
+        },
+        "drawCommandReuse": {
+          "calls": 8,
+          "totalMs": 17.50000011920929,
+          "maxMs": 2.400000035762787
+        }
+      },
+      "imageHash": "224b841d3ce2980d91c428b88b30d11ebaa6db5b728abef1d476e797e0b7f57f"
+    },
+    "upload-immutable-0": {
+      "frameMs": {
+        "count": 719,
+        "mean": 15.910152990231095,
+        "median": 12.5,
+        "p95": 18.19999998807907,
+        "p99": 176.4000000357628,
+        "min": 11.699999988079071,
+        "max": 184.39999997615814
+      },
+      "cpuMs": {
+        "count": 720,
+        "mean": 1.6324999995529652,
+        "median": 0.5,
+        "p95": 0.8999999761581421,
+        "p99": 86.5,
+        "min": 0.2999999523162842,
+        "max": 101.39999997615814
+      },
+      "gpuMs": {
+        "count": 720,
+        "mean": 5.667632577777776,
+        "median": 5.656576,
+        "p95": 5.69856,
+        "p99": 6.116352,
+        "min": 5.650432,
+        "max": 6.286336
+      },
+      "splats": {
+        "numSplats": 2087136,
+        "sphericalHarmonicsDegree": 3,
+        "textureWidth": 32768,
+        "textureHeight": 128,
+        "sortRequestsDuringRun": 8,
+        "dataGenerationsDuringRun": 8
+      },
+      "worker": [
+        {
+          "bytes": 25045632,
+          "keys": 1,
+          "peak": 25045632,
+          "sets": 10,
+          "releases": 15,
+          "budget": 134217728
+        }
+      ],
+      "tileLoads": 139,
+      "tileUnloads": 0,
+      "primitiveCounters": {
+        "snapshotAggregate": {
+          "calls": 8,
+          "totalMs": 424.5,
+          "maxMs": 66.19999998807907
+        },
+        "shTextureBuild": {
+          "calls": 8,
+          "totalMs": 813.1000000238419,
+          "maxMs": 104.89999997615814
+        },
+        "textureProcess": {
+          "calls": 8,
+          "totalMs": 1245.2000000476837,
+          "maxMs": 160.5
+        },
+        "sortPositionCopy": {
+          "calls": 8,
+          "totalMs": 81.69999998807907,
+          "maxMs": 11.5
+        },
+        "sortSchedule": {
+          "calls": 8,
+          "totalMs": 0.19999998807907104,
+          "maxMs": 0.10000002384185791
+        },
+        "drawCommandReuse": {
+          "calls": 8,
+          "totalMs": 16.5,
+          "maxMs": 2.400000035762787
+        }
+      },
+      "imageHash": "224b841d3ce2980d91c428b88b30d11ebaa6db5b728abef1d476e797e0b7f57f"
+    },
+    "upload-base-1": {
+      "frameMs": {
+        "count": 719,
+        "mean": 15.685952712083559,
+        "median": 12.599999964237213,
+        "p95": 19.100000023841858,
+        "p99": 99.30000001192093,
+        "min": 11.699999988079071,
+        "max": 172.89999997615814
+      },
+      "cpuMs": {
+        "count": 720,
+        "mean": 1.6334722221725517,
+        "median": 0.5,
+        "p95": 0.8999999761581421,
+        "p99": 86.09999996423721,
+        "min": 0.2999999523162842,
+        "max": 102.70000004768372
+      },
+      "gpuMs": {
+        "count": 720,
+        "mean": 5.867669333333331,
+        "median": 5.656576,
+        "p95": 5.69856,
+        "p99": 23.834624,
+        "min": 5.650432,
+        "max": 24.8064
+      },
+      "splats": {
+        "numSplats": 2087136,
+        "sphericalHarmonicsDegree": 3,
+        "textureWidth": 32768,
+        "textureHeight": 128,
+        "sortRequestsDuringRun": 8,
+        "dataGenerationsDuringRun": 8
+      },
+      "worker": [
+        {
+          "bytes": 25045632,
+          "keys": 1,
+          "peak": 25045632,
+          "sets": 10,
+          "releases": 15,
+          "budget": 134217728
+        }
+      ],
+      "tileLoads": 139,
+      "tileUnloads": 0,
+      "primitiveCounters": {
+        "snapshotAggregate": {
+          "calls": 8,
+          "totalMs": 424.3000000715256,
+          "maxMs": 65.5
+        },
+        "shTextureBuild": {
+          "calls": 8,
+          "totalMs": 343.7999999523163,
+          "maxMs": 115.5
+        },
+        "textureProcess": {
+          "calls": 8,
+          "totalMs": 608.7000000476837,
+          "maxMs": 148.70000004768372
+        },
+        "sortPositionCopy": {
+          "calls": 8,
+          "totalMs": 79.40000003576279,
+          "maxMs": 10.400000035762787
+        },
+        "sortSchedule": {
+          "calls": 8,
+          "totalMs": 0.40000003576278687,
+          "maxMs": 0.10000002384185791
+        },
+        "drawCommandReuse": {
+          "calls": 8,
+          "totalMs": 16.600000023841858,
+          "maxMs": 2.300000011920929
+        }
+      },
+      "imageHash": "224b841d3ce2980d91c428b88b30d11ebaa6db5b728abef1d476e797e0b7f57f"
+    },
+    "upload-immutable-1": {
+      "frameMs": {
+        "count": 719,
+        "mean": 16.304450625836104,
+        "median": 13,
+        "p95": 18.19999998807907,
+        "p99": 174.5,
+        "min": 11.699999988079071,
+        "max": 183.0999999642372
+      },
+      "cpuMs": {
+        "count": 720,
+        "mean": 1.6823611112932364,
+        "median": 0.5,
+        "p95": 0.8999999761581421,
+        "p99": 87.5,
+        "min": 0.2999999523162842,
+        "max": 109.39999997615814
+      },
+      "gpuMs": {
+        "count": 720,
+        "mean": 5.667347422222223,
+        "median": 5.656576,
+        "p95": 5.69856,
+        "p99": 6.1184,
+        "min": 5.650432,
+        "max": 6.304768
+      },
+      "splats": {
+        "numSplats": 2087136,
+        "sphericalHarmonicsDegree": 3,
+        "textureWidth": 32768,
+        "textureHeight": 128,
+        "sortRequestsDuringRun": 8,
+        "dataGenerationsDuringRun": 8
+      },
+      "worker": [
+        {
+          "bytes": 25045632,
+          "keys": 1,
+          "peak": 25045632,
+          "sets": 10,
+          "releases": 15,
+          "budget": 134217728
+        }
+      ],
+      "tileLoads": 139,
+      "tileUnloads": 0,
+      "primitiveCounters": {
+        "snapshotAggregate": {
+          "calls": 8,
+          "totalMs": 430.5,
+          "maxMs": 71.39999997615814
+        },
+        "shTextureBuild": {
+          "calls": 8,
+          "totalMs": 811.6999999284744,
+          "maxMs": 103.69999998807907
+        },
+        "textureProcess": {
+          "calls": 8,
+          "totalMs": 1247.2999999523163,
+          "maxMs": 159.80000001192093
+        },
+        "sortPositionCopy": {
+          "calls": 8,
+          "totalMs": 81.39999997615814,
+          "maxMs": 11.300000011920929
+        },
+        "sortSchedule": {
+          "calls": 8,
+          "totalMs": 0.40000003576278687,
+          "maxMs": 0.19999998807907104
+        },
+        "drawCommandReuse": {
+          "calls": 8,
+          "totalMs": 15.5,
+          "maxMs": 2.300000011920929
+        }
+      },
+      "imageHash": "224b841d3ce2980d91c428b88b30d11ebaa6db5b728abef1d476e797e0b7f57f"
+    },
+    "upload-base-2": {
+      "frameMs": {
+        "count": 719,
+        "mean": 15.673157162726008,
+        "median": 12.5,
+        "p95": 20.400000035762787,
+        "p99": 99.30000001192093,
+        "min": 11.699999988079071,
+        "max": 175.69999998807907
+      },
+      "cpuMs": {
+        "count": 720,
+        "mean": 1.6705555554065439,
+        "median": 0.5,
+        "p95": 1,
+        "p99": 86.69999998807907,
+        "min": 0.2999999523162842,
+        "max": 104.89999997615814
+      },
+      "gpuMs": {
+        "count": 720,
+        "mean": 5.8706702222222376,
+        "median": 5.6576,
+        "p95": 5.69856,
+        "p99": 23.671808,
+        "min": 5.651456,
+        "max": 25.785344
+      },
+      "splats": {
+        "numSplats": 2087136,
+        "sphericalHarmonicsDegree": 3,
+        "textureWidth": 32768,
+        "textureHeight": 128,
+        "sortRequestsDuringRun": 8,
+        "dataGenerationsDuringRun": 8
+      },
+      "worker": [
+        {
+          "bytes": 25045632,
+          "keys": 1,
+          "peak": 25045632,
+          "sets": 10,
+          "releases": 14,
+          "budget": 134217728
+        }
+      ],
+      "tileLoads": 139,
+      "tileUnloads": 0,
+      "primitiveCounters": {
+        "snapshotAggregate": {
+          "calls": 8,
+          "totalMs": 423.60000002384186,
+          "maxMs": 66.10000002384186
+        },
+        "shTextureBuild": {
+          "calls": 8,
+          "totalMs": 346.69999998807907,
+          "maxMs": 117.30000001192093
+        },
+        "textureProcess": {
+          "calls": 8,
+          "totalMs": 616.2999999523163,
+          "maxMs": 151.5
+        },
+        "sortPositionCopy": {
+          "calls": 8,
+          "totalMs": 83.70000010728836,
+          "maxMs": 11.700000047683716
+        },
+        "sortSchedule": {
+          "calls": 8,
+          "totalMs": 0.4999999403953552,
+          "maxMs": 0.19999998807907104
+        },
+        "drawCommandReuse": {
+          "calls": 8,
+          "totalMs": 16.399999976158142,
+          "maxMs": 2.199999988079071
+        }
+      },
+      "imageHash": "224b841d3ce2980d91c428b88b30d11ebaa6db5b728abef1d476e797e0b7f57f"
+    },
+    "upload-immutable-2": {
+      "frameMs": {
+        "count": 719,
+        "mean": 15.827816411666314,
+        "median": 12.400000035762787,
+        "p95": 18.100000023841858,
+        "p99": 174.80000001192093,
+        "min": 11.699999988079071,
+        "max": 183.19999998807907
+      },
+      "cpuMs": {
+        "count": 720,
+        "mean": 1.6234722231825194,
+        "median": 0.5,
+        "p95": 0.8999999761581421,
+        "p99": 87.69999998807907,
+        "min": 0.2999999523162842,
+        "max": 103.69999998807907
+      },
+      "gpuMs": {
+        "count": 720,
+        "mean": 5.666728666666659,
+        "median": 5.656576,
+        "p95": 5.69856,
+        "p99": 6.116352,
+        "min": 5.649408,
+        "max": 6.216704
+      },
+      "splats": {
+        "numSplats": 2087136,
+        "sphericalHarmonicsDegree": 3,
+        "textureWidth": 32768,
+        "textureHeight": 128,
+        "sortRequestsDuringRun": 8,
+        "dataGenerationsDuringRun": 8
+      },
+      "worker": [
+        {
+          "bytes": 25045632,
+          "keys": 1,
+          "peak": 25045632,
+          "sets": 10,
+          "releases": 15,
+          "budget": 134217728
+        }
+      ],
+      "tileLoads": 139,
+      "tileUnloads": 0,
+      "primitiveCounters": {
+        "snapshotAggregate": {
+          "calls": 8,
+          "totalMs": 431.3000000715256,
+          "maxMs": 66.39999997615814
+        },
+        "shTextureBuild": {
+          "calls": 8,
+          "totalMs": 805,
+          "maxMs": 103.69999998807907
+        },
+        "textureProcess": {
+          "calls": 8,
+          "totalMs": 1236.6000000238419,
+          "maxMs": 158.89999997615814
+        },
+        "sortPositionCopy": {
+          "calls": 8,
+          "totalMs": 81.40000003576279,
+          "maxMs": 11.5
+        },
+        "sortSchedule": {
+          "calls": 8,
+          "totalMs": 0.30000001192092896,
+          "maxMs": 0.10000002384185791
+        },
+        "drawCommandReuse": {
+          "calls": 8,
+          "totalMs": 16.899999976158142,
+          "maxMs": 2.399999976158142
+        }
+      },
+      "imageHash": "224b841d3ce2980d91c428b88b30d11ebaa6db5b728abef1d476e797e0b7f57f"
+    }
+  },
+  "cacheBudget": {
+    "cache-base-0": {
+      "frameMs": {
+        "count": 399,
+        "mean": 47.067669172932334,
+        "median": 45.59999996423721,
+        "p95": 57,
+        "p99": 62.19999998807907,
+        "min": 42,
+        "max": 64.60000002384186
+      },
+      "cpuMs": {
+        "count": 400,
+        "mean": 4.973750000745058,
+        "median": 3.700000047683716,
+        "p95": 15,
+        "p99": 16.299999952316284,
+        "min": 1.100000023841858,
+        "max": 16.80000001192093
+      },
+      "gpuMs": {
+        "count": 400,
+        "mean": 32.767206400000006,
+        "median": 32.828416,
+        "p95": 33.39776,
+        "p99": 33.603584,
+        "min": 31.40608,
+        "max": 33.806336
+      },
+      "splats": {
+        "numSplats": 2010001,
+        "sphericalHarmonicsDegree": 3,
+        "textureWidth": 32768,
+        "textureHeight": 123,
+        "sortRequestsDuringRun": 59,
+        "dataGenerationsDuringRun": 0
+      },
+      "worker": [
+        {
+          "bytes": 120600060,
+          "keys": 5,
+          "peak": 132195324,
+          "sets": 118,
+          "releases": 136,
+          "budget": 134217728
+        }
+      ],
+      "tileLoads": 834,
+      "tileUnloads": 0,
+      "primitiveCounters": {
+        "sortPositionCopy": {
+          "calls": 351,
+          "totalMs": 647.5999999046326,
+          "maxMs": 13.400000035762787
+        },
+        "sortSchedule": {
+          "calls": 351,
+          "totalMs": 7.8000001311302185,
+          "maxMs": 0.10000002384185791
+        },
+        "drawCommandReuse": {
+          "calls": 287,
+          "totalMs": 658.0000002384186,
+          "maxMs": 3.800000011920929
+        }
+      },
+      "imageHash": "337bb47d6c9bb8c84bd2a135331f71c55326146f9968d17eef07ddba1238de5a",
+      "steadyCounters": {
+        "sorts": 354,
+        "misses": 59,
+        "bytesSent": 1423080708
+      }
+    },
+    "cache-cache256-0": {
+      "frameMs": {
+        "count": 399,
+        "mean": 45.616290726906676,
+        "median": 45.30000001192093,
+        "p95": 48.59999996423721,
+        "p99": 54.30000001192093,
+        "min": 41.5,
+        "max": 73.80000001192093
+      },
+      "cpuMs": {
+        "count": 400,
+        "mean": 3.4557500003278254,
+        "median": 3.699999988079071,
+        "p95": 5.199999988079071,
+        "p99": 7.100000023841858,
+        "min": 1.199999988079071,
+        "max": 11.200000047683716
+      },
+      "gpuMs": {
+        "count": 400,
+        "mean": 32.77844992000002,
+        "median": 32.82944,
+        "p95": 33.435648,
+        "p99": 33.690624,
+        "min": 31.415296,
+        "max": 33.864704
+      },
+      "splats": {
+        "numSplats": 2010001,
+        "sphericalHarmonicsDegree": 3,
+        "textureWidth": 32768,
+        "textureHeight": 123,
+        "sortRequestsDuringRun": 49,
+        "dataGenerationsDuringRun": 0
+      },
+      "worker": [
+        {
+          "bytes": 144720072,
+          "keys": 6,
+          "peak": 146798616,
+          "sets": 35,
+          "releases": 53,
+          "budget": 268435456
+        }
+      ],
+      "tileLoads": 834,
+      "tileUnloads": 0,
+      "primitiveCounters": {
+        "sortPositionCopy": {
+          "calls": 290,
+          "totalMs": 0.7999999523162842,
+          "maxMs": 0.10000002384185791
+        },
+        "sortSchedule": {
+          "calls": 290,
+          "totalMs": 10.599999845027924,
+          "maxMs": 4.899999976158142
+        },
+        "drawCommandReuse": {
+          "calls": 285,
+          "totalMs": 671.0999997258186,
+          "maxMs": 4.5
+        }
+      },
+      "imageHash": "337bb47d6c9bb8c84bd2a135331f71c55326146f9968d17eef07ddba1238de5a",
+      "steadyCounters": {
+        "sorts": 293,
+        "misses": 0,
+        "bytesSent": 0
+      }
+    },
+    "cache-base-1": {
+      "frameMs": {
+        "count": 399,
+        "mean": 46.87669172935318,
+        "median": 45.299999952316284,
+        "p95": 57.19999998807907,
+        "p99": 62.80000001192093,
+        "min": 41.69999998807907,
+        "max": 64.90000003576279
+      },
+      "cpuMs": {
+        "count": 400,
+        "mean": 4.96499999910593,
+        "median": 3.699999988079071,
+        "p95": 15.5,
+        "p99": 16.600000023841858,
+        "min": 1.199999988079071,
+        "max": 19.600000023841858
+      },
+      "gpuMs": {
+        "count": 400,
+        "mean": 32.768896,
+        "median": 32.82944,
+        "p95": 33.391616,
+        "p99": 33.677312,
+        "min": 31.366144,
+        "max": 33.98144
+      },
+      "splats": {
+        "numSplats": 2010001,
+        "sphericalHarmonicsDegree": 3,
+        "textureWidth": 32768,
+        "textureHeight": 123,
+        "sortRequestsDuringRun": 58,
+        "dataGenerationsDuringRun": 0
+      },
+      "worker": [
+        {
+          "bytes": 120600060,
+          "keys": 5,
+          "peak": 132706452,
+          "sets": 112,
+          "releases": 142,
+          "budget": 134217728
+        }
+      ],
+      "tileLoads": 834,
+      "tileUnloads": 0,
+      "primitiveCounters": {
+        "sortPositionCopy": {
+          "calls": 344,
+          "totalMs": 648.0000002384186,
+          "maxMs": 13
+        },
+        "sortSchedule": {
+          "calls": 344,
+          "totalMs": 9.29999977350235,
+          "maxMs": 0.10000002384185791
+        },
+        "drawCommandReuse": {
+          "calls": 281,
+          "totalMs": 636.8000002503395,
+          "maxMs": 3.900000035762787
+        }
+      },
+      "imageHash": "337bb47d6c9bb8c84bd2a135331f71c55326146f9968d17eef07ddba1238de5a",
+      "steadyCounters": {
+        "sorts": 347,
+        "misses": 59,
+        "bytesSent": 1423080708
+      }
+    },
+    "cache-cache256-1": {
+      "frameMs": {
+        "count": 399,
+        "mean": 45.65388471186908,
+        "median": 45.39999997615814,
+        "p95": 48.30000001192093,
+        "p99": 54.30000001192093,
+        "min": 42,
+        "max": 66.39999997615814
+      },
+      "cpuMs": {
+        "count": 400,
+        "mean": 3.4712500008940697,
+        "median": 3.700000047683716,
+        "p95": 5.099999964237213,
+        "p99": 8.400000035762787,
+        "min": 1.2999999523162842,
+        "max": 10.199999988079071
+      },
+      "gpuMs": {
+        "count": 400,
+        "mean": 32.78889984000002,
+        "median": 32.864256,
+        "p95": 33.412096,
+        "p99": 33.676288,
+        "min": 31.321088,
+        "max": 33.915904
+      },
+      "splats": {
+        "numSplats": 2010001,
+        "sphericalHarmonicsDegree": 3,
+        "textureWidth": 32768,
+        "textureHeight": 123,
+        "sortRequestsDuringRun": 49,
+        "dataGenerationsDuringRun": 0
+      },
+      "worker": [
+        {
+          "bytes": 144720072,
+          "keys": 6,
+          "peak": 147085584,
+          "sets": 37,
+          "releases": 61,
+          "budget": 268435456
+        }
+      ],
+      "tileLoads": 834,
+      "tileUnloads": 0,
+      "primitiveCounters": {
+        "sortPositionCopy": {
+          "calls": 293,
+          "totalMs": 1.2999998927116394,
+          "maxMs": 0.10000002384185791
+        },
+        "sortSchedule": {
+          "calls": 293,
+          "totalMs": 7.300000071525574,
+          "maxMs": 0.19999998807907104
+        },
+        "drawCommandReuse": {
+          "calls": 288,
+          "totalMs": 666.6999996304512,
+          "maxMs": 3.700000047683716
+        }
+      },
+      "imageHash": "337bb47d6c9bb8c84bd2a135331f71c55326146f9968d17eef07ddba1238de5a",
+      "steadyCounters": {
+        "sorts": 296,
+        "misses": 0,
+        "bytesSent": 0
+      }
+    }
+  },
+  "cacheCountVector": [
+    2010001,
+    2010001,
+    2010001,
+    2010001,
+    2010001,
+    2010001
+  ],
+  "cpuSelfTimeTop": [
+    {
+      "function": "(program)",
+      "file": "",
+      "line": 0,
+      "sampledMs": 16244.873000000054
+    },
+    {
+      "function": "wasm-function[499]",
+      "file": "000a32ce",
+      "line": 1,
+      "sampledMs": 2998.206000000009
+    },
+    {
+      "function": "packSphericalHarmonicsData",
+      "file": "Cesium.js",
+      "line": 153147,
+      "sampledMs": 2678.0050000000156
+    },
+    {
+      "function": "J",
+      "file": "Cesium.js",
+      "line": 89184,
+      "sampledMs": 1389.4850000000042
+    },
+    {
+      "function": "processSpz",
+      "file": "Cesium.js",
+      "line": 87158,
+      "sampledMs": 1085.3380000000016
+    },
+    {
+      "function": "texImage2D",
+      "file": "",
+      "line": 0,
+      "sampledMs": 724.3650000000006
+    },
+    {
+      "function": "wasm-function[98]",
+      "file": "000a32ce",
+      "line": 1,
+      "sampledMs": 641.7739999999999
+    },
+    {
+      "function": "aggregateShData",
+      "file": "Cesium.js",
+      "line": 152328,
+      "sampledMs": 547.9779999999996
+    },
+    {
+      "function": "GaussianSplatPrimitive.transformTile",
+      "file": "Cesium.js",
+      "line": 151865,
+      "sampledMs": 489.54
+    },
+    {
+      "function": "GaussianSplatPrimitive.generateSplatTexture",
+      "file": "Cesium.js",
+      "line": 151989,
+      "sampledMs": 448.5169999999999
+    },
+    {
+      "function": "wasm-function[207]",
+      "file": "000a32ce",
+      "line": 1,
+      "sampledMs": 446.4090000000001
+    },
+    {
+      "function": "(garbage collector)",
+      "file": "",
+      "line": 0,
+      "sampledMs": 419.2529999999997
+    },
+    {
+      "function": "processGeneratedSplatTextureData",
+      "file": "Cesium.js",
+      "line": 151422,
+      "sampledMs": 323.48099999999977
+    },
+    {
+      "function": "multiplyByPoint",
+      "file": "Cesium.js",
+      "line": 25175,
+      "sampledMs": 300.2810000000001
+    },
+    {
+      "function": "aggregateAttributeValues",
+      "file": "Cesium.js",
+      "line": 152298,
+      "sampledMs": 270.11599999999993
+    },
+    {
+      "function": "wasm-function[68]",
+      "file": "000a32ce",
+      "line": 1,
+      "sampledMs": 243.756
+    },
+    {
+      "function": "wasm-function[122]",
+      "file": "000a32ce",
+      "line": 1,
+      "sampledMs": 227.82
+    },
+    {
+      "function": "er",
+      "file": "Cesium.js",
+      "line": 87351,
+      "sampledMs": 179.29999999999993
+    },
+    {
+      "function": "",
+      "file": "",
+      "line": 0,
+      "sampledMs": 173.58699999999982
+    },
+    {
+      "function": "Or",
+      "file": "Cesium.js",
+      "line": 89194,
+      "sampledMs": 166.409
+    },
+    {
+      "function": "GaussianSplatPrimitive._prepareSorterPositions",
+      "file": "Cesium.js",
+      "line": 151799,
+      "sampledMs": 132.69599999999988
+    },
+    {
+      "function": "update",
+      "file": "Cesium.js",
+      "line": 152948,
+      "sampledMs": 113.48899999999998
+    },
+    {
+      "function": "wasm-function[322]",
+      "file": "000a32ce",
+      "line": 1,
+      "sampledMs": 105.8489999999999
+    },
+    {
+      "function": "",
+      "file": "Cesium.js",
+      "line": 89195,
+      "sampledMs": 100.308
+    },
+    {
+      "function": "Rr",
+      "file": "Cesium.js",
+      "line": 89218,
+      "sampledMs": 97.75899999999996
+    }
+  ],
+  "failedAttempts": [
+    "profile-base-1-failed-0.json",
+    "profile-nodraw-0-failed-0.json",
+    "profile-tiny-0-failed-0.json",
+    "streaming-attribution-failed-0.json",
+    "streaming-attribution-failed-1.json",
+    "streaming-attribution-failed-2.json"
+  ]
+}
