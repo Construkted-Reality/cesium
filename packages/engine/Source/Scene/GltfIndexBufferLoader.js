@@ -203,11 +203,19 @@ class GltfIndexBufferLoader extends ResourceLoader {
       const indexBufferJob = scratchIndexBufferJob;
       indexBufferJob.set(typedArray, indexDatatype, frameState.context);
       const jobScheduler = frameState.jobScheduler;
-      if (!jobScheduler.execute(indexBufferJob, JobType.BUFFER)) {
-        // Job scheduler is full. Try again next frame.
-        return false;
+      try {
+        if (!jobScheduler.execute(indexBufferJob, JobType.BUFFER)) {
+          // Job scheduler is full. Try again next frame.
+          return false;
+        }
+        buffer = indexBufferJob.buffer;
+      } finally {
+        // Release inputs even when the scheduler defers or throws.
+        indexBufferJob.typedArray = undefined;
+        indexBufferJob.indexDatatype = undefined;
+        indexBufferJob.context = undefined;
+        indexBufferJob.buffer = undefined;
       }
-      buffer = indexBufferJob.buffer;
     } else if (this._loadBuffer) {
       buffer = createIndexBuffer(typedArray, indexDatatype, frameState.context);
     }
