@@ -10,6 +10,13 @@ class GaussianSplatPositionCache {
     this._entries = new Map();
   }
 
+  resize(maximumByteLength) {
+    this.maximumByteLength = maximumByteLength;
+    while (this.byteLength > maximumByteLength) {
+      this.remove(this._entries.keys().next().value);
+    }
+  }
+
   remove(key) {
     const positions = this._entries.get(key);
     if (defined(positions)) {

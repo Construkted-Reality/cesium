@@ -1247,6 +1247,25 @@ function GaussianSplatPrimitive(options) {
   this._splatBudgetSSEScale = 1.0;
 }
 
+Object.defineProperties(GaussianSplatPrimitive, {
+  /**
+   * Maximum retained position bytes in the shared sort worker. This setting applies
+   * to all Gaussian splat primitives in this JavaScript context. A lower limit evicts
+   * least recently used positions. Zero disables retention. Active sorts can use
+   * additional memory. A higher limit can reduce copies when several tilesets render.
+   * @type {number}
+   * @default 134217728
+   */
+  maximumCacheByteLength: {
+    get() {
+      return GaussianSplatSorter.maximumCacheByteLength;
+    },
+    set(value) {
+      GaussianSplatSorter.maximumCacheByteLength = value;
+    },
+  },
+});
+
 Object.defineProperties(GaussianSplatPrimitive.prototype, {
   /**
    * Indicates whether the primitive is ready for use.

@@ -1,3 +1,4 @@
+import { packSpzSphericalHarmonics } from "./packSpzSphericalHarmonics.js";
 import Check from "../Core/Check.js";
 import Frozen from "../Core/Frozen.js";
 import defined from "../Core/defined.js";
@@ -126,10 +127,14 @@ class GltfVertexBufferLoader extends ResourceLoader {
     this._asynchronous = asynchronous;
     this._loadBuffer = loadBuffer;
     this._loadTypedArray = loadTypedArray;
+    this._packedSphericalHarmonicsDegree = !loadBuffer
+      ? options.packedSphericalHarmonicsDegree
+      : undefined;
     this._bufferViewLoader = undefined;
     this._dracoLoader = undefined;
     this._quantization = undefined;
     this._typedArray = undefined;
+    this._packedSphericalHarmonics = undefined;
     this._buffer = undefined;
     this._state = ResourceLoaderState.UNLOADED;
     this._promise = undefined;
@@ -169,6 +174,11 @@ class GltfVertexBufferLoader extends ResourceLoader {
    */
   get typedArray() {
     return this._typedArray;
+  }
+
+  /** Dense SH data owned by the first coefficient loader. @type {Uint32Array} @readonly @private */
+  get packedSphericalHarmonics() {
+    return this._packedSphericalHarmonics;
   }
 
   /**
@@ -271,8 +281,10 @@ class GltfVertexBufferLoader extends ResourceLoader {
     }
 
     // Unload everything except the vertex buffer
+    const packedSphericalHarmonics = this._packedSphericalHarmonics;
     this.unload();
 
+    this._packedSphericalHarmonics = packedSphericalHarmonics;
     this._buffer = buffer;
     this._typedArray = this._loadTypedArray ? typedArray : undefined;
     this._state = ResourceLoaderState.READY;
@@ -310,6 +322,7 @@ class GltfVertexBufferLoader extends ResourceLoader {
     this._dracoLoader = undefined;
     this._spzLoader = undefined;
     this._typedArray = undefined;
+    this._packedSphericalHarmonics = undefined;
     this._buffer = undefined;
     this._gltf = undefined;
     this._primitive = undefined;
@@ -426,7 +439,24 @@ function processSpz(vertexBufferLoader) {
   vertexBufferLoader._state = ResourceLoaderState.PROCESSING;
   const spzLoader = vertexBufferLoader._spzLoader;
 
-  const gcloudData = spzLoader.decodedData.gcloud;
+  const decoded = spzLoader.decodedData;
+  const gcloudData = decoded.gcloud;
+  if (
+    defined(vertexBufferLoader._packedSphericalHarmonicsDegree) &&
+    vertexBufferLoader._packedSphericalHarmonicsDegree ===
+      gcloudData.shDegree &&
+    vertexBufferLoader._attributeSemantic.includes("SH_DEGREE_")
+  ) {
+    if (!defined(decoded.packedSphericalHarmonics)) {
+      decoded.packedSphericalHarmonics = packSpzSphericalHarmonics(gcloudData);
+    }
+    if (/SH_DEGREE_1_COEF_0$/.test(vertexBufferLoader._attributeSemantic)) {
+      vertexBufferLoader._packedSphericalHarmonics =
+        decoded.packedSphericalHarmonics;
+    }
+    vertexBufferLoader._typedArray = undefined;
+    return;
+  }
 
   if (vertexBufferLoader._attributeSemantic === "POSITION") {
     vertexBufferLoader._typedArray = gcloudData.positions;

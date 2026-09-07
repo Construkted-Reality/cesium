@@ -2,6 +2,7 @@ import ArticulationStageType from "../Core/ArticulationStageType.js";
 import Cartesian2 from "../Core/Cartesian2.js";
 import Cartesian3 from "../Core/Cartesian3.js";
 import Cartesian4 from "../Core/Cartesian4.js";
+import { getPackedSphericalHarmonicsDegree } from "./packSpzSphericalHarmonics.js";
 import Check from "../Core/Check.js";
 import ComponentDatatype from "../Core/ComponentDatatype.js";
 import Credit from "../Core/Credit.js";
@@ -193,6 +194,7 @@ class GltfLoader extends ResourceLoader {
    * @param {boolean} [options.incrementallyLoadTextures=true] Determine if textures may continue to stream in after the glTF is loaded.
    * @param {Axis} [options.upAxis=Axis.Y] The up-axis of the glTF model.
    * @param {Axis} [options.forwardAxis=Axis.Z] The forward-axis of the glTF model.
+   * @param {boolean} [options.packSphericalHarmonics=false] Use dense SH data for Gaussian tile loading only.
    * @param {boolean} [options.loadAttributesAsTypedArray=false] Load all attributes and indices as typed arrays instead of GPU buffers. If the attributes are interleaved in the glTF they will be de-interleaved in the typed array.
    * @param {boolean} [options.loadAttributesFor2D=false] If <code>true</code>, load the positions buffer and any instanced attribute buffers as typed arrays for accurately projecting models to 2D.
    * @param {boolean} [options.enablePick=false]  If <code>true</code>, load the positions buffer, any instanced attribute buffers, and index buffer as typed arrays for CPU-enabled picking in WebGL1.
@@ -238,6 +240,7 @@ class GltfLoader extends ResourceLoader {
     this._upAxis = upAxis;
     this._forwardAxis = forwardAxis;
     this._loadAttributesAsTypedArray = loadAttributesAsTypedArray;
+    this._packSphericalHarmonics = options.packSphericalHarmonics ?? false;
     this._loadAttributesFor2D = loadAttributesFor2D;
     this._enablePick = enablePick;
     this._loadIndicesForWireframe = loadIndicesForWireframe;
@@ -727,6 +730,13 @@ function getVertexBufferLoader(
     primitive: primitive,
     draco: draco,
     spz: spzExtension,
+    packedSphericalHarmonicsDegree:
+      loader._packSphericalHarmonics &&
+      defined(spzExtension) &&
+      !loadBuffer &&
+      semantic.includes("SH_DEGREE_")
+        ? getPackedSphericalHarmonicsDegree(primitive.attributes)
+        : undefined,
     attributeSemantic: semantic,
     accessorId: accessorId,
     asynchronous: loader._asynchronous,
@@ -1191,6 +1201,12 @@ function finalizeSpzAttribute(
 ) {
   attribute.byteOffset = 0;
   attribute.byteStride = undefined;
+
+  if (defined(vertexBufferLoader.packedSphericalHarmonics)) {
+    attribute.packedSphericalHarmonics =
+      vertexBufferLoader.packedSphericalHarmonics;
+    return;
+  }
 
   if (loadBuffer) {
     attribute.buffer = vertexBufferLoader.buffer;

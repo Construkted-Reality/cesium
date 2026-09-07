@@ -393,6 +393,9 @@ ResourceCacheKey.getVertexBufferCacheKey = function (options) {
 
   if (defined(spz)) {
     const spzCacheKey = getSpzCacheKey(gltf, spz, gltfResource, baseResource);
+    if (defined(options.packedSphericalHarmonicsDegree)) {
+      cacheKeySuffix += `-packed-sh-${options.packedSphericalHarmonicsDegree}`;
+    }
     return `vertex-buffer:${spzCacheKey}-spz-${attributeSemantic}${cacheKeySuffix}`;
   }
 

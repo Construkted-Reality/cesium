@@ -3,11 +3,12 @@ import { chromium } from "@playwright/test";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { GPU_LAUNCH_ARGS } from "./bench.mjs";
-const out = "/mnt/data2/cesium-splat-perf/loading-experiment-results";
+const out = process.env.SPLAT_RESULTS || "/mnt/data2/cesium-splat-perf/loading-experiment-results";
 const runs = JSON.parse(readFileSync(process.argv[2], "utf8"));
 mkdirSync(out, {recursive:true});
 const clock = () => execFileSync("nvidia-smi", ["--query-gpu=clocks.gr,clocks.mem,temperature.gpu,memory.used", "--format=csv,noheader"], {encoding:"utf8"}).trim();
 for (const run of runs) {
+  if (run.cycles && run.lifecycle !== "1") { throw new Error("cycles requires lifecycle=1"); }
   for (let attempt=0; attempt<3; attempt++) {
     const browser = await chromium.launch({headless:true, channel:"chromium",args: run.backend === "gl" ? GPU_LAUNCH_ARGS.filter(x=>!x.startsWith("--use-angle=")&&!x.startsWith("--enable-features=")).concat(["--use-angle=gl"]) : GPU_LAUNCH_ARGS});
     const context = await browser.newContext({viewport:{width:Number(run.width||1920),height:Number(run.height||1080)},deviceScaleFactor:1});
@@ -15,6 +16,9 @@ for (const run of runs) {
     await context.route("**/Build/CesiumUnminified/Cesium.js",async route=> {
       const response=await route.fetch();let body=await response.text();
       const swap=(a,b)=>{if(!body.includes(a)){throw new Error(`Bundle anchor missing: ${a}`);}body=body.replace(a,b);};
+      if (run.production) {
+        if (run.production === "baseline") { swap("packSphericalHarmonics: true", "packSphericalHarmonics: false"); }
+      } else {
       swap('const decodePromise = Rr(this._bufferViewTypedArray, {\n        unpackOptions: { coordinateSystem: "UNSPECIFIED" }\n      });',
         'const decodePromise = globalThis.__loadingDecode(this._bufferViewTypedArray, {unpackOptions:{coordinateSystem:"UNSPECIFIED"}},this,Rr);');
       swap('const gcloudData = spzLoader.decodedData.gcloud;',`const gcloudData = spzLoader.decodedData.gcloud;
@@ -25,6 +29,7 @@ for (const run of runs) {
       swap('function packSphericalHarmonicsData(tileContent) {',`function packSphericalHarmonicsData(tileContent) {
         const direct = tileContent.gltfPrimitive.attributes.find(a=>a.typedArray?.buffer.__packedSH);
         if(direct)return direct.typedArray.buffer.__packedSH;`);
+      }
       await route.fulfill({response,body});
     });
     if(run.wasmProbe==="1") {
@@ -56,13 +61,13 @@ for (const run of runs) {
 globalThis.__cacheProbe = {cache:cachedPositions,peak:0,sets:0,releases:0};
 const originalSet = cachedPositions.set.bind(cachedPositions);
 cachedPositions.set = function(...args) { originalSet(...args); globalThis.__cacheProbe.sets++; globalThis.__cacheProbe.peak = Math.max(globalThis.__cacheProbe.peak,this.byteLength); };`);
-      body=body.replace("const { primitive, sortType, positionsKey } = parameters;", `if(parameters.cacheByteBudget !== undefined) {
+      if (!run.production) { body=body.replace("const { primitive, sortType, positionsKey } = parameters;", `if(parameters.cacheByteBudget !== undefined) {
         const b=parameters.cacheByteBudget;
         if(!Number.isSafeInteger(b)||b<0||b>1073741824)throw new Error("Invalid worker budget");
         cachedPositions.maximumByteLength=b;
         while(cachedPositions.byteLength>b)cachedPositions.remove(cachedPositions._entries.keys().next().value);
       }
-      const { primitive, sortType, positionsKey } = parameters;`);
+      const { primitive, sortType, positionsKey } = parameters;`); }
       body=body.replace("cachedPositions.remove(key);", "globalThis.__cacheProbe.releases++; cachedPositions.remove(key);");
       await route.fulfill({response,body});
     });
@@ -120,7 +125,7 @@ cachedPositions.set = function(...args) { originalSet(...args); globalThis.__cac
       if(run.profileCPU==="1") {const profile=await cdp.send("Profiler.stop");writeFileSync(`${out}/${run.label}.cpuprofile`,JSON.stringify(profile.profile));}
       if(run.budgetValidation==="1") {
         result.budgetValidation=await page.evaluate(async()=> {
-          const invalid=[-1,0.5,NaN,Infinity,1073741825];const rejected=[];
+          const invalid=[-1,0.5,NaN,Infinity,Number.MAX_SAFE_INTEGER+1];const rejected=[];
           for(const v of invalid) {try {window.__setPositionBudget(v);rejected.push(false);}catch {rejected.push(true);}}
           await window.__setPositionBudget(0);
           for(let i=0;i<120;i++){await new Promise(r=>requestAnimationFrame(r));}

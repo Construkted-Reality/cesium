@@ -52,6 +52,7 @@ window.__loadingDecode=(input,options,owner,decode)=> {
 };
 window.__loadingQueueState=()=>({active:!!active,queued:queue.length});
 window.__setPositionBudget=bytes=> {
+  if(params.has("production")) { Cesium.GaussianSplatPrimitive.maximumCacheByteLength=bytes; return; }
   if(!Number.isSafeInteger(bytes)||bytes<0||bytes>1024*1024*1024){throw new Error("Budget must be an integer from 0 to 1 GiB");}
   window.__positionBudget=bytes;Cesium.GaussianSplatSorter.maximumCacheByteLength=bytes;
   if(Cesium.GaussianSplatSorter._taskProcessorReady){return Cesium.GaussianSplatSorter._sorterTaskProcessor.scheduleTask({cacheByteBudget:bytes});}
@@ -59,7 +60,7 @@ window.__setPositionBudget=bytes=> {
 window.__setPositionBudget(Number(params.get("budgetMiB")||128)*1024*1024);
 const schedule=Cesium.TaskProcessor.prototype.scheduleTask;
 Cesium.TaskProcessor.prototype.scheduleTask=function(parameters,...rest) {
-  if(this._workerPath.includes("gaussianSplatSorter")){parameters.cacheByteBudget=window.__positionBudget;}
+  if(!params.has("production") && this._workerPath.includes("gaussianSplatSorter")){parameters.cacheByteBudget=window.__positionBudget;}
   return schedule.call(this,parameters,...rest);
 };
 

@@ -270,6 +270,14 @@ export class Attribute {
     this.typedArray = undefined;
 
     /**
+     * Dense half-float SH data for Gaussian tile loading. Only the first SH
+     * coefficient attribute owns this array. Other packed SH attributes have no typedArray.
+     * @type {Uint32Array}
+     * @ignore
+     */
+    this.packedSphericalHarmonics = undefined;
+
+    /**
      * A vertex buffer. Attribute values are accessed using byteOffset and byteStride.
      *
      * @type {Buffer}

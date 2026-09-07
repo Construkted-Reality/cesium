@@ -428,6 +428,7 @@ class GaussianSplat3DTileContent {
 
     const loaderOptions = {
       releaseGltfJson: false,
+      packSphericalHarmonics: true,
       upAxis: Axis.Y,
       forwardAxis: Axis.Z,
     };
@@ -725,6 +726,12 @@ function extractSHDegreeAndCoef(attribute) {
  * @private
  */
 function packSphericalHarmonicsData(tileContent) {
+  const direct = tileContent.gltfPrimitive.attributes.find((attribute) =>
+    defined(attribute.packedSphericalHarmonics),
+  );
+  if (defined(direct)) {
+    return direct.packedSphericalHarmonics;
+  }
   const degree = tileContent.sphericalHarmonicsDegree;
   const coefs = tileContent.sphericalHarmonicsCoefficientCount;
   const totalLength = tileContent.pointsLength * Math.ceil(coefs / 4) * 2;

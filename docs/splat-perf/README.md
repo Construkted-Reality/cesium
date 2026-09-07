@@ -18,6 +18,8 @@ The [streaming and GPU tests](streaming-gpu-2026-09-07/RESULTS.md) validate PR #
 under cache pressure and identify the next optimization targets.
 The [loading experiments](loading-experiments-2026-09-07/RESULTS.md) measure direct packing,
 worker decoding, runtime cache budgets, and longer memory tests.
+The [production loading follow-up](production-loading-2026-09-07/RESULTS.md) integrates direct packing
+and documents the application-wide `GaussianSplatPrimitive.maximumCacheByteLength` option.
 
 The remaining sections record the original optimization round. Their file
 counts, cache policy, and test status refer to that historical baseline. Read

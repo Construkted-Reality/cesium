@@ -23,6 +23,11 @@ function generateGaussianSortWorker(parameters, transferableObjects) {
     return initWorker(parameters, transferableObjects);
   }
 
+  const budget = parameters.cacheByteBudget;
+  if (Number.isSafeInteger(budget) && budget >= 0) {
+    cachedPositions.resize(budget);
+  }
+
   for (const key of parameters.releaseKeys ?? []) {
     cachedPositions.remove(key);
   }
