@@ -1,0 +1,2 @@
+npm run build -- --minify --removePragmas
+SPLAT_RESULTS=<output> SPLAT_RELEASE_BACKEND=gl SPLAT_WAYLAND_RUNTIME=<runtime> node tools/splat-perf/decoder-release-check.mjs

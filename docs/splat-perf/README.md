@@ -24,6 +24,9 @@ and documents the application-wide `GaussianSplatPrimitive.maximumCacheByteLengt
 The [worker validation](worker-validation-2026-09-07/RESULTS.md) tests decoder pools, snapshot coalescing,
 heap retention, hardware OpenGL, and degree-0 SPZ loading. These changes remain experimental.
 
+The [production decoder pool](decoder-pool-2026-09-07/RESULTS.md) adds bounded worker decoding,
+earlier partial visibility, and fewer startup stalls. It preserves snapshot scheduling and documents the memory tradeoff.
+
 The remaining sections record the original optimization round. Their file
 counts, cache policy, and test status refer to that historical baseline. Read
 the follow-up results for the current changes and validation.

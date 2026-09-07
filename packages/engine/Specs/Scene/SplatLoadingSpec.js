@@ -104,55 +104,71 @@ describe("Scene/SplatLoading", function () {
       }),
     );
   });
-  it("keeps shared decode data intact and releases packed loader storage", function () {
-    const resource = new Resource("https://example.com/test.glb");
-    const cloud = {
-      shDegree: 1,
-      numPoints: 1,
-      sh: new Float32Array([1, 2, 3, 4, 5, 6, 7, 8, 9]),
-    };
-    const decodedData = { gcloud: cloud };
-    const spz = { decodedData, process: () => true };
-    function cache() {}
-    cache.unload = jasmine.createSpy("unload");
-    cache.statistics = new ResourceCacheStatistics();
-    function load(degree, semantic, key) {
-      const loader = new GltfVertexBufferLoader({
-        resourceCache: cache,
-        gltf: {},
-        gltfResource: resource,
-        baseResource: resource,
-        spz: { bufferView: 0 },
-        attributeSemantic: semantic,
-        loadTypedArray: true,
-        packedSphericalHarmonicsDegree: degree,
-        cacheKey: key,
+  [false, true].forEach(function (workerPacked) {
+    it(`keeps shared decode data intact with worker packing ${workerPacked}`, function () {
+      const resource = new Resource("https://example.com/test.glb");
+      const cloud = {
+        shDegree: 1,
+        numPoints: 1,
+        sh: new Float32Array([1, 2, 3, 4, 5, 6, 7, 8, 9]),
+      };
+      const decodedData = { gcloud: cloud };
+      if (workerPacked) {
+        decodedData.packedSphericalHarmonics = packSpzSphericalHarmonics(cloud);
+      }
+      const sh = cloud.sh;
+      let reads = 0;
+      Object.defineProperty(cloud, "sh", {
+        get: () => {
+          reads++;
+          return sh;
+        },
       });
-      loader._spzLoader = spz;
-      loader._state = ResourceLoaderState.PROCESSING;
-      expect(loader.process({})).toBe(true);
-      return loader;
-    }
-    const packed = load(1, "_SH_DEGREE_1_COEF_0", "packed");
-    const other = load(1, "_SH_DEGREE_1_COEF_1", "other");
-    const ordinary = load(undefined, "_SH_DEGREE_1_COEF_1", "ordinary");
-    const mismatch = load(2, "_SH_DEGREE_1_COEF_1", "mismatch");
-    expect(packed.packedSphericalHarmonics).toBe(
-      decodedData.packedSphericalHarmonics,
-    );
-    expect(packed.typedArray).toBeUndefined();
-    expect(other.packedSphericalHarmonics).toBeUndefined();
-    expect(other.typedArray).toBeUndefined();
-    expect(Array.from(ordinary.typedArray)).toEqual([4, 5, 6]);
-    expect(mismatch.typedArray).toEqual(ordinary.typedArray);
-    expect(cloud.sh.length).toBe(9);
-    expect(cache.statistics.geometryByteLength).toBe(24 + 12 + 12);
-    for (const loader of [packed, other, ordinary, mismatch]) {
-      cache.statistics.removeLoader(loader);
-      loader.unload();
-    }
-    expect(packed.packedSphericalHarmonics).toBeUndefined();
-    expect(cache.statistics.geometryByteLength).toBe(0);
+      const spz = { decodedData, process: () => true };
+      function cache() {}
+      cache.unload = jasmine.createSpy("unload");
+      cache.statistics = new ResourceCacheStatistics();
+      function load(degree, semantic, key) {
+        const loader = new GltfVertexBufferLoader({
+          resourceCache: cache,
+          gltf: {},
+          gltfResource: resource,
+          baseResource: resource,
+          spz: { bufferView: 0 },
+          attributeSemantic: semantic,
+          loadTypedArray: true,
+          packedSphericalHarmonicsDegree: degree,
+          cacheKey: key,
+        });
+        loader._spzLoader = spz;
+        loader._state = ResourceLoaderState.PROCESSING;
+        expect(loader.process({})).toBe(true);
+        return loader;
+      }
+      const packed = load(1, "_SH_DEGREE_1_COEF_0", "packed");
+      const other = load(1, "_SH_DEGREE_1_COEF_1", "other");
+      if (workerPacked) {
+        expect(reads).toBe(0);
+      }
+      const ordinary = load(undefined, "_SH_DEGREE_1_COEF_1", "ordinary");
+      const mismatch = load(2, "_SH_DEGREE_1_COEF_1", "mismatch");
+      expect(packed.packedSphericalHarmonics).toBe(
+        decodedData.packedSphericalHarmonics,
+      );
+      expect(packed.typedArray).toBeUndefined();
+      expect(other.packedSphericalHarmonics).toBeUndefined();
+      expect(other.typedArray).toBeUndefined();
+      expect(Array.from(ordinary.typedArray)).toEqual([4, 5, 6]);
+      expect(mismatch.typedArray).toEqual(ordinary.typedArray);
+      expect(cloud.sh.length).toBe(9);
+      expect(cache.statistics.geometryByteLength).toBe(24 + 12 + 12);
+      for (const loader of [packed, other, ordinary, mismatch]) {
+        cache.statistics.removeLoader(loader);
+        loader.unload();
+      }
+      expect(packed.packedSphericalHarmonics).toBeUndefined();
+      expect(cache.statistics.geometryByteLength).toBe(0);
+    });
   });
   it("shrinks the cache in access order and supports disabling and regrowth", function () {
     const cache = new GaussianSplatPositionCache(32);
