@@ -1,0 +1,360 @@
+[
+  {
+    "file": "heap-attribution-candidate-0.heapsnapshot",
+    "retainingPaths": {
+      "blink::HeapHashTableBacking<blink::HashTable<blink::String, blink::KeyValuePair<blink::String, cppgc::internal::BasicMember<blink::NetworkResourcesData::ResourceData, cppgc::internal::StrongMemberTag, cppgc::internal::DijkstraWriteBarrierPolicy>>, blink::KeyValuePairExtractor, blink::HashMapValueTraits<blink::HashTraits<String>, blink::HashTraits<cppgc::internal::BasicMember<blink::NetworkResourcesData::ResourceData, cppgc::internal::StrongMemberTag, cppgc::internal::DijkstraWriteBarrierPolicy>>>, blink::HashTraits<String>, blink::HeapAllocator>>": [
+        {
+          "node": "synthetic:(GC roots)",
+          "edge": "1"
+        },
+        {
+          "node": "synthetic:C++ Persistent roots",
+          "edge": "29"
+        },
+        {
+          "node": "native:blink::DevToolsSession",
+          "edge": "v8_inspector::V8InspectorSessionImpl::V8InspectorSessionImpl(V8InspectorImpl *, int, int, V8Inspector::ManagedChannel *, StringView, V8Inspector::ClientTrustLevel, std::shared_ptr<V8DebuggerBarrier>, V8EmbedderState)@../../v8/src/inspector/v8-inspector-session-impl.cc:114"
+        },
+        {
+          "node": "native:blink::HeapVectorBacking<cppgc::internal::BasicMember<blink::InspectorAgent, cppgc::internal::StrongMemberTag, cppgc::internal::DijkstraWriteBarrierPolicy>>",
+          "edge": "4"
+        },
+        {
+          "node": "native:blink::InspectorNetworkAgent",
+          "edge": "3"
+        },
+        {
+          "node": "native:blink::NetworkResourcesData",
+          "edge": "2"
+        },
+        {
+          "node": "native:blink::HeapHashTableBacking<blink::HashTable<blink::String, blink::KeyValuePair<blink::String, cppgc::internal::BasicMember<blink::NetworkResourcesData::ResourceData, cppgc::internal::StrongMemberTag, cppgc::internal::DijkstraWriteBarrierPolicy>>, blink::KeyValuePairExtractor, blink::HashMapValueTraits<blink::HashTraits<String>, blink::HashTraits<cppgc::internal::BasicMember<blink::NetworkResourcesData::ResourceData, cppgc::internal::StrongMemberTag, cppgc::internal::DijkstraWriteBarrierPolicy>>>, blink::HashTraits<String>, blink::HeapAllocator>>",
+          "edge": "1"
+        }
+      ],
+      "blink::NetworkResourcesData::ResourceData": [
+        {
+          "node": "synthetic:(GC roots)",
+          "edge": "1"
+        },
+        {
+          "node": "synthetic:C++ Persistent roots",
+          "edge": "29"
+        },
+        {
+          "node": "native:blink::DevToolsSession",
+          "edge": "v8_inspector::V8InspectorSessionImpl::V8InspectorSessionImpl(V8InspectorImpl *, int, int, V8Inspector::ManagedChannel *, StringView, V8Inspector::ClientTrustLevel, std::shared_ptr<V8DebuggerBarrier>, V8EmbedderState)@../../v8/src/inspector/v8-inspector-session-impl.cc:114"
+        },
+        {
+          "node": "native:blink::HeapVectorBacking<cppgc::internal::BasicMember<blink::InspectorAgent, cppgc::internal::StrongMemberTag, cppgc::internal::DijkstraWriteBarrierPolicy>>",
+          "edge": "4"
+        },
+        {
+          "node": "native:blink::InspectorNetworkAgent",
+          "edge": "3"
+        },
+        {
+          "node": "native:blink::NetworkResourcesData",
+          "edge": "2"
+        },
+        {
+          "node": "native:blink::HeapHashTableBacking<blink::HashTable<blink::String, blink::KeyValuePair<blink::String, cppgc::internal::BasicMember<blink::NetworkResourcesData::ResourceData, cppgc::internal::StrongMemberTag, cppgc::internal::DijkstraWriteBarrierPolicy>>, blink::KeyValuePairExtractor, blink::HashMapValueTraits<blink::HashTraits<String>, blink::HashTraits<cppgc::internal::BasicMember<blink::NetworkResourcesData::ResourceData, cppgc::internal::StrongMemberTag, cppgc::internal::DijkstraWriteBarrierPolicy>>>, blink::HashTraits<String>, blink::HeapAllocator>>",
+          "edge": "1"
+        },
+        {
+          "node": "native:blink::NetworkResourcesData::ResourceData",
+          "edge": "23"
+        }
+      ]
+    },
+    "selectedGroups": {
+      "object:Cesium3DTilePassState": [
+        7,
+        224
+      ],
+      "object:Cesium3DTile": [
+        235,
+        80840
+      ],
+      "object:Cesium3DTileset": [
+        1,
+        600
+      ],
+      "object:Cesium3DTilesetStatistics": [
+        10,
+        960
+      ],
+      "object:Cesium3DTilesetCache": [
+        1,
+        56
+      ],
+      "object:Cesium3DTileStyleEngine": [
+        1,
+        56
+      ],
+      "object:Cesium3DTilesetHeatmap": [
+        1,
+        72
+      ],
+      "object:Cesium3DTilesetVisualizer": [
+        1,
+        64
+      ]
+    }
+  },
+  {
+    "file": "heap-attribution-candidate-23.heapsnapshot",
+    "retainingPaths": {
+      "blink::HeapHashTableBacking<blink::HashTable<blink::String, blink::KeyValuePair<blink::String, cppgc::internal::BasicMember<blink::NetworkResourcesData::ResourceData, cppgc::internal::StrongMemberTag, cppgc::internal::DijkstraWriteBarrierPolicy>>, blink::KeyValuePairExtractor, blink::HashMapValueTraits<blink::HashTraits<String>, blink::HashTraits<cppgc::internal::BasicMember<blink::NetworkResourcesData::ResourceData, cppgc::internal::StrongMemberTag, cppgc::internal::DijkstraWriteBarrierPolicy>>>, blink::HashTraits<String>, blink::HeapAllocator>>": [
+        {
+          "node": "synthetic:(GC roots)",
+          "edge": "1"
+        },
+        {
+          "node": "synthetic:C++ Persistent roots",
+          "edge": "29"
+        },
+        {
+          "node": "native:blink::DevToolsSession",
+          "edge": "v8_inspector::V8InspectorSessionImpl::V8InspectorSessionImpl(V8InspectorImpl *, int, int, V8Inspector::ManagedChannel *, StringView, V8Inspector::ClientTrustLevel, std::shared_ptr<V8DebuggerBarrier>, V8EmbedderState)@../../v8/src/inspector/v8-inspector-session-impl.cc:114"
+        },
+        {
+          "node": "native:blink::HeapVectorBacking<cppgc::internal::BasicMember<blink::InspectorAgent, cppgc::internal::StrongMemberTag, cppgc::internal::DijkstraWriteBarrierPolicy>>",
+          "edge": "4"
+        },
+        {
+          "node": "native:blink::InspectorNetworkAgent",
+          "edge": "3"
+        },
+        {
+          "node": "native:blink::NetworkResourcesData",
+          "edge": "2"
+        },
+        {
+          "node": "native:blink::HeapHashTableBacking<blink::HashTable<blink::String, blink::KeyValuePair<blink::String, cppgc::internal::BasicMember<blink::NetworkResourcesData::ResourceData, cppgc::internal::StrongMemberTag, cppgc::internal::DijkstraWriteBarrierPolicy>>, blink::KeyValuePairExtractor, blink::HashMapValueTraits<blink::HashTraits<String>, blink::HashTraits<cppgc::internal::BasicMember<blink::NetworkResourcesData::ResourceData, cppgc::internal::StrongMemberTag, cppgc::internal::DijkstraWriteBarrierPolicy>>>, blink::HashTraits<String>, blink::HeapAllocator>>",
+          "edge": "1"
+        }
+      ],
+      "blink::NetworkResourcesData::ResourceData": [
+        {
+          "node": "synthetic:(GC roots)",
+          "edge": "1"
+        },
+        {
+          "node": "synthetic:C++ Persistent roots",
+          "edge": "29"
+        },
+        {
+          "node": "native:blink::DevToolsSession",
+          "edge": "v8_inspector::V8InspectorSessionImpl::V8InspectorSessionImpl(V8InspectorImpl *, int, int, V8Inspector::ManagedChannel *, StringView, V8Inspector::ClientTrustLevel, std::shared_ptr<V8DebuggerBarrier>, V8EmbedderState)@../../v8/src/inspector/v8-inspector-session-impl.cc:114"
+        },
+        {
+          "node": "native:blink::HeapVectorBacking<cppgc::internal::BasicMember<blink::InspectorAgent, cppgc::internal::StrongMemberTag, cppgc::internal::DijkstraWriteBarrierPolicy>>",
+          "edge": "4"
+        },
+        {
+          "node": "native:blink::InspectorNetworkAgent",
+          "edge": "3"
+        },
+        {
+          "node": "native:blink::NetworkResourcesData",
+          "edge": "2"
+        },
+        {
+          "node": "native:blink::HeapHashTableBacking<blink::HashTable<blink::String, blink::KeyValuePair<blink::String, cppgc::internal::BasicMember<blink::NetworkResourcesData::ResourceData, cppgc::internal::StrongMemberTag, cppgc::internal::DijkstraWriteBarrierPolicy>>, blink::KeyValuePairExtractor, blink::HashMapValueTraits<blink::HashTraits<String>, blink::HashTraits<cppgc::internal::BasicMember<blink::NetworkResourcesData::ResourceData, cppgc::internal::StrongMemberTag, cppgc::internal::DijkstraWriteBarrierPolicy>>>, blink::HashTraits<String>, blink::HeapAllocator>>",
+          "edge": "1"
+        },
+        {
+          "node": "native:blink::NetworkResourcesData::ResourceData",
+          "edge": "194"
+        }
+      ]
+    },
+    "largestGrowthFromFirst": [
+      {
+        "group": "code:system / InstructionStream",
+        "count": 780,
+        "bytes": 976704
+      },
+      {
+        "group": "code:system / TrustedByteArray",
+        "count": 1823,
+        "bytes": 299744
+      },
+      {
+        "group": "native:blink::NetworkResourcesData::ResourceData",
+        "count": 782,
+        "bytes": 225216
+      },
+      {
+        "group": "native:blink::XHRReplayData",
+        "count": 782,
+        "bytes": 137632
+      },
+      {
+        "group": "code:system / ProtectedFixedArray",
+        "count": 566,
+        "bytes": 133468
+      },
+      {
+        "group": "native:system / WeakArrayList",
+        "count": 1288,
+        "bytes": 114152
+      },
+      {
+        "group": "code:system / Code",
+        "count": 780,
+        "bytes": 56160
+      },
+      {
+        "group": "code:system / FeedbackVector",
+        "count": 210,
+        "bytes": 38332
+      },
+      {
+        "group": "native:blink::HeapHashTableBacking<blink::HashTable<blink::String, blink::KeyValuePair<blink::String, cppgc::internal::BasicMember<blink::NetworkResourcesData::ResourceData, cppgc::internal::StrongMemberTag, cppgc::internal::DijkstraWriteBarrierPolicy>>, blink::KeyValuePairExtractor, blink::HashMapValueTraits<blink::HashTraits<String>, blink::HashTraits<cppgc::internal::BasicMember<blink::NetworkResourcesData::ResourceData, cppgc::internal::StrongMemberTag, cppgc::internal::DijkstraWriteBarrierPolicy>>>, blink::HashTraits<String>, blink::HeapAllocator>>",
+        "count": 0,
+        "bytes": 30720
+      },
+      {
+        "group": "native:PerformanceLongAnimationFrameTiming",
+        "count": 190,
+        "bytes": 28880
+      },
+      {
+        "group": "native:blink::ScriptTimingInfo",
+        "count": 201,
+        "bytes": 27336
+      },
+      {
+        "group": "native:PerformanceResourceTiming",
+        "count": 197,
+        "bytes": 26792
+      },
+      {
+        "group": "native:PerformanceScriptTiming",
+        "count": 201,
+        "bytes": 24120
+      },
+      {
+        "group": "code:system / TrustedWeakFixedArray",
+        "count": 566,
+        "bytes": 21584
+      },
+      {
+        "group": "native:TaskAttributionTiming",
+        "count": 97,
+        "bytes": 11640
+      },
+      {
+        "group": "native:PerformanceLongTaskTiming",
+        "count": 97,
+        "bytes": 10088
+      },
+      {
+        "group": "native:system / ProtectedFixedArray",
+        "count": 566,
+        "bytes": 8384
+      },
+      {
+        "group": "code:system / WeakFixedArray",
+        "count": 325,
+        "bytes": 7112
+      },
+      {
+        "group": "object shape:system / Map",
+        "count": 176,
+        "bytes": 7040
+      },
+      {
+        "group": "object:Object",
+        "count": 210,
+        "bytes": 6276
+      },
+      {
+        "group": "code:system / CodeWrapper",
+        "count": 780,
+        "bytes": 6240
+      },
+      {
+        "group": "string:127.0.0.1:8099",
+        "count": 235,
+        "bytes": 6184
+      },
+      {
+        "group": "code:system / LoadHandler",
+        "count": 363,
+        "bytes": 5812
+      },
+      {
+        "group": "native:system / SharedFunctionInfoWrapper",
+        "count": 566,
+        "bytes": 4528
+      },
+      {
+        "group": "native:blink::HeapVectorBacking<cppgc::internal::BasicMember<blink::PerformanceScriptTiming, cppgc::internal::StrongMemberTag, cppgc::internal::DijkstraWriteBarrierPolicy>>",
+        "count": 183,
+        "bytes": 4392
+      },
+      {
+        "group": "code:system / AllocationSite",
+        "count": 145,
+        "bytes": 3988
+      },
+      {
+        "group": "object shape:system / DescriptorArray",
+        "count": 43,
+        "bytes": 3140
+      },
+      {
+        "group": "native:blink::HeapVectorBacking<cppgc::internal::BasicMember<blink::TaskAttributionTiming, cppgc::internal::StrongMemberTag, cppgc::internal::DijkstraWriteBarrierPolicy>>",
+        "count": 97,
+        "bytes": 2328
+      },
+      {
+        "group": "code:system / WeakArrayList",
+        "count": 81,
+        "bytes": 2288
+      },
+      {
+        "group": "native:blink::HeapVectorBacking<cppgc::internal::BasicMember<blink::PerformanceEntry, cppgc::internal::StrongMemberTag, cppgc::internal::DijkstraWriteBarrierPolicy>>",
+        "count": 0,
+        "bytes": 2272
+      }
+    ],
+    "selectedGroups": {
+      "object:Cesium3DTilePassState": [
+        7,
+        224
+      ],
+      "object:Cesium3DTile": [
+        235,
+        80840
+      ],
+      "object:Cesium3DTileset": [
+        1,
+        600
+      ],
+      "object:Cesium3DTilesetStatistics": [
+        10,
+        960
+      ],
+      "object:Cesium3DTilesetVisualizer": [
+        1,
+        64
+      ],
+      "object:Cesium3DTileStyleEngine": [
+        1,
+        24
+      ],
+      "object:Cesium3DTilesetCache": [
+        1,
+        24
+      ],
+      "object:Cesium3DTilesetHeatmap": [
+        1,
+        40
+      ]
+    }
+  }
+]

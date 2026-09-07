@@ -1,0 +1,44 @@
+[
+  {
+    "label": "stress-geo-newdefault-1000",
+    "production": "worker",
+    "loading": "worker",
+    "snapshotProbe": "1",
+    "mode": "stress",
+    "frames": "1080",
+    "warmup": "90",
+    "tileset": "/splat-data/oracle-run/geo-newdefault/tileset.json",
+    "coalesceMs": "1000"
+  },
+  {
+    "label": "stress-geo-newdefault-0",
+    "production": "worker",
+    "loading": "worker",
+    "snapshotProbe": "1",
+    "mode": "stress",
+    "frames": "1080",
+    "warmup": "90",
+    "tileset": "/splat-data/oracle-run/geo-newdefault/tileset.json"
+  },
+  {
+    "label": "stress-bike-newdefault-1000",
+    "production": "worker",
+    "loading": "worker",
+    "snapshotProbe": "1",
+    "mode": "stress",
+    "frames": "1080",
+    "warmup": "90",
+    "tileset": "/splat-data/oracle-run/bike-newdefault/tileset.json",
+    "coalesceMs": "1000"
+  },
+  {
+    "label": "stress-bike-newdefault-0",
+    "production": "worker",
+    "loading": "worker",
+    "snapshotProbe": "1",
+    "mode": "stress",
+    "frames": "1080",
+    "warmup": "90",
+    "tileset": "/splat-data/oracle-run/bike-newdefault/tileset.json"
+  }
+]

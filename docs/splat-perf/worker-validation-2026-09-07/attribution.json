@@ -1,0 +1,62 @@
+[
+  {
+    "label": "decoder-profile-geo-newdefault",
+    "production": "worker",
+    "loading": "worker",
+    "snapshotProbe": "1",
+    "coalesceMs": "1000",
+    "decoderProfile": "1",
+    "mode": "static",
+    "frames": "60",
+    "warmup": "90",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "capture": "1",
+    "tileset": "/splat-data/oracle-run/geo-newdefault/tileset.json"
+  },
+  {
+    "label": "decoder-profile-bike-newdefault",
+    "production": "worker",
+    "loading": "worker",
+    "snapshotProbe": "1",
+    "coalesceMs": "1000",
+    "decoderProfile": "1",
+    "mode": "static",
+    "frames": "60",
+    "warmup": "90",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "capture": "1",
+    "tileset": "/splat-data/oracle-run/bike-newdefault/tileset.json"
+  },
+  {
+    "label": "heap-attribution-candidate",
+    "production": "candidate",
+    "loading": "base",
+    "mode": "static",
+    "frames": "30",
+    "warmup": "60",
+    "sse": "8",
+    "width": "960",
+    "height": "540",
+    "lifecycle": "1",
+    "cycles": "24",
+    "heapSnapshot": "1",
+    "wasmProbe": "1"
+  },
+  {
+    "label": "heap-attribution-worker",
+    "production": "worker",
+    "loading": "worker",
+    "mode": "static",
+    "frames": "30",
+    "warmup": "60",
+    "sse": "8",
+    "width": "960",
+    "height": "540",
+    "lifecycle": "1",
+    "cycles": "24",
+    "heapSnapshot": "1",
+    "wasmProbe": "1"
+  }
+]

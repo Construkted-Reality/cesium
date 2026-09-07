@@ -1,0 +1,2690 @@
+[
+  {
+    "cycle": 0,
+    "heap": {
+      "usedSize": 13332692,
+      "totalSize": 14405632,
+      "embedderHeapUsedSize": 733728,
+      "backingStorageSize": 25400874
+    },
+    "state": {
+      "gl": {
+        "createTexture": 56,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 92,
+        "createBuffer": 8,
+        "createVertexArray": 4,
+        "createProgram": 8,
+        "deleteFramebuffer": 86,
+        "deleteTexture": 48,
+        "deleteBuffer": 6,
+        "deleteVertexArray": 3,
+        "deleteProgram": 4
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 4
+      }
+    }
+  },
+  {
+    "cycle": 1,
+    "heap": {
+      "usedSize": 13636560,
+      "totalSize": 14667776,
+      "embedderHeapUsedSize": 678112,
+      "backingStorageSize": 25401012
+    },
+    "state": {
+      "gl": {
+        "createTexture": 104,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 178,
+        "createBuffer": 14,
+        "createVertexArray": 7,
+        "createProgram": 12,
+        "deleteFramebuffer": 172,
+        "deleteTexture": 96,
+        "deleteBuffer": 12,
+        "deleteVertexArray": 6,
+        "deleteProgram": 8
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 8
+      }
+    }
+  },
+  {
+    "cycle": 2,
+    "heap": {
+      "usedSize": 14063844,
+      "totalSize": 15192064,
+      "embedderHeapUsedSize": 722496,
+      "backingStorageSize": 25401304
+    },
+    "state": {
+      "gl": {
+        "createTexture": 152,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 264,
+        "createBuffer": 20,
+        "createVertexArray": 10,
+        "createProgram": 16,
+        "deleteFramebuffer": 258,
+        "deleteTexture": 144,
+        "deleteBuffer": 18,
+        "deleteVertexArray": 9,
+        "deleteProgram": 12
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 12
+      }
+    }
+  },
+  {
+    "cycle": 3,
+    "heap": {
+      "usedSize": 14159012,
+      "totalSize": 15192064,
+      "embedderHeapUsedSize": 652200,
+      "backingStorageSize": 25401304
+    },
+    "state": {
+      "gl": {
+        "createTexture": 200,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 350,
+        "createBuffer": 26,
+        "createVertexArray": 13,
+        "createProgram": 20,
+        "deleteFramebuffer": 344,
+        "deleteTexture": 192,
+        "deleteBuffer": 24,
+        "deleteVertexArray": 12,
+        "deleteProgram": 16
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 16
+      }
+    }
+  },
+  {
+    "cycle": 4,
+    "heap": {
+      "usedSize": 14234288,
+      "totalSize": 15192064,
+      "embedderHeapUsedSize": 605232,
+      "backingStorageSize": 25401158
+    },
+    "state": {
+      "gl": {
+        "createTexture": 246,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 436,
+        "createBuffer": 30,
+        "createVertexArray": 15,
+        "createProgram": 24,
+        "deleteFramebuffer": 430,
+        "deleteTexture": 238,
+        "deleteBuffer": 28,
+        "deleteVertexArray": 14,
+        "deleteProgram": 20
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 18
+      }
+    }
+  },
+  {
+    "cycle": 5,
+    "heap": {
+      "usedSize": 14294324,
+      "totalSize": 15192064,
+      "embedderHeapUsedSize": 660472,
+      "backingStorageSize": 25401158
+    },
+    "state": {
+      "gl": {
+        "createTexture": 292,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 522,
+        "createBuffer": 34,
+        "createVertexArray": 17,
+        "createProgram": 28,
+        "deleteFramebuffer": 516,
+        "deleteTexture": 284,
+        "deleteBuffer": 32,
+        "deleteVertexArray": 16,
+        "deleteProgram": 24
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 20
+      }
+    }
+  },
+  {
+    "cycle": 6,
+    "heap": {
+      "usedSize": 14332548,
+      "totalSize": 15192064,
+      "embedderHeapUsedSize": 743488,
+      "backingStorageSize": 25401025
+    },
+    "state": {
+      "gl": {
+        "createTexture": 338,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 608,
+        "createBuffer": 38,
+        "createVertexArray": 19,
+        "createProgram": 32,
+        "deleteFramebuffer": 602,
+        "deleteTexture": 330,
+        "deleteBuffer": 36,
+        "deleteVertexArray": 18,
+        "deleteProgram": 28
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 22
+      }
+    }
+  },
+  {
+    "cycle": 7,
+    "heap": {
+      "usedSize": 14397964,
+      "totalSize": 15454208,
+      "embedderHeapUsedSize": 701400,
+      "backingStorageSize": 25401244
+    },
+    "state": {
+      "gl": {
+        "createTexture": 384,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 694,
+        "createBuffer": 42,
+        "createVertexArray": 21,
+        "createProgram": 36,
+        "deleteFramebuffer": 688,
+        "deleteTexture": 376,
+        "deleteBuffer": 40,
+        "deleteVertexArray": 20,
+        "deleteProgram": 32
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 24
+      }
+    }
+  },
+  {
+    "cycle": 8,
+    "heap": {
+      "usedSize": 14477552,
+      "totalSize": 15978496,
+      "embedderHeapUsedSize": 680832,
+      "backingStorageSize": 25401317
+    },
+    "state": {
+      "gl": {
+        "createTexture": 430,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 780,
+        "createBuffer": 46,
+        "createVertexArray": 23,
+        "createProgram": 40,
+        "deleteFramebuffer": 774,
+        "deleteTexture": 422,
+        "deleteBuffer": 44,
+        "deleteVertexArray": 22,
+        "deleteProgram": 36
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 26
+      }
+    }
+  },
+  {
+    "cycle": 9,
+    "heap": {
+      "usedSize": 14483876,
+      "totalSize": 15454208,
+      "embedderHeapUsedSize": 680408,
+      "backingStorageSize": 25401244
+    },
+    "state": {
+      "gl": {
+        "createTexture": 476,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 866,
+        "createBuffer": 50,
+        "createVertexArray": 25,
+        "createProgram": 44,
+        "deleteFramebuffer": 860,
+        "deleteTexture": 468,
+        "deleteBuffer": 48,
+        "deleteVertexArray": 24,
+        "deleteProgram": 40
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 28
+      }
+    }
+  },
+  {
+    "cycle": 10,
+    "heap": {
+      "usedSize": 14498504,
+      "totalSize": 15454208,
+      "embedderHeapUsedSize": 699624,
+      "backingStorageSize": 25400877
+    },
+    "state": {
+      "gl": {
+        "createTexture": 522,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 952,
+        "createBuffer": 54,
+        "createVertexArray": 27,
+        "createProgram": 48,
+        "deleteFramebuffer": 946,
+        "deleteTexture": 514,
+        "deleteBuffer": 52,
+        "deleteVertexArray": 26,
+        "deleteProgram": 44
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 30
+      }
+    }
+  },
+  {
+    "cycle": 11,
+    "heap": {
+      "usedSize": 14548936,
+      "totalSize": 15454208,
+      "embedderHeapUsedSize": 701536,
+      "backingStorageSize": 25401097
+    },
+    "state": {
+      "gl": {
+        "createTexture": 570,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 1038,
+        "createBuffer": 60,
+        "createVertexArray": 30,
+        "createProgram": 52,
+        "deleteFramebuffer": 1032,
+        "deleteTexture": 562,
+        "deleteBuffer": 58,
+        "deleteVertexArray": 29,
+        "deleteProgram": 48
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 34
+      }
+    }
+  },
+  {
+    "cycle": 12,
+    "heap": {
+      "usedSize": 14563200,
+      "totalSize": 15454208,
+      "embedderHeapUsedSize": 655496,
+      "backingStorageSize": 25401171
+    },
+    "state": {
+      "gl": {
+        "createTexture": 616,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 1124,
+        "createBuffer": 64,
+        "createVertexArray": 32,
+        "createProgram": 56,
+        "deleteFramebuffer": 1118,
+        "deleteTexture": 608,
+        "deleteBuffer": 62,
+        "deleteVertexArray": 31,
+        "deleteProgram": 52
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 36
+      }
+    }
+  },
+  {
+    "cycle": 13,
+    "heap": {
+      "usedSize": 14586076,
+      "totalSize": 15978496,
+      "embedderHeapUsedSize": 729440,
+      "backingStorageSize": 25401171
+    },
+    "state": {
+      "gl": {
+        "createTexture": 664,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 1210,
+        "createBuffer": 70,
+        "createVertexArray": 35,
+        "createProgram": 60,
+        "deleteFramebuffer": 1204,
+        "deleteTexture": 656,
+        "deleteBuffer": 68,
+        "deleteVertexArray": 34,
+        "deleteProgram": 56
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 40
+      }
+    }
+  },
+  {
+    "cycle": 14,
+    "heap": {
+      "usedSize": 14625624,
+      "totalSize": 15978496,
+      "embedderHeapUsedSize": 829656,
+      "backingStorageSize": 25401025
+    },
+    "state": {
+      "gl": {
+        "createTexture": 710,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 1296,
+        "createBuffer": 74,
+        "createVertexArray": 37,
+        "createProgram": 64,
+        "deleteFramebuffer": 1290,
+        "deleteTexture": 702,
+        "deleteBuffer": 72,
+        "deleteVertexArray": 36,
+        "deleteProgram": 60
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 42
+      }
+    }
+  },
+  {
+    "cycle": 15,
+    "heap": {
+      "usedSize": 14688764,
+      "totalSize": 15716352,
+      "embedderHeapUsedSize": 815296,
+      "backingStorageSize": 25401025
+    },
+    "state": {
+      "gl": {
+        "createTexture": 756,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 1382,
+        "createBuffer": 78,
+        "createVertexArray": 39,
+        "createProgram": 68,
+        "deleteFramebuffer": 1376,
+        "deleteTexture": 748,
+        "deleteBuffer": 76,
+        "deleteVertexArray": 38,
+        "deleteProgram": 64
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 44
+      }
+    }
+  },
+  {
+    "cycle": 16,
+    "heap": {
+      "usedSize": 14711060,
+      "totalSize": 15978496,
+      "embedderHeapUsedSize": 748832,
+      "backingStorageSize": 25400950
+    },
+    "state": {
+      "gl": {
+        "createTexture": 804,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 1468,
+        "createBuffer": 84,
+        "createVertexArray": 42,
+        "createProgram": 72,
+        "deleteFramebuffer": 1462,
+        "deleteTexture": 796,
+        "deleteBuffer": 82,
+        "deleteVertexArray": 41,
+        "deleteProgram": 68
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 48
+      }
+    }
+  },
+  {
+    "cycle": 17,
+    "heap": {
+      "usedSize": 14725464,
+      "totalSize": 15978496,
+      "embedderHeapUsedSize": 729448,
+      "backingStorageSize": 25401025
+    },
+    "state": {
+      "gl": {
+        "createTexture": 850,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 1554,
+        "createBuffer": 88,
+        "createVertexArray": 44,
+        "createProgram": 76,
+        "deleteFramebuffer": 1548,
+        "deleteTexture": 842,
+        "deleteBuffer": 86,
+        "deleteVertexArray": 43,
+        "deleteProgram": 72
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 50
+      }
+    }
+  },
+  {
+    "cycle": 18,
+    "heap": {
+      "usedSize": 14731996,
+      "totalSize": 15978496,
+      "embedderHeapUsedSize": 784504,
+      "backingStorageSize": 25401317
+    },
+    "state": {
+      "gl": {
+        "createTexture": 898,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 1640,
+        "createBuffer": 94,
+        "createVertexArray": 47,
+        "createProgram": 80,
+        "deleteFramebuffer": 1634,
+        "deleteTexture": 890,
+        "deleteBuffer": 92,
+        "deleteVertexArray": 46,
+        "deleteProgram": 76
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 54
+      }
+    }
+  },
+  {
+    "cycle": 19,
+    "heap": {
+      "usedSize": 14738440,
+      "totalSize": 15978496,
+      "embedderHeapUsedSize": 781360,
+      "backingStorageSize": 25400877
+    },
+    "state": {
+      "gl": {
+        "createTexture": 946,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 1726,
+        "createBuffer": 100,
+        "createVertexArray": 50,
+        "createProgram": 84,
+        "deleteFramebuffer": 1720,
+        "deleteTexture": 938,
+        "deleteBuffer": 98,
+        "deleteVertexArray": 49,
+        "deleteProgram": 80
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 58
+      }
+    }
+  },
+  {
+    "cycle": 20,
+    "heap": {
+      "usedSize": 14744572,
+      "totalSize": 16240640,
+      "embedderHeapUsedSize": 729712,
+      "backingStorageSize": 25401025
+    },
+    "state": {
+      "gl": {
+        "createTexture": 992,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 1812,
+        "createBuffer": 104,
+        "createVertexArray": 52,
+        "createProgram": 88,
+        "deleteFramebuffer": 1806,
+        "deleteTexture": 984,
+        "deleteBuffer": 102,
+        "deleteVertexArray": 51,
+        "deleteProgram": 84
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 60
+      }
+    }
+  },
+  {
+    "cycle": 21,
+    "heap": {
+      "usedSize": 14749436,
+      "totalSize": 15978496,
+      "embedderHeapUsedSize": 733928,
+      "backingStorageSize": 25400877
+    },
+    "state": {
+      "gl": {
+        "createTexture": 1038,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 1898,
+        "createBuffer": 108,
+        "createVertexArray": 54,
+        "createProgram": 92,
+        "deleteFramebuffer": 1892,
+        "deleteTexture": 1030,
+        "deleteBuffer": 106,
+        "deleteVertexArray": 53,
+        "deleteProgram": 88
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 62
+      }
+    }
+  },
+  {
+    "cycle": 22,
+    "heap": {
+      "usedSize": 14755480,
+      "totalSize": 15978496,
+      "embedderHeapUsedSize": 778192,
+      "backingStorageSize": 25401244
+    },
+    "state": {
+      "gl": {
+        "createTexture": 1084,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 1984,
+        "createBuffer": 112,
+        "createVertexArray": 56,
+        "createProgram": 96,
+        "deleteFramebuffer": 1978,
+        "deleteTexture": 1076,
+        "deleteBuffer": 110,
+        "deleteVertexArray": 55,
+        "deleteProgram": 92
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 64
+      }
+    }
+  },
+  {
+    "cycle": 23,
+    "heap": {
+      "usedSize": 14769396,
+      "totalSize": 15978496,
+      "embedderHeapUsedSize": 758272,
+      "backingStorageSize": 25401171
+    },
+    "state": {
+      "gl": {
+        "createTexture": 1130,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 2070,
+        "createBuffer": 116,
+        "createVertexArray": 58,
+        "createProgram": 100,
+        "deleteFramebuffer": 2064,
+        "deleteTexture": 1122,
+        "deleteBuffer": 114,
+        "deleteVertexArray": 57,
+        "deleteProgram": 96
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 66
+      }
+    }
+  },
+  {
+    "cycle": 24,
+    "heap": {
+      "usedSize": 14777196,
+      "totalSize": 15978496,
+      "embedderHeapUsedSize": 795608,
+      "backingStorageSize": 25400949
+    },
+    "state": {
+      "gl": {
+        "createTexture": 1176,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 2156,
+        "createBuffer": 120,
+        "createVertexArray": 60,
+        "createProgram": 104,
+        "deleteFramebuffer": 2150,
+        "deleteTexture": 1168,
+        "deleteBuffer": 118,
+        "deleteVertexArray": 59,
+        "deleteProgram": 100
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 68
+      }
+    }
+  },
+  {
+    "cycle": 25,
+    "heap": {
+      "usedSize": 14781284,
+      "totalSize": 16240640,
+      "embedderHeapUsedSize": 778824,
+      "backingStorageSize": 25401171
+    },
+    "state": {
+      "gl": {
+        "createTexture": 1222,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 2242,
+        "createBuffer": 124,
+        "createVertexArray": 62,
+        "createProgram": 108,
+        "deleteFramebuffer": 2236,
+        "deleteTexture": 1214,
+        "deleteBuffer": 122,
+        "deleteVertexArray": 61,
+        "deleteProgram": 104
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 70
+      }
+    }
+  },
+  {
+    "cycle": 26,
+    "heap": {
+      "usedSize": 14789200,
+      "totalSize": 15978496,
+      "embedderHeapUsedSize": 809704,
+      "backingStorageSize": 25401170
+    },
+    "state": {
+      "gl": {
+        "createTexture": 1268,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 2328,
+        "createBuffer": 128,
+        "createVertexArray": 64,
+        "createProgram": 112,
+        "deleteFramebuffer": 2322,
+        "deleteTexture": 1260,
+        "deleteBuffer": 126,
+        "deleteVertexArray": 63,
+        "deleteProgram": 108
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 72
+      }
+    }
+  },
+  {
+    "cycle": 27,
+    "heap": {
+      "usedSize": 14801768,
+      "totalSize": 15978496,
+      "embedderHeapUsedSize": 739768,
+      "backingStorageSize": 25400877
+    },
+    "state": {
+      "gl": {
+        "createTexture": 1314,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 2414,
+        "createBuffer": 132,
+        "createVertexArray": 66,
+        "createProgram": 116,
+        "deleteFramebuffer": 2408,
+        "deleteTexture": 1306,
+        "deleteBuffer": 130,
+        "deleteVertexArray": 65,
+        "deleteProgram": 112
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 74
+      }
+    }
+  },
+  {
+    "cycle": 28,
+    "heap": {
+      "usedSize": 14843948,
+      "totalSize": 15978496,
+      "embedderHeapUsedSize": 837216,
+      "backingStorageSize": 25400950
+    },
+    "state": {
+      "gl": {
+        "createTexture": 1360,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 2500,
+        "createBuffer": 136,
+        "createVertexArray": 68,
+        "createProgram": 120,
+        "deleteFramebuffer": 2494,
+        "deleteTexture": 1352,
+        "deleteBuffer": 134,
+        "deleteVertexArray": 67,
+        "deleteProgram": 116
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 76
+      }
+    }
+  },
+  {
+    "cycle": 29,
+    "heap": {
+      "usedSize": 14848104,
+      "totalSize": 15978496,
+      "embedderHeapUsedSize": 871088,
+      "backingStorageSize": 25400877
+    },
+    "state": {
+      "gl": {
+        "createTexture": 1406,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 2586,
+        "createBuffer": 140,
+        "createVertexArray": 70,
+        "createProgram": 124,
+        "deleteFramebuffer": 2580,
+        "deleteTexture": 1398,
+        "deleteBuffer": 138,
+        "deleteVertexArray": 69,
+        "deleteProgram": 120
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 78
+      }
+    }
+  },
+  {
+    "cycle": 30,
+    "heap": {
+      "usedSize": 14852020,
+      "totalSize": 15978496,
+      "embedderHeapUsedSize": 781656,
+      "backingStorageSize": 25401025
+    },
+    "state": {
+      "gl": {
+        "createTexture": 1452,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 2672,
+        "createBuffer": 144,
+        "createVertexArray": 72,
+        "createProgram": 128,
+        "deleteFramebuffer": 2666,
+        "deleteTexture": 1444,
+        "deleteBuffer": 142,
+        "deleteVertexArray": 71,
+        "deleteProgram": 124
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 80
+      }
+    }
+  },
+  {
+    "cycle": 31,
+    "heap": {
+      "usedSize": 14868032,
+      "totalSize": 16240640,
+      "embedderHeapUsedSize": 762080,
+      "backingStorageSize": 25401025
+    },
+    "state": {
+      "gl": {
+        "createTexture": 1498,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 2758,
+        "createBuffer": 148,
+        "createVertexArray": 74,
+        "createProgram": 132,
+        "deleteFramebuffer": 2752,
+        "deleteTexture": 1490,
+        "deleteBuffer": 146,
+        "deleteVertexArray": 73,
+        "deleteProgram": 128
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 82
+      }
+    }
+  },
+  {
+    "cycle": 32,
+    "heap": {
+      "usedSize": 14875440,
+      "totalSize": 15978496,
+      "embedderHeapUsedSize": 834480,
+      "backingStorageSize": 25401097
+    },
+    "state": {
+      "gl": {
+        "createTexture": 1544,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 2844,
+        "createBuffer": 152,
+        "createVertexArray": 76,
+        "createProgram": 136,
+        "deleteFramebuffer": 2838,
+        "deleteTexture": 1536,
+        "deleteBuffer": 150,
+        "deleteVertexArray": 75,
+        "deleteProgram": 132
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 84
+      }
+    }
+  },
+  {
+    "cycle": 33,
+    "heap": {
+      "usedSize": 14879720,
+      "totalSize": 15978496,
+      "embedderHeapUsedSize": 840112,
+      "backingStorageSize": 25400950
+    },
+    "state": {
+      "gl": {
+        "createTexture": 1592,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 2930,
+        "createBuffer": 158,
+        "createVertexArray": 79,
+        "createProgram": 140,
+        "deleteFramebuffer": 2924,
+        "deleteTexture": 1584,
+        "deleteBuffer": 156,
+        "deleteVertexArray": 78,
+        "deleteProgram": 136
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 88
+      }
+    }
+  },
+  {
+    "cycle": 34,
+    "heap": {
+      "usedSize": 14887304,
+      "totalSize": 15978496,
+      "embedderHeapUsedSize": 754168,
+      "backingStorageSize": 25401023
+    },
+    "state": {
+      "gl": {
+        "createTexture": 1640,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 3016,
+        "createBuffer": 164,
+        "createVertexArray": 82,
+        "createProgram": 144,
+        "deleteFramebuffer": 3010,
+        "deleteTexture": 1632,
+        "deleteBuffer": 162,
+        "deleteVertexArray": 81,
+        "deleteProgram": 140
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 92
+      }
+    }
+  },
+  {
+    "cycle": 35,
+    "heap": {
+      "usedSize": 14885384,
+      "totalSize": 15978496,
+      "embedderHeapUsedSize": 814368,
+      "backingStorageSize": 25401025
+    },
+    "state": {
+      "gl": {
+        "createTexture": 1686,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 3102,
+        "createBuffer": 168,
+        "createVertexArray": 84,
+        "createProgram": 148,
+        "deleteFramebuffer": 3096,
+        "deleteTexture": 1678,
+        "deleteBuffer": 166,
+        "deleteVertexArray": 83,
+        "deleteProgram": 144
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 94
+      }
+    }
+  },
+  {
+    "cycle": 36,
+    "heap": {
+      "usedSize": 14892696,
+      "totalSize": 15978496,
+      "embedderHeapUsedSize": 869560,
+      "backingStorageSize": 25401025
+    },
+    "state": {
+      "gl": {
+        "createTexture": 1734,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 3188,
+        "createBuffer": 174,
+        "createVertexArray": 87,
+        "createProgram": 152,
+        "deleteFramebuffer": 3182,
+        "deleteTexture": 1726,
+        "deleteBuffer": 172,
+        "deleteVertexArray": 86,
+        "deleteProgram": 148
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 98
+      }
+    }
+  },
+  {
+    "cycle": 37,
+    "heap": {
+      "usedSize": 14891420,
+      "totalSize": 15978496,
+      "embedderHeapUsedSize": 776552,
+      "backingStorageSize": 25400950
+    },
+    "state": {
+      "gl": {
+        "createTexture": 1780,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 3274,
+        "createBuffer": 178,
+        "createVertexArray": 89,
+        "createProgram": 156,
+        "deleteFramebuffer": 3268,
+        "deleteTexture": 1772,
+        "deleteBuffer": 176,
+        "deleteVertexArray": 88,
+        "deleteProgram": 152
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 100
+      }
+    }
+  },
+  {
+    "cycle": 38,
+    "heap": {
+      "usedSize": 14894524,
+      "totalSize": 15978496,
+      "embedderHeapUsedSize": 789416,
+      "backingStorageSize": 25401024
+    },
+    "state": {
+      "gl": {
+        "createTexture": 1826,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 3360,
+        "createBuffer": 182,
+        "createVertexArray": 91,
+        "createProgram": 160,
+        "deleteFramebuffer": 3354,
+        "deleteTexture": 1818,
+        "deleteBuffer": 180,
+        "deleteVertexArray": 90,
+        "deleteProgram": 156
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 102
+      }
+    }
+  },
+  {
+    "cycle": 39,
+    "heap": {
+      "usedSize": 14911608,
+      "totalSize": 15978496,
+      "embedderHeapUsedSize": 850560,
+      "backingStorageSize": 25400950
+    },
+    "state": {
+      "gl": {
+        "createTexture": 1874,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 3446,
+        "createBuffer": 188,
+        "createVertexArray": 94,
+        "createProgram": 164,
+        "deleteFramebuffer": 3440,
+        "deleteTexture": 1866,
+        "deleteBuffer": 186,
+        "deleteVertexArray": 93,
+        "deleteProgram": 160
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 106
+      }
+    }
+  },
+  {
+    "cycle": 40,
+    "heap": {
+      "usedSize": 14914016,
+      "totalSize": 16240640,
+      "embedderHeapUsedSize": 834216,
+      "backingStorageSize": 25401171
+    },
+    "state": {
+      "gl": {
+        "createTexture": 1920,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 3532,
+        "createBuffer": 192,
+        "createVertexArray": 96,
+        "createProgram": 168,
+        "deleteFramebuffer": 3526,
+        "deleteTexture": 1912,
+        "deleteBuffer": 190,
+        "deleteVertexArray": 95,
+        "deleteProgram": 164
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 108
+      }
+    }
+  },
+  {
+    "cycle": 41,
+    "heap": {
+      "usedSize": 14926944,
+      "totalSize": 15978496,
+      "embedderHeapUsedSize": 819696,
+      "backingStorageSize": 25401171
+    },
+    "state": {
+      "gl": {
+        "createTexture": 1968,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 3618,
+        "createBuffer": 198,
+        "createVertexArray": 99,
+        "createProgram": 172,
+        "deleteFramebuffer": 3612,
+        "deleteTexture": 1960,
+        "deleteBuffer": 196,
+        "deleteVertexArray": 98,
+        "deleteProgram": 168
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 112
+      }
+    }
+  },
+  {
+    "cycle": 42,
+    "heap": {
+      "usedSize": 14927712,
+      "totalSize": 15978496,
+      "embedderHeapUsedSize": 806824,
+      "backingStorageSize": 25401171
+    },
+    "state": {
+      "gl": {
+        "createTexture": 2014,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 3704,
+        "createBuffer": 202,
+        "createVertexArray": 101,
+        "createProgram": 176,
+        "deleteFramebuffer": 3698,
+        "deleteTexture": 2006,
+        "deleteBuffer": 200,
+        "deleteVertexArray": 100,
+        "deleteProgram": 172
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 114
+      }
+    }
+  },
+  {
+    "cycle": 43,
+    "heap": {
+      "usedSize": 14929612,
+      "totalSize": 15978496,
+      "embedderHeapUsedSize": 777552,
+      "backingStorageSize": 25400951
+    },
+    "state": {
+      "gl": {
+        "createTexture": 2060,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 3790,
+        "createBuffer": 206,
+        "createVertexArray": 103,
+        "createProgram": 180,
+        "deleteFramebuffer": 3784,
+        "deleteTexture": 2052,
+        "deleteBuffer": 204,
+        "deleteVertexArray": 102,
+        "deleteProgram": 176
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 116
+      }
+    }
+  },
+  {
+    "cycle": 44,
+    "heap": {
+      "usedSize": 14929804,
+      "totalSize": 15978496,
+      "embedderHeapUsedSize": 826288,
+      "backingStorageSize": 25400803
+    },
+    "state": {
+      "gl": {
+        "createTexture": 2106,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 3876,
+        "createBuffer": 210,
+        "createVertexArray": 105,
+        "createProgram": 184,
+        "deleteFramebuffer": 3870,
+        "deleteTexture": 2098,
+        "deleteBuffer": 208,
+        "deleteVertexArray": 104,
+        "deleteProgram": 180
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 118
+      }
+    }
+  },
+  {
+    "cycle": 45,
+    "heap": {
+      "usedSize": 14930964,
+      "totalSize": 15978496,
+      "embedderHeapUsedSize": 796936,
+      "backingStorageSize": 25401243
+    },
+    "state": {
+      "gl": {
+        "createTexture": 2154,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 3962,
+        "createBuffer": 216,
+        "createVertexArray": 108,
+        "createProgram": 188,
+        "deleteFramebuffer": 3956,
+        "deleteTexture": 2146,
+        "deleteBuffer": 214,
+        "deleteVertexArray": 107,
+        "deleteProgram": 184
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 122
+      }
+    }
+  },
+  {
+    "cycle": 46,
+    "heap": {
+      "usedSize": 14930160,
+      "totalSize": 15978496,
+      "embedderHeapUsedSize": 838392,
+      "backingStorageSize": 25400877
+    },
+    "state": {
+      "gl": {
+        "createTexture": 2200,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 4048,
+        "createBuffer": 220,
+        "createVertexArray": 110,
+        "createProgram": 192,
+        "deleteFramebuffer": 4042,
+        "deleteTexture": 2192,
+        "deleteBuffer": 218,
+        "deleteVertexArray": 109,
+        "deleteProgram": 188
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 124
+      }
+    }
+  },
+  {
+    "cycle": 47,
+    "heap": {
+      "usedSize": 14929596,
+      "totalSize": 16240640,
+      "embedderHeapUsedSize": 821272,
+      "backingStorageSize": 25400877
+    },
+    "state": {
+      "gl": {
+        "createTexture": 2248,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 4134,
+        "createBuffer": 226,
+        "createVertexArray": 113,
+        "createProgram": 196,
+        "deleteFramebuffer": 4128,
+        "deleteTexture": 2240,
+        "deleteBuffer": 224,
+        "deleteVertexArray": 112,
+        "deleteProgram": 192
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 128
+      }
+    }
+  },
+  {
+    "cycle": 48,
+    "heap": {
+      "usedSize": 14935252,
+      "totalSize": 15978496,
+      "embedderHeapUsedSize": 861320,
+      "backingStorageSize": 25401023
+    },
+    "state": {
+      "gl": {
+        "createTexture": 2296,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 4220,
+        "createBuffer": 232,
+        "createVertexArray": 116,
+        "createProgram": 200,
+        "deleteFramebuffer": 4214,
+        "deleteTexture": 2288,
+        "deleteBuffer": 230,
+        "deleteVertexArray": 115,
+        "deleteProgram": 196
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 132
+      }
+    }
+  },
+  {
+    "cycle": 49,
+    "heap": {
+      "usedSize": 14935324,
+      "totalSize": 15978496,
+      "embedderHeapUsedSize": 850448,
+      "backingStorageSize": 25401171
+    },
+    "state": {
+      "gl": {
+        "createTexture": 2342,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 4306,
+        "createBuffer": 236,
+        "createVertexArray": 118,
+        "createProgram": 204,
+        "deleteFramebuffer": 4300,
+        "deleteTexture": 2334,
+        "deleteBuffer": 234,
+        "deleteVertexArray": 117,
+        "deleteProgram": 200
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 134
+      }
+    }
+  },
+  {
+    "cycle": 50,
+    "heap": {
+      "usedSize": 14938828,
+      "totalSize": 15978496,
+      "embedderHeapUsedSize": 810808,
+      "backingStorageSize": 25401243
+    },
+    "state": {
+      "gl": {
+        "createTexture": 2390,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 4392,
+        "createBuffer": 242,
+        "createVertexArray": 121,
+        "createProgram": 208,
+        "deleteFramebuffer": 4386,
+        "deleteTexture": 2382,
+        "deleteBuffer": 240,
+        "deleteVertexArray": 120,
+        "deleteProgram": 204
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 138
+      }
+    }
+  },
+  {
+    "cycle": 51,
+    "heap": {
+      "usedSize": 14939020,
+      "totalSize": 15978496,
+      "embedderHeapUsedSize": 820240,
+      "backingStorageSize": 25401244
+    },
+    "state": {
+      "gl": {
+        "createTexture": 2436,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 4478,
+        "createBuffer": 246,
+        "createVertexArray": 123,
+        "createProgram": 212,
+        "deleteFramebuffer": 4472,
+        "deleteTexture": 2428,
+        "deleteBuffer": 244,
+        "deleteVertexArray": 122,
+        "deleteProgram": 208
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 140
+      }
+    }
+  },
+  {
+    "cycle": 52,
+    "heap": {
+      "usedSize": 14948204,
+      "totalSize": 15978496,
+      "embedderHeapUsedSize": 827208,
+      "backingStorageSize": 25400877
+    },
+    "state": {
+      "gl": {
+        "createTexture": 2482,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 4564,
+        "createBuffer": 250,
+        "createVertexArray": 125,
+        "createProgram": 216,
+        "deleteFramebuffer": 4558,
+        "deleteTexture": 2474,
+        "deleteBuffer": 248,
+        "deleteVertexArray": 124,
+        "deleteProgram": 212
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 142
+      }
+    }
+  },
+  {
+    "cycle": 53,
+    "heap": {
+      "usedSize": 14949032,
+      "totalSize": 16240640,
+      "embedderHeapUsedSize": 858448,
+      "backingStorageSize": 25400877
+    },
+    "state": {
+      "gl": {
+        "createTexture": 2528,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 4650,
+        "createBuffer": 254,
+        "createVertexArray": 127,
+        "createProgram": 220,
+        "deleteFramebuffer": 4644,
+        "deleteTexture": 2520,
+        "deleteBuffer": 252,
+        "deleteVertexArray": 126,
+        "deleteProgram": 216
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 144
+      }
+    }
+  },
+  {
+    "cycle": 54,
+    "heap": {
+      "usedSize": 14973784,
+      "totalSize": 16502784,
+      "embedderHeapUsedSize": 763760,
+      "backingStorageSize": 25400877
+    },
+    "state": {
+      "gl": {
+        "createTexture": 2574,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 4736,
+        "createBuffer": 258,
+        "createVertexArray": 129,
+        "createProgram": 224,
+        "deleteFramebuffer": 4730,
+        "deleteTexture": 2566,
+        "deleteBuffer": 256,
+        "deleteVertexArray": 128,
+        "deleteProgram": 220
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 146
+      }
+    }
+  },
+  {
+    "cycle": 55,
+    "heap": {
+      "usedSize": 15007208,
+      "totalSize": 15978496,
+      "embedderHeapUsedSize": 769472,
+      "backingStorageSize": 25400951
+    },
+    "state": {
+      "gl": {
+        "createTexture": 2622,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 4822,
+        "createBuffer": 264,
+        "createVertexArray": 132,
+        "createProgram": 228,
+        "deleteFramebuffer": 4816,
+        "deleteTexture": 2614,
+        "deleteBuffer": 262,
+        "deleteVertexArray": 131,
+        "deleteProgram": 224
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 150
+      }
+    }
+  },
+  {
+    "cycle": 56,
+    "heap": {
+      "usedSize": 15006680,
+      "totalSize": 15978496,
+      "embedderHeapUsedSize": 798456,
+      "backingStorageSize": 25401244
+    },
+    "state": {
+      "gl": {
+        "createTexture": 2668,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 4908,
+        "createBuffer": 268,
+        "createVertexArray": 134,
+        "createProgram": 232,
+        "deleteFramebuffer": 4902,
+        "deleteTexture": 2660,
+        "deleteBuffer": 266,
+        "deleteVertexArray": 133,
+        "deleteProgram": 228
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 152
+      }
+    }
+  },
+  {
+    "cycle": 57,
+    "heap": {
+      "usedSize": 15007956,
+      "totalSize": 15978496,
+      "embedderHeapUsedSize": 757816,
+      "backingStorageSize": 25400950
+    },
+    "state": {
+      "gl": {
+        "createTexture": 2714,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 4994,
+        "createBuffer": 272,
+        "createVertexArray": 136,
+        "createProgram": 236,
+        "deleteFramebuffer": 4988,
+        "deleteTexture": 2706,
+        "deleteBuffer": 270,
+        "deleteVertexArray": 135,
+        "deleteProgram": 232
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 154
+      }
+    }
+  },
+  {
+    "cycle": 58,
+    "heap": {
+      "usedSize": 15008156,
+      "totalSize": 15978496,
+      "embedderHeapUsedSize": 737336,
+      "backingStorageSize": 25400877
+    },
+    "state": {
+      "gl": {
+        "createTexture": 2760,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 5080,
+        "createBuffer": 276,
+        "createVertexArray": 138,
+        "createProgram": 240,
+        "deleteFramebuffer": 5074,
+        "deleteTexture": 2752,
+        "deleteBuffer": 274,
+        "deleteVertexArray": 137,
+        "deleteProgram": 236
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 156
+      }
+    }
+  },
+  {
+    "cycle": 59,
+    "heap": {
+      "usedSize": 15021764,
+      "totalSize": 16240640,
+      "embedderHeapUsedSize": 768112,
+      "backingStorageSize": 25401098
+    },
+    "state": {
+      "gl": {
+        "createTexture": 2808,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 5166,
+        "createBuffer": 282,
+        "createVertexArray": 141,
+        "createProgram": 244,
+        "deleteFramebuffer": 5160,
+        "deleteTexture": 2800,
+        "deleteBuffer": 280,
+        "deleteVertexArray": 140,
+        "deleteProgram": 240
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 160
+      }
+    }
+  },
+  {
+    "cycle": 60,
+    "heap": {
+      "usedSize": 15022016,
+      "totalSize": 15978496,
+      "embedderHeapUsedSize": 793512,
+      "backingStorageSize": 25401024
+    },
+    "state": {
+      "gl": {
+        "createTexture": 2856,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 5252,
+        "createBuffer": 288,
+        "createVertexArray": 144,
+        "createProgram": 248,
+        "deleteFramebuffer": 5246,
+        "deleteTexture": 2848,
+        "deleteBuffer": 286,
+        "deleteVertexArray": 143,
+        "deleteProgram": 244
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 164
+      }
+    }
+  },
+  {
+    "cycle": 61,
+    "heap": {
+      "usedSize": 15024464,
+      "totalSize": 15978496,
+      "embedderHeapUsedSize": 791552,
+      "backingStorageSize": 25401025
+    },
+    "state": {
+      "gl": {
+        "createTexture": 2902,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 5338,
+        "createBuffer": 292,
+        "createVertexArray": 146,
+        "createProgram": 252,
+        "deleteFramebuffer": 5332,
+        "deleteTexture": 2894,
+        "deleteBuffer": 290,
+        "deleteVertexArray": 145,
+        "deleteProgram": 248
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 166
+      }
+    }
+  },
+  {
+    "cycle": 62,
+    "heap": {
+      "usedSize": 15047012,
+      "totalSize": 16240640,
+      "embedderHeapUsedSize": 849264,
+      "backingStorageSize": 25401171
+    },
+    "state": {
+      "gl": {
+        "createTexture": 2948,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 5424,
+        "createBuffer": 296,
+        "createVertexArray": 148,
+        "createProgram": 256,
+        "deleteFramebuffer": 5418,
+        "deleteTexture": 2940,
+        "deleteBuffer": 294,
+        "deleteVertexArray": 147,
+        "deleteProgram": 252
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 168
+      }
+    }
+  },
+  {
+    "cycle": 63,
+    "heap": {
+      "usedSize": 15051020,
+      "totalSize": 16240640,
+      "embedderHeapUsedSize": 832064,
+      "backingStorageSize": 25400877
+    },
+    "state": {
+      "gl": {
+        "createTexture": 2994,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 5510,
+        "createBuffer": 300,
+        "createVertexArray": 150,
+        "createProgram": 260,
+        "deleteFramebuffer": 5504,
+        "deleteTexture": 2986,
+        "deleteBuffer": 298,
+        "deleteVertexArray": 149,
+        "deleteProgram": 256
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 170
+      }
+    }
+  },
+  {
+    "cycle": 64,
+    "heap": {
+      "usedSize": 15055124,
+      "totalSize": 16240640,
+      "embedderHeapUsedSize": 832464,
+      "backingStorageSize": 25400877
+    },
+    "state": {
+      "gl": {
+        "createTexture": 3042,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 5596,
+        "createBuffer": 306,
+        "createVertexArray": 153,
+        "createProgram": 264,
+        "deleteFramebuffer": 5590,
+        "deleteTexture": 3034,
+        "deleteBuffer": 304,
+        "deleteVertexArray": 152,
+        "deleteProgram": 260
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 174
+      }
+    }
+  },
+  {
+    "cycle": 65,
+    "heap": {
+      "usedSize": 15057860,
+      "totalSize": 16240640,
+      "embedderHeapUsedSize": 842544,
+      "backingStorageSize": 25400951
+    },
+    "state": {
+      "gl": {
+        "createTexture": 3090,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 5682,
+        "createBuffer": 312,
+        "createVertexArray": 156,
+        "createProgram": 268,
+        "deleteFramebuffer": 5676,
+        "deleteTexture": 3082,
+        "deleteBuffer": 310,
+        "deleteVertexArray": 155,
+        "deleteProgram": 264
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 178
+      }
+    }
+  },
+  {
+    "cycle": 66,
+    "heap": {
+      "usedSize": 15059580,
+      "totalSize": 16764928,
+      "embedderHeapUsedSize": 849136,
+      "backingStorageSize": 25401098
+    },
+    "state": {
+      "gl": {
+        "createTexture": 3138,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 5768,
+        "createBuffer": 318,
+        "createVertexArray": 159,
+        "createProgram": 272,
+        "deleteFramebuffer": 5762,
+        "deleteTexture": 3130,
+        "deleteBuffer": 316,
+        "deleteVertexArray": 158,
+        "deleteProgram": 268
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 182
+      }
+    }
+  },
+  {
+    "cycle": 67,
+    "heap": {
+      "usedSize": 15057848,
+      "totalSize": 16240640,
+      "embedderHeapUsedSize": 856816,
+      "backingStorageSize": 25401244
+    },
+    "state": {
+      "gl": {
+        "createTexture": 3184,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 5854,
+        "createBuffer": 322,
+        "createVertexArray": 161,
+        "createProgram": 276,
+        "deleteFramebuffer": 5848,
+        "deleteTexture": 3176,
+        "deleteBuffer": 320,
+        "deleteVertexArray": 160,
+        "deleteProgram": 272
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 184
+      }
+    }
+  },
+  {
+    "cycle": 68,
+    "heap": {
+      "usedSize": 15062008,
+      "totalSize": 16240640,
+      "embedderHeapUsedSize": 831064,
+      "backingStorageSize": 25401243
+    },
+    "state": {
+      "gl": {
+        "createTexture": 3232,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 5940,
+        "createBuffer": 328,
+        "createVertexArray": 164,
+        "createProgram": 280,
+        "deleteFramebuffer": 5934,
+        "deleteTexture": 3224,
+        "deleteBuffer": 326,
+        "deleteVertexArray": 163,
+        "deleteProgram": 276
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 188
+      }
+    }
+  },
+  {
+    "cycle": 69,
+    "heap": {
+      "usedSize": 15060244,
+      "totalSize": 15978496,
+      "embedderHeapUsedSize": 842152,
+      "backingStorageSize": 25400877
+    },
+    "state": {
+      "gl": {
+        "createTexture": 3278,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 6026,
+        "createBuffer": 332,
+        "createVertexArray": 166,
+        "createProgram": 284,
+        "deleteFramebuffer": 6020,
+        "deleteTexture": 3270,
+        "deleteBuffer": 330,
+        "deleteVertexArray": 165,
+        "deleteProgram": 280
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 190
+      }
+    }
+  },
+  {
+    "cycle": 70,
+    "heap": {
+      "usedSize": 15068040,
+      "totalSize": 16240640,
+      "embedderHeapUsedSize": 789384,
+      "backingStorageSize": 25400803
+    },
+    "state": {
+      "gl": {
+        "createTexture": 3324,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 6112,
+        "createBuffer": 336,
+        "createVertexArray": 168,
+        "createProgram": 288,
+        "deleteFramebuffer": 6106,
+        "deleteTexture": 3316,
+        "deleteBuffer": 334,
+        "deleteVertexArray": 167,
+        "deleteProgram": 284
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 192
+      }
+    }
+  },
+  {
+    "cycle": 71,
+    "heap": {
+      "usedSize": 15075424,
+      "totalSize": 16502784,
+      "embedderHeapUsedSize": 750872,
+      "backingStorageSize": 25400877
+    },
+    "state": {
+      "gl": {
+        "createTexture": 3372,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 6198,
+        "createBuffer": 342,
+        "createVertexArray": 171,
+        "createProgram": 292,
+        "deleteFramebuffer": 6192,
+        "deleteTexture": 3364,
+        "deleteBuffer": 340,
+        "deleteVertexArray": 170,
+        "deleteProgram": 288
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 196
+      }
+    }
+  },
+  {
+    "cycle": 72,
+    "heap": {
+      "usedSize": 15076596,
+      "totalSize": 16764928,
+      "embedderHeapUsedSize": 798416,
+      "backingStorageSize": 25401171
+    },
+    "state": {
+      "gl": {
+        "createTexture": 3420,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 6284,
+        "createBuffer": 348,
+        "createVertexArray": 174,
+        "createProgram": 296,
+        "deleteFramebuffer": 6278,
+        "deleteTexture": 3412,
+        "deleteBuffer": 346,
+        "deleteVertexArray": 173,
+        "deleteProgram": 292
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 200
+      }
+    }
+  },
+  {
+    "cycle": 73,
+    "heap": {
+      "usedSize": 15076796,
+      "totalSize": 16502784,
+      "embedderHeapUsedSize": 802680,
+      "backingStorageSize": 25401095
+    },
+    "state": {
+      "gl": {
+        "createTexture": 3466,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 6370,
+        "createBuffer": 352,
+        "createVertexArray": 176,
+        "createProgram": 300,
+        "deleteFramebuffer": 6364,
+        "deleteTexture": 3458,
+        "deleteBuffer": 350,
+        "deleteVertexArray": 175,
+        "deleteProgram": 296
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 202
+      }
+    }
+  },
+  {
+    "cycle": 74,
+    "heap": {
+      "usedSize": 15077116,
+      "totalSize": 16764928,
+      "embedderHeapUsedSize": 814536,
+      "backingStorageSize": 25400877
+    },
+    "state": {
+      "gl": {
+        "createTexture": 3512,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 6456,
+        "createBuffer": 356,
+        "createVertexArray": 178,
+        "createProgram": 304,
+        "deleteFramebuffer": 6450,
+        "deleteTexture": 3504,
+        "deleteBuffer": 354,
+        "deleteVertexArray": 177,
+        "deleteProgram": 300
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 204
+      }
+    }
+  },
+  {
+    "cycle": 75,
+    "heap": {
+      "usedSize": 15082448,
+      "totalSize": 16764928,
+      "embedderHeapUsedSize": 839600,
+      "backingStorageSize": 25401244
+    },
+    "state": {
+      "gl": {
+        "createTexture": 3560,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 6542,
+        "createBuffer": 362,
+        "createVertexArray": 181,
+        "createProgram": 308,
+        "deleteFramebuffer": 6536,
+        "deleteTexture": 3552,
+        "deleteBuffer": 360,
+        "deleteVertexArray": 180,
+        "deleteProgram": 304
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 208
+      }
+    }
+  },
+  {
+    "cycle": 76,
+    "heap": {
+      "usedSize": 15081496,
+      "totalSize": 16240640,
+      "embedderHeapUsedSize": 814712,
+      "backingStorageSize": 25401025
+    },
+    "state": {
+      "gl": {
+        "createTexture": 3606,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 6628,
+        "createBuffer": 366,
+        "createVertexArray": 183,
+        "createProgram": 312,
+        "deleteFramebuffer": 6622,
+        "deleteTexture": 3598,
+        "deleteBuffer": 364,
+        "deleteVertexArray": 182,
+        "deleteProgram": 308
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 210
+      }
+    }
+  },
+  {
+    "cycle": 77,
+    "heap": {
+      "usedSize": 15106948,
+      "totalSize": 16502784,
+      "embedderHeapUsedSize": 802952,
+      "backingStorageSize": 25401023
+    },
+    "state": {
+      "gl": {
+        "createTexture": 3654,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 6714,
+        "createBuffer": 372,
+        "createVertexArray": 186,
+        "createProgram": 316,
+        "deleteFramebuffer": 6708,
+        "deleteTexture": 3646,
+        "deleteBuffer": 370,
+        "deleteVertexArray": 185,
+        "deleteProgram": 312
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 214
+      }
+    }
+  },
+  {
+    "cycle": 78,
+    "heap": {
+      "usedSize": 15094680,
+      "totalSize": 16502784,
+      "embedderHeapUsedSize": 842472,
+      "backingStorageSize": 25401244
+    },
+    "state": {
+      "gl": {
+        "createTexture": 3702,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 6800,
+        "createBuffer": 378,
+        "createVertexArray": 189,
+        "createProgram": 320,
+        "deleteFramebuffer": 6794,
+        "deleteTexture": 3694,
+        "deleteBuffer": 376,
+        "deleteVertexArray": 188,
+        "deleteProgram": 316
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 218
+      }
+    }
+  },
+  {
+    "cycle": 79,
+    "heap": {
+      "usedSize": 15106308,
+      "totalSize": 16502784,
+      "embedderHeapUsedSize": 826128,
+      "backingStorageSize": 25400877
+    },
+    "state": {
+      "gl": {
+        "createTexture": 3748,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 6886,
+        "createBuffer": 382,
+        "createVertexArray": 191,
+        "createProgram": 324,
+        "deleteFramebuffer": 6880,
+        "deleteTexture": 3740,
+        "deleteBuffer": 380,
+        "deleteVertexArray": 190,
+        "deleteProgram": 320
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 220
+      }
+    }
+  },
+  {
+    "cycle": 80,
+    "heap": {
+      "usedSize": 15110988,
+      "totalSize": 16502784,
+      "embedderHeapUsedSize": 800544,
+      "backingStorageSize": 25401024
+    },
+    "state": {
+      "gl": {
+        "createTexture": 3796,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 6972,
+        "createBuffer": 388,
+        "createVertexArray": 194,
+        "createProgram": 328,
+        "deleteFramebuffer": 6966,
+        "deleteTexture": 3788,
+        "deleteBuffer": 386,
+        "deleteVertexArray": 193,
+        "deleteProgram": 324
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 224
+      }
+    }
+  },
+  {
+    "cycle": 81,
+    "heap": {
+      "usedSize": 15150524,
+      "totalSize": 16502784,
+      "embedderHeapUsedSize": 785576,
+      "backingStorageSize": 25400877
+    },
+    "state": {
+      "gl": {
+        "createTexture": 3844,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 7058,
+        "createBuffer": 394,
+        "createVertexArray": 197,
+        "createProgram": 332,
+        "deleteFramebuffer": 7052,
+        "deleteTexture": 3836,
+        "deleteBuffer": 392,
+        "deleteVertexArray": 196,
+        "deleteProgram": 328
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 228
+      }
+    }
+  },
+  {
+    "cycle": 82,
+    "heap": {
+      "usedSize": 15149536,
+      "totalSize": 16502784,
+      "embedderHeapUsedSize": 832456,
+      "backingStorageSize": 25401244
+    },
+    "state": {
+      "gl": {
+        "createTexture": 3890,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 7144,
+        "createBuffer": 398,
+        "createVertexArray": 199,
+        "createProgram": 336,
+        "deleteFramebuffer": 7138,
+        "deleteTexture": 3882,
+        "deleteBuffer": 396,
+        "deleteVertexArray": 198,
+        "deleteProgram": 332
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 230
+      }
+    }
+  },
+  {
+    "cycle": 83,
+    "heap": {
+      "usedSize": 15151064,
+      "totalSize": 16502784,
+      "embedderHeapUsedSize": 824648,
+      "backingStorageSize": 25401244
+    },
+    "state": {
+      "gl": {
+        "createTexture": 3936,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 7230,
+        "createBuffer": 402,
+        "createVertexArray": 201,
+        "createProgram": 340,
+        "deleteFramebuffer": 7224,
+        "deleteTexture": 3928,
+        "deleteBuffer": 400,
+        "deleteVertexArray": 200,
+        "deleteProgram": 336
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 232
+      }
+    }
+  },
+  {
+    "cycle": 84,
+    "heap": {
+      "usedSize": 15159728,
+      "totalSize": 16502784,
+      "embedderHeapUsedSize": 797200,
+      "backingStorageSize": 25400877
+    },
+    "state": {
+      "gl": {
+        "createTexture": 3984,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 7316,
+        "createBuffer": 408,
+        "createVertexArray": 204,
+        "createProgram": 344,
+        "deleteFramebuffer": 7310,
+        "deleteTexture": 3976,
+        "deleteBuffer": 406,
+        "deleteVertexArray": 203,
+        "deleteProgram": 340
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 236
+      }
+    }
+  },
+  {
+    "cycle": 85,
+    "heap": {
+      "usedSize": 15180936,
+      "totalSize": 16502784,
+      "embedderHeapUsedSize": 761648,
+      "backingStorageSize": 25401098
+    },
+    "state": {
+      "gl": {
+        "createTexture": 4032,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 7402,
+        "createBuffer": 414,
+        "createVertexArray": 207,
+        "createProgram": 348,
+        "deleteFramebuffer": 7396,
+        "deleteTexture": 4024,
+        "deleteBuffer": 412,
+        "deleteVertexArray": 206,
+        "deleteProgram": 344
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 240
+      }
+    }
+  },
+  {
+    "cycle": 86,
+    "heap": {
+      "usedSize": 15178768,
+      "totalSize": 16764928,
+      "embedderHeapUsedSize": 784600,
+      "backingStorageSize": 25400950
+    },
+    "state": {
+      "gl": {
+        "createTexture": 4080,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 7488,
+        "createBuffer": 420,
+        "createVertexArray": 210,
+        "createProgram": 352,
+        "deleteFramebuffer": 7482,
+        "deleteTexture": 4072,
+        "deleteBuffer": 418,
+        "deleteVertexArray": 209,
+        "deleteProgram": 348
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 244
+      }
+    }
+  },
+  {
+    "cycle": 87,
+    "heap": {
+      "usedSize": 15185060,
+      "totalSize": 16764928,
+      "embedderHeapUsedSize": 779008,
+      "backingStorageSize": 25400950
+    },
+    "state": {
+      "gl": {
+        "createTexture": 4126,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 7574,
+        "createBuffer": 424,
+        "createVertexArray": 212,
+        "createProgram": 356,
+        "deleteFramebuffer": 7568,
+        "deleteTexture": 4118,
+        "deleteBuffer": 422,
+        "deleteVertexArray": 211,
+        "deleteProgram": 352
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 246
+      }
+    }
+  },
+  {
+    "cycle": 88,
+    "heap": {
+      "usedSize": 15191384,
+      "totalSize": 16502784,
+      "embedderHeapUsedSize": 756520,
+      "backingStorageSize": 25401171
+    },
+    "state": {
+      "gl": {
+        "createTexture": 4174,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 7660,
+        "createBuffer": 430,
+        "createVertexArray": 215,
+        "createProgram": 360,
+        "deleteFramebuffer": 7654,
+        "deleteTexture": 4166,
+        "deleteBuffer": 428,
+        "deleteVertexArray": 214,
+        "deleteProgram": 356
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 250
+      }
+    }
+  },
+  {
+    "cycle": 89,
+    "heap": {
+      "usedSize": 15193432,
+      "totalSize": 16502784,
+      "embedderHeapUsedSize": 738720,
+      "backingStorageSize": 25401023
+    },
+    "state": {
+      "gl": {
+        "createTexture": 4222,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 7746,
+        "createBuffer": 436,
+        "createVertexArray": 218,
+        "createProgram": 364,
+        "deleteFramebuffer": 7740,
+        "deleteTexture": 4214,
+        "deleteBuffer": 434,
+        "deleteVertexArray": 217,
+        "deleteProgram": 360
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 254
+      }
+    }
+  },
+  {
+    "cycle": 90,
+    "heap": {
+      "usedSize": 15192036,
+      "totalSize": 16502784,
+      "embedderHeapUsedSize": 781912,
+      "backingStorageSize": 25401244
+    },
+    "state": {
+      "gl": {
+        "createTexture": 4268,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 7832,
+        "createBuffer": 440,
+        "createVertexArray": 220,
+        "createProgram": 368,
+        "deleteFramebuffer": 7826,
+        "deleteTexture": 4260,
+        "deleteBuffer": 438,
+        "deleteVertexArray": 219,
+        "deleteProgram": 364
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 256
+      }
+    }
+  },
+  {
+    "cycle": 91,
+    "heap": {
+      "usedSize": 15196808,
+      "totalSize": 16502784,
+      "embedderHeapUsedSize": 784816,
+      "backingStorageSize": 25400950
+    },
+    "state": {
+      "gl": {
+        "createTexture": 4316,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 7918,
+        "createBuffer": 446,
+        "createVertexArray": 223,
+        "createProgram": 372,
+        "deleteFramebuffer": 7912,
+        "deleteTexture": 4308,
+        "deleteBuffer": 444,
+        "deleteVertexArray": 222,
+        "deleteProgram": 368
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 260
+      }
+    }
+  },
+  {
+    "cycle": 92,
+    "heap": {
+      "usedSize": 15195204,
+      "totalSize": 16502784,
+      "embedderHeapUsedSize": 800888,
+      "backingStorageSize": 25400877
+    },
+    "state": {
+      "gl": {
+        "createTexture": 4362,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 8004,
+        "createBuffer": 450,
+        "createVertexArray": 225,
+        "createProgram": 376,
+        "deleteFramebuffer": 7998,
+        "deleteTexture": 4354,
+        "deleteBuffer": 448,
+        "deleteVertexArray": 224,
+        "deleteProgram": 372
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 262
+      }
+    }
+  },
+  {
+    "cycle": 93,
+    "heap": {
+      "usedSize": 15197636,
+      "totalSize": 16502784,
+      "embedderHeapUsedSize": 850504,
+      "backingStorageSize": 25401171
+    },
+    "state": {
+      "gl": {
+        "createTexture": 4410,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 8090,
+        "createBuffer": 456,
+        "createVertexArray": 228,
+        "createProgram": 380,
+        "deleteFramebuffer": 8084,
+        "deleteTexture": 4402,
+        "deleteBuffer": 454,
+        "deleteVertexArray": 227,
+        "deleteProgram": 376
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 266
+      }
+    }
+  },
+  {
+    "cycle": 94,
+    "heap": {
+      "usedSize": 15207136,
+      "totalSize": 16502784,
+      "embedderHeapUsedSize": 836400,
+      "backingStorageSize": 25400950
+    },
+    "state": {
+      "gl": {
+        "createTexture": 4458,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 8176,
+        "createBuffer": 462,
+        "createVertexArray": 231,
+        "createProgram": 384,
+        "deleteFramebuffer": 8170,
+        "deleteTexture": 4450,
+        "deleteBuffer": 460,
+        "deleteVertexArray": 230,
+        "deleteProgram": 380
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 270
+      }
+    }
+  },
+  {
+    "cycle": 95,
+    "heap": {
+      "usedSize": 15206504,
+      "totalSize": 16502784,
+      "embedderHeapUsedSize": 834040,
+      "backingStorageSize": 25400877
+    },
+    "state": {
+      "gl": {
+        "createTexture": 4504,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 8262,
+        "createBuffer": 466,
+        "createVertexArray": 233,
+        "createProgram": 388,
+        "deleteFramebuffer": 8256,
+        "deleteTexture": 4496,
+        "deleteBuffer": 464,
+        "deleteVertexArray": 232,
+        "deleteProgram": 384
+      },
+      "telemetryLengths": {
+        "frames": 30,
+        "uploads": 272
+      }
+    }
+  }
+]
