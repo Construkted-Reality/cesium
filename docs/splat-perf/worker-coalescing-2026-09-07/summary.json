@@ -1,0 +1,403 @@
+{
+  "static": [
+    {
+      "name": "attribution-candidate",
+      "count": 2087136,
+      "builds": 2,
+      "loads": 139,
+      "unloads": 0,
+      "reasons": {
+        "bootstrap": 1,
+        "stale": 1
+      },
+      "sameSelectionRebuilds": 0,
+      "readyMs": 5598.0,
+      "firstVisibleMs": 5083.400000035763,
+      "maxStartupGapMs": 441.10000002384186,
+      "sha256": "224b841d3ce2980d91c428b88b30d11ebaa6db5b728abef1d476e797e0b7f57f",
+      "decodeMs": 0,
+      "packMs": 0
+    },
+    {
+      "name": "attribution-worker",
+      "count": 2087136,
+      "builds": 15,
+      "loads": 139,
+      "unloads": 0,
+      "reasons": {
+        "bootstrap": 1,
+        "stable": 5,
+        "timeout": 9
+      },
+      "sameSelectionRebuilds": 0,
+      "readyMs": 8043.199999988079,
+      "firstVisibleMs": 1120.699999988079,
+      "maxStartupGapMs": 197.19999998807907,
+      "sha256": "224b841d3ce2980d91c428b88b30d11ebaa6db5b728abef1d476e797e0b7f57f",
+      "decodeMs": 3078.8000000715256,
+      "packMs": 941.5000004768372
+    },
+    {
+      "name": "coalesce-geo-250",
+      "count": 2087136,
+      "builds": 13,
+      "loads": 139,
+      "unloads": 0,
+      "reasons": {
+        "bootstrap": 1,
+        "stable": 2,
+        "timeout": 10
+      },
+      "sameSelectionRebuilds": 2,
+      "readyMs": 9823.700000047684,
+      "firstVisibleMs": 1352.7000000476837,
+      "maxStartupGapMs": 203,
+      "sha256": "224b841d3ce2980d91c428b88b30d11ebaa6db5b728abef1d476e797e0b7f57f",
+      "decodeMs": 3484.8000004291534,
+      "packMs": 1017.4999995827675
+    },
+    {
+      "name": "coalesce-geo-500",
+      "count": 2087136,
+      "builds": 11,
+      "loads": 139,
+      "unloads": 0,
+      "reasons": {
+        "bootstrap": 1,
+        "timeout": 10
+      },
+      "sameSelectionRebuilds": 0,
+      "readyMs": 9088.300000011921,
+      "firstVisibleMs": 1363.3999999761581,
+      "maxStartupGapMs": 234,
+      "sha256": "224b841d3ce2980d91c428b88b30d11ebaa6db5b728abef1d476e797e0b7f57f",
+      "decodeMs": 3329.1999999284744,
+      "packMs": 996.7999998927116
+    },
+    {
+      "name": "repeat-geo-newdefault-0-0",
+      "count": 2087136,
+      "builds": 16,
+      "loads": 139,
+      "unloads": 0,
+      "reasons": {
+        "bootstrap": 1,
+        "stable": 6,
+        "timeout": 9
+      },
+      "sameSelectionRebuilds": 6,
+      "readyMs": 8306.700000047684,
+      "firstVisibleMs": 1145.2000000476837,
+      "maxStartupGapMs": 187.89999997615814,
+      "sha256": "224b841d3ce2980d91c428b88b30d11ebaa6db5b728abef1d476e797e0b7f57f",
+      "decodeMs": 3009.199999690056,
+      "packMs": 930.4999999403954
+    },
+    {
+      "name": "repeat-geo-newdefault-500-0",
+      "count": 2087136,
+      "builds": 12,
+      "loads": 139,
+      "unloads": 0,
+      "reasons": {
+        "bootstrap": 1,
+        "timeout": 10,
+        "stable": 1
+      },
+      "sameSelectionRebuilds": 1,
+      "readyMs": 8141.099999964237,
+      "firstVisibleMs": 1068.0,
+      "maxStartupGapMs": 188.69999998807907,
+      "sha256": "224b841d3ce2980d91c428b88b30d11ebaa6db5b728abef1d476e797e0b7f57f",
+      "decodeMs": 3000.8000000715256,
+      "packMs": 916.2999998927116
+    },
+    {
+      "name": "repeat-geo-newdefault-1000-0",
+      "count": 2087136,
+      "builds": 7,
+      "loads": 139,
+      "unloads": 0,
+      "reasons": {
+        "bootstrap": 1,
+        "timeout": 6
+      },
+      "sameSelectionRebuilds": 0,
+      "readyMs": 7238.599999964237,
+      "firstVisibleMs": 1102.800000011921,
+      "maxStartupGapMs": 186.70000004768372,
+      "sha256": "224b841d3ce2980d91c428b88b30d11ebaa6db5b728abef1d476e797e0b7f57f",
+      "decodeMs": 2904.6000002622604,
+      "packMs": 917.0999997854233
+    },
+    {
+      "name": "repeat-geo-newdefault-1000-1",
+      "count": 2087136,
+      "builds": 7,
+      "loads": 139,
+      "unloads": 0,
+      "reasons": {
+        "bootstrap": 1,
+        "timeout": 6
+      },
+      "sameSelectionRebuilds": 0,
+      "readyMs": 7153.600000023842,
+      "firstVisibleMs": 1064.4000000357628,
+      "maxStartupGapMs": 189.5,
+      "sha256": "224b841d3ce2980d91c428b88b30d11ebaa6db5b728abef1d476e797e0b7f57f",
+      "decodeMs": 2964.799999654293,
+      "packMs": 923.6000002622604
+    },
+    {
+      "name": "repeat-geo-newdefault-500-1",
+      "count": 2087136,
+      "builds": 12,
+      "loads": 139,
+      "unloads": 0,
+      "reasons": {
+        "bootstrap": 1,
+        "timeout": 11
+      },
+      "sameSelectionRebuilds": 0,
+      "readyMs": 8584.399999976158,
+      "firstVisibleMs": 1080.8999999761581,
+      "maxStartupGapMs": 205.5999999642372,
+      "sha256": "224b841d3ce2980d91c428b88b30d11ebaa6db5b728abef1d476e797e0b7f57f",
+      "decodeMs": 2992.5000001192093,
+      "packMs": 927.1999996900558
+    },
+    {
+      "name": "repeat-geo-newdefault-0-1",
+      "count": 2087136,
+      "builds": 15,
+      "loads": 139,
+      "unloads": 0,
+      "reasons": {
+        "bootstrap": 1,
+        "stable": 5,
+        "timeout": 9
+      },
+      "sameSelectionRebuilds": 5,
+      "readyMs": 8217.300000011921,
+      "firstVisibleMs": 1045.6000000238419,
+      "maxStartupGapMs": 188.80000001192093,
+      "sha256": "224b841d3ce2980d91c428b88b30d11ebaa6db5b728abef1d476e797e0b7f57f",
+      "decodeMs": 2955.1000002622604,
+      "packMs": 909.6000000834465
+    },
+    {
+      "name": "repeat-bike-newdefault-0-0",
+      "count": 705883,
+      "builds": 17,
+      "loads": 72,
+      "unloads": 0,
+      "reasons": {
+        "bootstrap": 1,
+        "stale": 1,
+        "stable": 11,
+        "timeout": 4
+      },
+      "sameSelectionRebuilds": 11,
+      "readyMs": 3121.5,
+      "firstVisibleMs": 594.3999999761581,
+      "maxStartupGapMs": 99,
+      "sha256": "b1779e5d06a911c6d756d8a9b1e80cffa0615f1c46c596ee4bfe8bd2d064db60",
+      "decodeMs": 1066.9000002145767,
+      "packMs": 301.9999998807907
+    },
+    {
+      "name": "repeat-bike-newdefault-500-0",
+      "count": 705883,
+      "builds": 6,
+      "loads": 72,
+      "unloads": 0,
+      "reasons": {
+        "bootstrap": 1,
+        "stale": 1,
+        "timeout": 4
+      },
+      "sameSelectionRebuilds": 0,
+      "readyMs": 2730.5,
+      "firstVisibleMs": 585.0999999642372,
+      "maxStartupGapMs": 80.40000003576279,
+      "sha256": "b1779e5d06a911c6d756d8a9b1e80cffa0615f1c46c596ee4bfe8bd2d064db60",
+      "decodeMs": 1044.2999997138977,
+      "packMs": 293.80000001192093
+    },
+    {
+      "name": "repeat-bike-newdefault-1000-0",
+      "count": 705883,
+      "builds": 4,
+      "loads": 72,
+      "unloads": 0,
+      "reasons": {
+        "bootstrap": 1,
+        "stale": 1,
+        "timeout": 2
+      },
+      "sameSelectionRebuilds": 0,
+      "readyMs": 2487.900000035763,
+      "firstVisibleMs": 578.1000000238419,
+      "maxStartupGapMs": 111.10000002384186,
+      "sha256": "b1779e5d06a911c6d756d8a9b1e80cffa0615f1c46c596ee4bfe8bd2d064db60",
+      "decodeMs": 1062.1999998688698,
+      "packMs": 303.6999998688698
+    },
+    {
+      "name": "repeat-bike-newdefault-1000-1",
+      "count": 705883,
+      "builds": 4,
+      "loads": 72,
+      "unloads": 0,
+      "reasons": {
+        "bootstrap": 1,
+        "stale": 1,
+        "timeout": 2
+      },
+      "sameSelectionRebuilds": 0,
+      "readyMs": 2441.199999988079,
+      "firstVisibleMs": 615.8000000119209,
+      "maxStartupGapMs": 103,
+      "sha256": "b1779e5d06a911c6d756d8a9b1e80cffa0615f1c46c596ee4bfe8bd2d064db60",
+      "decodeMs": 1061.3000003099442,
+      "packMs": 287.99999982118607
+    },
+    {
+      "name": "repeat-bike-newdefault-500-1",
+      "count": 705883,
+      "builds": 6,
+      "loads": 72,
+      "unloads": 0,
+      "reasons": {
+        "bootstrap": 1,
+        "stale": 1,
+        "timeout": 4
+      },
+      "sameSelectionRebuilds": 0,
+      "readyMs": 2748.899999976158,
+      "firstVisibleMs": 605.1999999880791,
+      "maxStartupGapMs": 79,
+      "sha256": "b1779e5d06a911c6d756d8a9b1e80cffa0615f1c46c596ee4bfe8bd2d064db60",
+      "decodeMs": 1071.400000154972,
+      "packMs": 296.39999985694885
+    },
+    {
+      "name": "repeat-bike-newdefault-0-1",
+      "count": 705883,
+      "builds": 14,
+      "loads": 72,
+      "unloads": 0,
+      "reasons": {
+        "bootstrap": 1,
+        "stale": 1,
+        "stable": 8,
+        "timeout": 4
+      },
+      "sameSelectionRebuilds": 8,
+      "readyMs": 3011.099999964237,
+      "firstVisibleMs": 592.3999999761581,
+      "maxStartupGapMs": 82.10000002384186,
+      "sha256": "b1779e5d06a911c6d756d8a9b1e80cffa0615f1c46c596ee4bfe8bd2d064db60",
+      "decodeMs": 1045.6999998688698,
+      "packMs": 294.10000014305115
+    }
+  ],
+  "stress": [
+    {
+      "name": "stress-geo-newdefault-1000",
+      "count": 1840345,
+      "builds": 20,
+      "loads": 228,
+      "unloads": 0,
+      "reasons": {
+        "bootstrap": 1,
+        "timeout": 19
+      },
+      "sameSelectionRebuilds": 0,
+      "frameMs": {
+        "count": 1079,
+        "mean": 18.566635773897833,
+        "median": 15.800000011920929,
+        "p95": 34.30000001192093,
+        "p99": 113.89999997615814,
+        "min": 8.300000011920929,
+        "max": 255
+      },
+      "staleIntervalsMs": []
+    },
+    {
+      "name": "stress-geo-newdefault-0",
+      "count": 1840345,
+      "builds": 30,
+      "loads": 228,
+      "unloads": 0,
+      "reasons": {
+        "bootstrap": 1,
+        "timeout": 24,
+        "stable": 5
+      },
+      "sameSelectionRebuilds": 5,
+      "frameMs": {
+        "count": 1079,
+        "mean": 19.15189990735474,
+        "median": 15.799999952316284,
+        "p95": 44.10000002384186,
+        "p99": 119.30000001192093,
+        "min": 8.800000011920929,
+        "max": 242.0999999642372
+      },
+      "staleIntervalsMs": []
+    },
+    {
+      "name": "stress-bike-newdefault-1000",
+      "count": 516700,
+      "builds": 17,
+      "loads": 229,
+      "unloads": 0,
+      "reasons": {
+        "bootstrap": 1,
+        "stale": 1,
+        "timeout": 15
+      },
+      "sameSelectionRebuilds": 0,
+      "frameMs": {
+        "count": 1079,
+        "mean": 12.27460611678584,
+        "median": 10.099999964237213,
+        "p95": 24.900000035762787,
+        "p99": 81.60000002384186,
+        "min": 7.299999952316284,
+        "max": 212.89999997615814
+      },
+      "staleIntervalsMs": [
+        202.69999998807907
+      ]
+    },
+    {
+      "name": "stress-bike-newdefault-0",
+      "count": 516700,
+      "builds": 46,
+      "loads": 229,
+      "unloads": 0,
+      "reasons": {
+        "bootstrap": 1,
+        "stale": 1,
+        "stable": 26,
+        "timeout": 18
+      },
+      "sameSelectionRebuilds": 26,
+      "frameMs": {
+        "count": 1079,
+        "mean": 14.56960148287659,
+        "median": 10.300000011920929,
+        "p95": 36.80000001192093,
+        "p99": 88.69999998807907,
+        "min": 7.399999976158142,
+        "max": 207.19999998807907
+      },
+      "staleIntervalsMs": [
+        210.0999999642372
+      ]
+    }
+  ]
+}

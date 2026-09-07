@@ -8,6 +8,7 @@ const runs = JSON.parse(readFileSync(process.argv[2], "utf8"));
 mkdirSync(out, {recursive:true});
 const clock = () => execFileSync("nvidia-smi", ["--query-gpu=clocks.gr,clocks.mem,temperature.gpu,memory.used", "--format=csv,noheader"], {encoding:"utf8"}).trim();
 for (const run of runs) {
+  if (run.coalesceMs && run.snapshotProbe !== "1") { throw new Error("coalesceMs requires snapshotProbe=1"); }
   if (run.cycles && run.lifecycle !== "1") { throw new Error("cycles requires lifecycle=1"); }
   for (let attempt=0; attempt<3; attempt++) {
     const browser = await chromium.launch({headless:true, channel:"chromium",args: run.backend === "gl" ? GPU_LAUNCH_ARGS.filter(x=>!x.startsWith("--use-angle=")&&!x.startsWith("--enable-features=")).concat(["--use-angle=gl"]) : GPU_LAUNCH_ARGS});
