@@ -49,8 +49,8 @@ The earlier PR #3 cache-pressure experiment measures the benefit of a larger bud
 ## Verification
 
 The relevant glTF, resource-cache, and Gaussian-splat groups pass 542 tests.
-The new loading group passes 11 tests, including cache separation, shared decoder use, packing, cleanup,
-budget validation, capacity deferral, and changes during an active control task.
+The new loading group passes 12 tests, including cache separation, shared decoder use, packing, cleanup,
+budget validation, capacity deferral, changes during an active control task, and zero-length position entries.
 A separate exact comparison checks 262,144 splats per degree, degrees 0 through 3, against the existing packer.
 Exceptional float values and padding match exactly.
 

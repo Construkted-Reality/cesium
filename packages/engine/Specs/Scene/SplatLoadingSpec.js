@@ -242,4 +242,13 @@ describe("Scene/SplatLoading", function () {
       GaussianSplatSorter._taskProcessorReady = ready;
     }
   });
+  it("disables retention of zero-length position arrays", function () {
+    const cache = new GaussianSplatPositionCache(16);
+    cache.set(1, new Float32Array(0));
+    cache.resize(0);
+    expect(cache.get(1)).toBeUndefined();
+    cache.set(2, new Float32Array(0));
+    expect(cache.get(2)).toBeUndefined();
+    expect(cache.byteLength).toBe(0);
+  });
 });
