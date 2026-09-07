@@ -57,3 +57,10 @@ We leave that attribution open and do not claim a complete heap plateau.
 The direct-driver failures occur before any snapshot builds. Logs preserve the missing URL, zero drawing-buffer, and expired script-ID attempts.
 The final driver uses the comparison launch defaults, a startup wait, preserved drawing buffer, and optional persistent lifecycle functions.
 All 235 regenerated fixture hashes match the original derived fixture. Sampled browser field checks pass again.
+
+## Delivery and cleanup
+
+PR #5 contains the related worker experiments and all five validation areas.
+GPU graphics and memory clock overrides are reset. The benchmark server and our Weston process are stopped.
+The three minimal Weston packages remain installed for later hardware OpenGL tests.
+The temporary regeneration fixture is removed after all 235 hashes match. The original degree-0 validation fixture and raw results remain.
