@@ -1,3 +1,4 @@
+import GltfBufferCache from "./GltfBufferCache.js";
 import { packSpzSphericalHarmonics } from "./packSpzSphericalHarmonics.js";
 import Check from "../Core/Check.js";
 import Frozen from "../Core/Frozen.js";
@@ -33,6 +34,7 @@ class GltfVertexBufferLoader extends ResourceLoader {
    * @param {object} [options.spz] The SPZ extension object.
    * @param {string} [options.attributeSemantic] The attribute semantic, e.g. POSITION or NORMAL.
    * @param {number} [options.accessorId] The accessor id.
+   * @param {string} [options.bufferCacheKey] The shared GPU buffer key.
    * @param {string} [options.cacheKey] The cache key of the resource.
    * @param {boolean} [options.asynchronous=true] Determines if WebGL resource creation will be spread out over several frames or block until all WebGL resources are created.
    * @param {boolean} [options.loadBuffer=false] Load vertex buffer as a GPU vertex buffer.
@@ -124,6 +126,7 @@ class GltfVertexBufferLoader extends ResourceLoader {
     this._attributeSemantic = attributeSemantic;
     this._accessorId = accessorId;
     this._cacheKey = cacheKey;
+    this._bufferCacheKey = options.bufferCacheKey;
     this._asynchronous = asynchronous;
     this._loadBuffer = loadBuffer;
     this._loadTypedArray = loadTypedArray;
@@ -265,9 +268,12 @@ class GltfVertexBufferLoader extends ResourceLoader {
       processSpz(this);
     }
 
+    const sharedBuffer = GltfBufferCache.acquire(this._bufferCacheKey);
     let buffer;
     const typedArray = this._typedArray;
-    if (this._loadBuffer && this._asynchronous) {
+    if (defined(sharedBuffer)) {
+      buffer = sharedBuffer;
+    } else if (this._loadBuffer && this._asynchronous) {
       const vertexBufferJob = scratchVertexBufferJob;
       vertexBufferJob.set(typedArray, frameState.context);
       const jobScheduler = frameState.jobScheduler;
@@ -286,6 +292,9 @@ class GltfVertexBufferLoader extends ResourceLoader {
 
     this._packedSphericalHarmonics = packedSphericalHarmonics;
     this._buffer = buffer;
+    if (defined(buffer) && !defined(sharedBuffer)) {
+      GltfBufferCache.add(this._bufferCacheKey, buffer);
+    }
     this._typedArray = this._loadTypedArray ? typedArray : undefined;
     this._state = ResourceLoaderState.READY;
     this._resourceCache.statistics.addGeometryLoader(this);
@@ -298,7 +307,11 @@ class GltfVertexBufferLoader extends ResourceLoader {
    */
   unload() {
     if (defined(this._buffer)) {
-      this._buffer.destroy();
+      if (defined(this._bufferCacheKey)) {
+        GltfBufferCache.release(this._bufferCacheKey);
+      } else {
+        this._buffer.destroy();
+      }
     }
 
     const resourceCache = this._resourceCache;
