@@ -504,7 +504,7 @@
             const extraTilesets = [];
             for (let i = 1; i < Number(params.get("multi") || 1); i++) {
               const extra = await Cesium.Cesium3DTileset.fromUrl(
-                config.tileset,
+                params.get("tileset2") || config.tileset,
                 {
                   maximumScreenSpaceError: config.screenSpaceError,
                   cacheBytes: Number(params.get("tileCache") || 536870912),
@@ -513,6 +513,32 @@
                   ),
                 },
               );
+              if (params.has("tileset2")) {
+                // Align the assets in one view so both compete for decoder slots.
+                const source = extra.boundingSphere;
+                const target = tileset.boundingSphere;
+                const sourceFrame = Cesium.Transforms.eastNorthUpToFixedFrame(
+                  source.center,
+                );
+                const targetFrame = Cesium.Transforms.eastNorthUpToFixedFrame(
+                  target.center,
+                );
+                const scale = Cesium.Matrix4.fromUniformScale(
+                  target.radius / source.radius,
+                );
+                extra.modelMatrix = Cesium.Matrix4.multiply(
+                  Cesium.Matrix4.multiply(
+                    targetFrame,
+                    scale,
+                    new Cesium.Matrix4(),
+                  ),
+                  Cesium.Matrix4.inverseTransformation(
+                    sourceFrame,
+                    new Cesium.Matrix4(),
+                  ),
+                  new Cesium.Matrix4(),
+                );
+              }
               scene.primitives.add(extra);
               extraTilesets.push(extra);
             }
