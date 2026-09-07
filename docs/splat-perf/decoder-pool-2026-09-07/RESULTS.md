@@ -107,13 +107,19 @@ The shared-consumer test verifies that worker-packed data avoids repacking while
 The final browser batch has 41 successful cases. The earlier implementation, profile, smoke, native-memory, and minified-global controls bring the standard-runner total to 80.
 The separate minified OpenGL checks add two successful cases. Initial Vulkan-driver failures are preserved separately.
 
+Download the [benchmark JSON archive](https://github.com/Construkted-Reality/cesium/releases/download/splat-decoder-pool-benchmarks-2026-09-07/decoder-pool-2026-09-07-json.tar.gz).
+The archive contains all 12 configurations and result files removed from this pull request.
+Its SHA-256 checksum is `fb1c63ecc4f5a66c6b7467d2ac541b85921f50a7015f108bf6dc8131864430a0`.
+Extract the archive from the repository root to restore the files under this report directory.
+
 Start `tools/splat-perf/serve.mjs` on port 8099 with the asset mappings configured.
 Set `SPLAT_RESULTS` to the output directory and `SPLAT_BASELINE_BUNDLE` to the saved PR #5 global bundle.
-Run `node tools/splat-perf/loading-run.mjs final-validation.json` with the configuration from this directory.
+Run `node tools/splat-perf/loading-run.mjs docs/splat-perf/decoder-pool-2026-09-07/final-validation.json` with the extracted configuration.
 For OpenGL, start headless Weston and set `SPLAT_WAYLAND_RUNTIME` to its runtime directory.
 Build the minified release with `npm run build -- --minify --removePragmas`.
 Run `decoder-release-check.mjs` with `SPLAT_RELEASE_BACKEND=gl` and the same output and Wayland variables for the release checks.
 Run `summarize-decoder-pool.py <output-directory> <report-directory>` to recreate the compact measurements.
 
 Raw results remain under `/mnt/data2/cesium-splat-perf/decoder-pool-results` on the server.
-The artifact manifest records their hashes. The report includes configurations, compact measurements, and the retry profile summary.
+The archive includes the artifact manifest, configurations, compact measurements, and retry profile summary.
+The manifest records hashes for the full server artifacts. The archive does not include those full artifacts.
