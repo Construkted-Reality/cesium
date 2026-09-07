@@ -222,6 +222,8 @@ describe("ResourceCache", function () {
   ["Vertex", "Index"].forEach(function (kind) {
     [false, true].forEach(function (reverse) {
       it(`shares ${kind} buffers across CPU policies, reverse=${reverse}`, async function () {
+        const initialGeometryBytes =
+          ResourceCache.statistics.geometryByteLength;
         const data = new Uint16Array([0, 1, 2]);
         spyOn(Resource.prototype, "fetchArrayBuffer").and.returnValue(
           Promise.resolve(data.buffer),
@@ -259,7 +261,7 @@ describe("ResourceCache", function () {
         expect(first).not.toBe(second);
         expect(first.buffer).toBe(second.buffer);
         expect(ResourceCache.statistics.geometryByteLength).toBe(
-          data.byteLength * 2,
+          initialGeometryBytes + data.byteLength * 2,
         );
         expect(reverse ? first.typedArray : second.typedArray).toBeDefined();
         expect(reverse ? second.typedArray : first.typedArray).toBeUndefined();
@@ -269,7 +271,9 @@ describe("ResourceCache", function () {
         expect(second.buffer).toBe(buffer);
         ResourceCache.unload(second);
         expect(buffer.isDestroyed()).toBe(true);
-        expect(ResourceCache.statistics.geometryByteLength).toBe(0);
+        expect(ResourceCache.statistics.geometryByteLength).toBe(
+          initialGeometryBytes,
+        );
       });
     });
   });
