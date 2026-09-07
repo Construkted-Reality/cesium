@@ -1,4 +1,5 @@
 import {
+  Event,
   PerspectiveFrustum,
   Math as CesiumMath,
   ResourceCache,
@@ -10,6 +11,7 @@ import {
   Transforms,
   VertexAttributeSemantic,
 } from "../../index.js";
+import GaussianSplatSorter from "../../Source/Scene/GaussianSplatSorter.js";
 import GaussianSplatPrimitive from "../../Source/Scene/GaussianSplatPrimitive.js";
 
 import Cesium3DTilesTester from "../../../../Specs/Cesium3DTilesTester.js";
@@ -59,6 +61,171 @@ describe(
     afterEach(function () {
       scene.primitives.removeAll();
       ResourceCache.clearForSpecs();
+    });
+
+    function createSortFixture() {
+      const tileset = {
+        show: true,
+        splitDirection: 0,
+        _selectedTiles: [],
+        tileLoad: new Event(),
+        tileVisible: new Event(),
+        update: function () {},
+      };
+      const primitive = new GaussianSplatPrimitive({ tileset });
+      tileset.gaussianSplatPrimitive = primitive;
+      primitive._rootTransform = Matrix4.clone(Matrix4.IDENTITY);
+      primitive._positions = new Float32Array([0, 0, 1, 0, 0, -1]);
+      primitive._numSplats = 2;
+      primitive._indexes = new Uint32Array([0, 1]);
+      primitive._drawCommand = {};
+      primitive._snapshot = {};
+      const frame = {
+        frameNumber: 100,
+        passes: {},
+        commandList: [],
+        camera: {
+          viewMatrix: Matrix4.clone(Matrix4.IDENTITY),
+          positionWC: new Cartesian3(),
+          directionWC: new Cartesian3(0, 0, -1),
+        },
+      };
+      return { primitive, frame, tileset };
+    }
+
+    it("retries a cache miss after the camera stops", async function () {
+      const { primitive, frame } = createSortFixture();
+      const sorted = new Uint32Array([1, 0]);
+      const sort = spyOn(
+        GaussianSplatSorter,
+        "radixSortIndexes",
+      ).and.returnValues(Promise.resolve(undefined), Promise.resolve(sorted));
+      primitive.update(frame);
+      await Promise.resolve();
+      frame.frameNumber++;
+      primitive.update(frame);
+      await Promise.resolve();
+      expect(sort.calls.count()).toBe(2);
+      expect(sort.calls.mostRecent().args[0].primitive.positions).toEqual(
+        primitive._positions,
+      );
+      expect(primitive._indexes).toBe(sorted);
+      primitive.destroy();
+    });
+
+    it("resends positions and uses the current view after unavailable capacity", async function () {
+      const { primitive, frame } = createSortFixture();
+      const sort = spyOn(
+        GaussianSplatSorter,
+        "radixSortIndexes",
+      ).and.returnValues(undefined, Promise.resolve(new Uint32Array([1, 0])));
+      primitive.update(frame);
+      expect(primitive._sorterPositionsKey).toBe(0);
+      frame.camera.viewMatrix[10] = -1;
+      frame.frameNumber++;
+      primitive.update(frame);
+      await Promise.resolve();
+      expect(sort.calls.count()).toBe(2);
+      expect(sort.calls.mostRecent().args[0].primitive.positions).toEqual(
+        primitive._positions,
+      );
+      expect(sort.calls.mostRecent().args[0].primitive.modelView[10]).toBe(-1);
+      primitive.destroy();
+    });
+
+    it("ignores a pending sort completion after destruction", async function () {
+      const { primitive, frame, tileset } = createSortFixture();
+      let resolve;
+      spyOn(GaussianSplatSorter, "radixSortIndexes").and.returnValue(
+        new Promise((complete) => {
+          resolve = complete;
+        }),
+      );
+      primitive.update(frame);
+      primitive.destroy();
+      resolve(new Uint32Array([1, 0]));
+      await Promise.resolve();
+      expect(primitive.isDestroyed()).toBe(true);
+      expect(primitive._indexes).toBeUndefined();
+      expect(tileset.gaussianSplatPrimitive).toBeUndefined();
+      expect(tileset.tileLoad.numberOfListeners).toBe(0);
+      expect(tileset.tileVisible.numberOfListeners).toBe(0);
+    });
+
+    it("destroys the aggregate primitive when its tileset is removed", async function () {
+      const tileset = await Cesium3DTilesTester.loadTileset(
+        scene,
+        sphericalHarmonicUrl,
+        options,
+      );
+      scene.camera.lookAt(
+        tileset.boundingSphere.center,
+        new HeadingPitchRange(0.0, -1.57, tileset.boundingSphere.radius),
+      );
+      await Cesium3DTilesTester.waitForTileContentReady(scene, tileset.root);
+      const primitive = tileset.gaussianSplatPrimitive;
+      expect(primitive).toBeDefined();
+      scene.primitives.remove(tileset);
+      expect(primitive.isDestroyed()).toBe(true);
+    });
+
+    it("commits a pending snapshot despite disjoint selection churn", async function () {
+      const { primitive, frame, tileset } = createSortFixture();
+      tileset.boundingSphere = {
+        center: Cartesian3.fromDegrees(0, 0),
+        radius: 10,
+      };
+      const makeTile = () => ({
+        computedTransform: Matrix4.IDENTITY,
+        content: {
+          worldTransform: Matrix4.IDENTITY,
+          pointsLength: 1,
+          positions: new Float32Array(3),
+          scales: new Float32Array(3),
+          rotations: new Float32Array(4),
+          gltfPrimitive: {
+            attributes: [
+              {
+                semantic: "COLOR",
+                type: "VEC4",
+                typedArray: new Uint8Array(4),
+              },
+            ],
+          },
+          sphericalHarmonicsDegree: 0,
+        },
+      });
+      const a = makeTile();
+      const b = makeTile();
+      primitive._selectedTileSet = new Set([a]);
+      spyOn(GaussianSplatPrimitive, "transformTile");
+      const generate = spyOn(
+        GaussianSplatPrimitive,
+        "generateSplatTexture",
+      ).and.callFake((owner, state, snapshot) => {
+        snapshot.state = "TEXTURE_PENDING";
+      });
+      for (let i = 0; i < 60; i++) {
+        frame.frameNumber++;
+        tileset._selectedTiles = [i % 2 === 0 ? b : a];
+        primitive.update(frame);
+      }
+      expect(generate.calls.count()).toBe(1);
+      const pending = primitive._pendingSnapshot;
+      pending.state = "TEXTURE_READY";
+      pending.gaussianSplatTexture = { destroy: function () {} };
+      spyOn(GaussianSplatSorter, "radixSortIndexes").and.returnValue(
+        Promise.resolve(new Uint32Array([0])),
+      );
+      spyOn(GaussianSplatPrimitive, "buildGSplatDrawCommand");
+      primitive.update(frame);
+      await Promise.resolve();
+      expect(primitive._snapshot).toBe(pending);
+      expect(primitive._pendingSnapshot).toBeUndefined();
+      frame.frameNumber++;
+      primitive.update(frame);
+      expect(generate.calls.count()).toBe(2);
+      primitive.destroy();
     });
 
     it("loads a Gaussian splats tileset", async function () {
