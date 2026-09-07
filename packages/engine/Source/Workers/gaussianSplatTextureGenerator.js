@@ -29,14 +29,18 @@ async function generateSplatTextureWorker(parameters, transferableObjects) {
     count,
   );
 
-  // Hand the buffer over instead of letting the structured clone copy it.
-  const data = result.data;
-  transferableObjects.push(data.buffer);
-  return {
-    data: data,
-    width: result.width,
-    height: result.height,
-  };
+  try {
+    // The data getter copies out of WASM memory before the result is freed.
+    const data = result.data;
+    transferableObjects.push(data.buffer);
+    return {
+      data: data,
+      width: result.width,
+      height: result.height,
+    };
+  } finally {
+    result.free();
+  }
 }
 
 export default createTaskProcessorWorker(generateSplatTextureWorker);

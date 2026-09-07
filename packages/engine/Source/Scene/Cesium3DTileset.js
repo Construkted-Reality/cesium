@@ -3650,6 +3650,10 @@ Cesium3DTileset.prototype.isDestroyed = function () {
  * @see Cesium3DTileset#isDestroyed
  */
 Cesium3DTileset.prototype.destroy = function () {
+  if (defined(this.gaussianSplatPrimitive)) {
+    this.gaussianSplatPrimitive.destroy();
+    this.gaussianSplatPrimitive = undefined;
+  }
   this._tileDebugLabels =
     this._tileDebugLabels && this._tileDebugLabels.destroy();
   this._clippingPlanes = this._clippingPlanes && this._clippingPlanes.destroy();

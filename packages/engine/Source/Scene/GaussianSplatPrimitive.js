@@ -407,6 +407,27 @@ function releaseRetiredTextures(primitive, frameNumber) {
   primitive._retiredTextures = next;
 }
 
+function retireDrawResources(primitive, frameNumber, vertexArray) {
+  primitive._retiredDrawResources.push({
+    frameNumber: frameNumber,
+    shaderProgram: primitive._drawCommand?.shaderProgram,
+    vertexArray: vertexArray,
+  });
+}
+
+function releaseRetiredDrawResources(primitive, frameNumber) {
+  primitive._retiredDrawResources = primitive._retiredDrawResources.filter(
+    (entry) => {
+      if (entry.frameNumber >= frameNumber) {
+        return true;
+      }
+      entry.shaderProgram?.destroy();
+      entry.vertexArray?.destroy();
+      return false;
+    },
+  );
+}
+
 function getSnapshotArrayBuffer(snapshot, key) {
   const value = snapshot?.[key];
   return defined(value) ? value.buffer : undefined;
@@ -425,22 +446,33 @@ function acquireAggregateScratchBuffer(
   }
 
   const activeBuffer = getSnapshotArrayBuffer(primitive._snapshot, key);
-  for (let i = 0; i < pool.length; i++) {
-    const candidate = pool[i];
+  const pendingBuffer = getSnapshotArrayBuffer(primitive._pendingSnapshot, key);
+  const owned = pool.filter(
+    (candidate) =>
+      candidate.buffer === activeBuffer || candidate.buffer === pendingBuffer,
+  );
+  let available;
+  for (const candidate of pool) {
     if (
+      candidate.buffer !== activeBuffer &&
+      candidate.buffer !== pendingBuffer &&
       candidate.length >= requiredLength &&
-      candidate.buffer !== activeBuffer
+      (!defined(available) || candidate.length < available.length)
     ) {
-      return candidate;
+      available = candidate;
     }
   }
-
-  const created = ComponentDatatype.createTypedArray(
-    componentDatatype,
-    requiredLength,
-  );
-  pool.push(created);
-  return created;
+  if (!defined(available)) {
+    available = ComponentDatatype.createTypedArray(
+      componentDatatype,
+      requiredLength,
+    );
+  }
+  // Retain only arrays owned by live snapshots and this writable array.
+  // Older undersized arrays must not accumulate as streaming counts increase.
+  owned.push(available);
+  primitive._aggregateScratchBuffers[key] = owned;
+  return available;
 }
 
 function trimAggregateScratchBuffer(buffer, length) {
@@ -513,6 +545,7 @@ function commitSnapshot(primitive, snapshot, frameState) {
   primitive._needsGaussianSplatTexture = false;
   primitive._gaussianSplatTexturePending = false;
 
+  retireDrawResources(primitive, frameNumber, primitive._vertexArray);
   primitive._vertexArray = undefined;
   primitive._vertexArrayLen = -1;
   primitive._drawCommand = undefined;
@@ -542,6 +575,9 @@ async function processGeneratedSplatTextureData(
 ) {
   try {
     const splatTextureData = await promise;
+    if (primitive.isDestroyed() || snapshot !== primitive._pendingSnapshot) {
+      return;
+    }
     const textureProcessStart = profiling.begin();
     const maxTex = ContextLimits.maximumTextureSize;
 
@@ -729,6 +765,9 @@ async function resolvePendingSnapshotSort(
 ) {
   try {
     const sortedData = await sortPromise;
+    if (primitive.isDestroyed()) {
+      return;
+    }
     if (
       !defined(pendingSort) ||
       pendingSort.snapshot !== primitive._pendingSnapshot
@@ -757,6 +796,9 @@ async function resolvePendingSnapshotSort(
     primitive._pendingSnapshot = undefined;
     GaussianSplatPrimitive.buildGSplatDrawCommand(primitive, frameState);
   } catch (err) {
+    if (primitive.isDestroyed()) {
+      return;
+    }
     primitive._invalidateSorterPositions();
     if (
       !defined(pendingSort) ||
@@ -788,6 +830,9 @@ async function resolvePendingSnapshotSort(
 async function resolveSteadySort(primitive, activeSort, sortPromise) {
   try {
     const sortedData = await sortPromise;
+    if (primitive.isDestroyed()) {
+      return;
+    }
     const isActive = isActiveSort(primitive, activeSort);
     const expectedCount = activeSort?.expectedCount;
     const currentCount = expectedCount;
@@ -798,13 +843,16 @@ async function resolveSteadySort(primitive, activeSort, sortPromise) {
       if (isActive) {
         primitive._invalidateSorterPositions();
         primitive._sorterPromise = undefined;
-        primitive._sorterState = GaussianSplatSortingState.IDLE;
+        primitive._sorterState = GaussianSplatSortingState.WAITING;
       }
       return;
     }
     primitive._indexes = sortedData;
     primitive._sorterState = GaussianSplatSortingState.SORTED;
   } catch (err) {
+    if (primitive.isDestroyed()) {
+      return;
+    }
     primitive._invalidateSorterPositions();
     if (!isActiveSort(primitive, activeSort)) {
       return;
@@ -1027,6 +1075,7 @@ function GaussianSplatPrimitive(options) {
    * @type {undefined|VertexArray}
    * @private
    */
+  this._retiredDrawResources = [];
   this._vertexArray = undefined;
   /**
    * The length of the vertex array, used to track changes in the number of splats.
@@ -1049,8 +1098,14 @@ function GaussianSplatPrimitive(options) {
   this._baseTilesetUpdate = this._tileset.update;
   this._tileset.update = this._wrappedUpdate.bind(this);
 
-  this._tileset.tileLoad.addEventListener(this.onTileLoad, this);
-  this._tileset.tileVisible.addEventListener(this.onTileVisible, this);
+  this._removeTileLoadListener = this._tileset.tileLoad.addEventListener(
+    this.onTileLoad,
+    this,
+  );
+  this._removeTileVisibleListener = this._tileset.tileVisible.addEventListener(
+    this.onTileVisible,
+    this,
+  );
 
   /**
    * Tracks current count of selected tiles.
@@ -1293,6 +1348,12 @@ GaussianSplatPrimitive.prototype._invalidateSorterPositions = function () {
 
 GaussianSplatPrimitive.prototype.destroy = function () {
   this._positions = undefined;
+  this._shData = undefined;
+  this._scratchAggregateShBuffer = undefined;
+  this._activeSort = undefined;
+  this._pendingSort = undefined;
+  this._sorterPromise = undefined;
+  this._pendingSortPromise = undefined;
   this._invalidateSorterPositions();
   this._rotations = undefined;
   this._scales = undefined;
@@ -1306,6 +1367,7 @@ GaussianSplatPrimitive.prototype.destroy = function () {
     }
   }
   this._retiredTextures = [];
+  releaseRetiredDrawResources(this, Number.POSITIVE_INFINITY);
   this._pendingSnapshot = undefined;
   this._snapshot = undefined;
   this._aggregateScratchBuffers = undefined;
@@ -1323,7 +1385,12 @@ GaussianSplatPrimitive.prototype.destroy = function () {
     this._vertexArray = undefined;
   }
 
-  this._tileset.update = this._baseTilesetUpdate.bind(this._tileset);
+  this._removeTileLoadListener?.();
+  this._removeTileVisibleListener?.();
+  this._tileset.update = this._baseTilesetUpdate;
+  if (this._tileset.gaussianSplatPrimitive === this) {
+    this._tileset.gaussianSplatPrimitive = undefined;
+  }
 
   return destroyObject(this);
 };
@@ -1755,6 +1822,11 @@ GaussianSplatPrimitive.buildGSplatDrawCommand = function (
   const needsRebuild =
     !defined(primitive._vertexArray) ||
     primitive._indexes.length > primitive._vertexArrayLen;
+  retireDrawResources(
+    primitive,
+    frameState.frameNumber,
+    needsRebuild ? primitive._vertexArray : undefined,
+  );
   if (needsRebuild) {
     const geometry = new Geometry({
       attributes: {
@@ -1831,6 +1903,7 @@ GaussianSplatPrimitive.prototype.update = function (frameState) {
   const tileset = this._tileset;
 
   releaseRetiredTextures(this, frameState.frameNumber);
+  releaseRetiredDrawResources(this, frameState.frameNumber);
 
   if (!tileset.show) {
     return;
@@ -1911,14 +1984,9 @@ GaussianSplatPrimitive.prototype.update = function (frameState) {
       snapshotIsStale ||
       this._snapshotRebuildStallFrames >= DEFAULT_MAX_SNAPSHOT_STALL_FRAMES;
 
-    // Starting a rebuild throws away the one that is already in flight. While
-    // tiles keep landing, each new tile sets the dirty flag and restarts the
-    // build, so nothing ever reaches the screen. Let a build in flight finish
-    // and rebuild again after it commits. Preempt it only when the camera has
-    // turned away from what that build covers, which snapshotIsStale reports,
-    // because _selectedTileSet already holds the tiles of the build in flight.
-    const allowRebuild =
-      wantsRebuild && (!defined(this._pendingSnapshot) || snapshotIsStale);
+    // Tile identity changes do not prove that a pending snapshot is invisible.
+    // Complete it before starting another build so LOD churn cannot starve commits.
+    const allowRebuild = wantsRebuild && !defined(this._pendingSnapshot);
     const hasPendingWork =
       this._dirty ||
       this._needsSnapshotRebuild ||
@@ -2212,6 +2280,7 @@ GaussianSplatPrimitive.prototype.update = function (frameState) {
         });
         profiling.add("sortSchedule", scheduleStart);
         if (!defined(sortPromise)) {
+          this._invalidateSorterPositions();
           this._pendingSortPromise = undefined;
           this._pendingSort = undefined;
           pending.state = SnapshotState.TEXTURE_READY;
@@ -2279,6 +2348,9 @@ GaussianSplatPrimitive.prototype.update = function (frameState) {
       });
       profiling.add("sortSchedule", scheduleStart);
       this._sorterPromise = rawPromise;
+      if (!defined(rawPromise)) {
+        this._invalidateSorterPositions();
+      }
       if (defined(rawPromise)) {
         markSteadySortStart(this, frameState);
         const activeSort = this._activeSort;
@@ -2295,6 +2367,7 @@ GaussianSplatPrimitive.prototype.update = function (frameState) {
     this._sorterState = GaussianSplatSortingState.SORTING;
     return;
   } else if (this._sorterState === GaussianSplatSortingState.WAITING) {
+    Matrix4.multiply(camera.viewMatrix, this._rootTransform, scratchMatrix4A);
     if (!defined(this._sorterPromise)) {
       const requestId = ++this._sortRequestId;
       const dataGeneration = this._splatDataGeneration;
@@ -2322,6 +2395,9 @@ GaussianSplatPrimitive.prototype.update = function (frameState) {
       });
       profiling.add("sortSchedule", scheduleStart);
       this._sorterPromise = rawPromise;
+      if (!defined(rawPromise)) {
+        this._invalidateSorterPositions();
+      }
       if (defined(rawPromise)) {
         markSteadySortStart(this, frameState);
         const activeSort = this._activeSort;
