@@ -18,6 +18,12 @@ for (const run of runs) {
       const swap=(a,b)=>{if(!body.includes(a)){throw new Error(`Bundle anchor missing: ${a}`);}body=body.replace(a,b);};
       if (run.production) {
         if (run.production === "baseline") { swap("packSphericalHarmonics: true", "packSphericalHarmonics: false"); }
+        if (run.production === "worker") {
+          swap('const decodePromise = Rr(this._bufferViewTypedArray, {\n        unpackOptions: { coordinateSystem: "UNSPECIFIED" }\n      });',
+            'const decodePromise = globalThis.__loadingDecode(this._bufferViewTypedArray, {unpackOptions:{coordinateSystem:"UNSPECIFIED"}},this,Rr);');
+          swap("decoded.packedSphericalHarmonics = packSpzSphericalHarmonics(gcloudData);", "decoded.packedSphericalHarmonics = gcloudData.__packedSH ?? packSpzSphericalHarmonics(gcloudData);");
+        }
+
       } else {
       swap('const decodePromise = Rr(this._bufferViewTypedArray, {\n        unpackOptions: { coordinateSystem: "UNSPECIFIED" }\n      });',
         'const decodePromise = globalThis.__loadingDecode(this._bufferViewTypedArray, {unpackOptions:{coordinateSystem:"UNSPECIFIED"}},this,Rr);');
@@ -29,6 +35,19 @@ for (const run of runs) {
       swap('function packSphericalHarmonicsData(tileContent) {',`function packSphericalHarmonicsData(tileContent) {
         const direct = tileContent.gltfPrimitive.attributes.find(a=>a.typedArray?.buffer.__packedSH);
         if(direct)return direct.typedArray.buffer.__packedSH;`);
+      }
+
+      if (run.coalesceMs) {
+        const delay = Number(run.coalesceMs);
+        if (!Number.isFinite(delay) || delay <= 0) { throw new Error("Invalid snapshot interval"); }
+        swap("const allowRebuild = wantsRebuild && !defined_default(this._pendingSnapshot);", `const coalesced = isBootstrap || snapshotIsStale || tileset.tilesLoaded || performance.now() - (this.__lastExperimentSnapshot || 0) >= ${delay};
+      const allowRebuild = wantsRebuild && coalesced && !defined_default(this._pendingSnapshot);`);
+      }
+      if (run.snapshotProbe === "1") {
+        swap("        this._splatDataGeneration++;", `
+        (globalThis.__snapshotTrace ||= []).push({t:performance.now(),generation:this._splatDataGeneration+1,selected:tileset._selectedTiles.length,dirty:this._dirty,changed:selectedTilesChanged,tiles:tileset._selectedTiles.map(tile=>{globalThis.__snapshotIDs ||= new WeakMap(); if(!globalThis.__snapshotIDs.has(tile))globalThis.__snapshotIDs.set(tile,(globalThis.__snapshotNextID=(globalThis.__snapshotNextID||0)+1));return globalThis.__snapshotIDs.get(tile);}),loaded:tileset.tilesLoaded,bootstrap:isBootstrap,stable:isStable,stale:snapshotIsStale,stallFrames:this._snapshotRebuildStallFrames});
+        this.__lastExperimentSnapshot = performance.now();
+        this._splatDataGeneration++;`);
       }
       await route.fulfill({response,body});
     });
@@ -204,7 +223,7 @@ cachedPositions.set = function(...args) { originalSet(...args); globalThis.__cac
       }
       const glError=await page.evaluate(()=>window.__scene.context._gl.getError());
       if(glError!==0){throw new Error(`WebGL error: ${glError}`);}
-      Object.assign(result,{run,errors,before,after:clock(),glError,loadingFinal:await page.evaluate(()=>window.__loadingStats)});
+      Object.assign(result,{run,errors,before,after:clock(),glError,loadingFinal:await page.evaluate(()=>window.__loadingStats),snapshotTrace:await page.evaluate(()=>window.__snapshotTrace || [])});
       writeFileSync(`${out}/${run.label}.json`,JSON.stringify(result,null,2));
       console.log(JSON.stringify({label:run.label,frame:result.bench.frameMs,gpu:result.bench.gpuMs,splats:result.bench.splats,worker:result.worker,errors}));
       break;
