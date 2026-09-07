@@ -35,3 +35,8 @@ The release test now waits for the expected count and no pending snapshot before
 The corrected minified captures differ from the baseline by at most two channel levels, like ordinary OpenGL repetitions.
 Standalone Vulkan release attempts lose their context before decoding; the bare WebGL warmup control does too.
 The standard Vulkan harness passes with the minified global bundle. Preserve all driver failures without a renderer workaround.
+
+## Cleanup
+
+The graphics and memory clock overrides are reset. The benchmark server and this run's Weston compositor are stopped.
+Raw data, the saved PR #5 baseline bundle, and the minified build remain on the server for reproduction.
