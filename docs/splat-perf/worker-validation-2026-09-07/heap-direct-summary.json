@@ -1,0 +1,420 @@
+[
+  {
+    "file": "heap-direct-0.heapsnapshot",
+    "retainingPaths": {},
+    "selectedGroups": {
+      "object:Cesium3DTilePassState": [
+        7,
+        224
+      ],
+      "object:Cesium3DTile": [
+        235,
+        80840
+      ],
+      "object:Cesium3DTileset": [
+        1,
+        600
+      ],
+      "object:Cesium3DTilesetCache": [
+        1,
+        56
+      ],
+      "object:Cesium3DTileStyleEngine": [
+        1,
+        56
+      ],
+      "object:Cesium3DTilesetStatistics": [
+        10,
+        960
+      ],
+      "object:Cesium3DTilesetHeatmap": [
+        1,
+        72
+      ],
+      "object:Cesium3DTilesetVisualizer": [
+        1,
+        64
+      ]
+    }
+  },
+  {
+    "file": "heap-direct-23.heapsnapshot",
+    "retainingPaths": {},
+    "largestGrowthFromFirst": [
+      {
+        "group": "code:system / InstructionStream",
+        "count": 679,
+        "bytes": 857856
+      },
+      {
+        "group": "code:system / TrustedByteArray",
+        "count": 1569,
+        "bytes": 245252
+      },
+      {
+        "group": "code:system / ProtectedFixedArray",
+        "count": 478,
+        "bytes": 108380
+      },
+      {
+        "group": "native:system / WeakArrayList",
+        "count": 1210,
+        "bytes": 97128
+      },
+      {
+        "group": "code:system / Code",
+        "count": 679,
+        "bytes": 48888
+      },
+      {
+        "group": "code:system / FeedbackVector",
+        "count": 199,
+        "bytes": 37352
+      },
+      {
+        "group": "native:PerformanceLongAnimationFrameTiming",
+        "count": 187,
+        "bytes": 28424
+      },
+      {
+        "group": "native:PerformanceResourceTiming",
+        "count": 201,
+        "bytes": 27336
+      },
+      {
+        "group": "native:blink::ScriptTimingInfo",
+        "count": 196,
+        "bytes": 26656
+      },
+      {
+        "group": "native:PerformanceScriptTiming",
+        "count": 196,
+        "bytes": 23520
+      },
+      {
+        "group": "code:system / TrustedWeakFixedArray",
+        "count": 478,
+        "bytes": 17800
+      },
+      {
+        "group": "native:TaskAttributionTiming",
+        "count": 81,
+        "bytes": 9720
+      },
+      {
+        "group": "native:PerformanceLongTaskTiming",
+        "count": 81,
+        "bytes": 8424
+      },
+      {
+        "group": "native:system / ProtectedFixedArray",
+        "count": 478,
+        "bytes": 6892
+      },
+      {
+        "group": "object shape:system / Map",
+        "count": 169,
+        "bytes": 6760
+      },
+      {
+        "group": "string:127.0.0.1:8099",
+        "count": 228,
+        "bytes": 6072
+      },
+      {
+        "group": "code:system / LoadHandler",
+        "count": 346,
+        "bytes": 5540
+      },
+      {
+        "group": "code:system / CodeWrapper",
+        "count": 679,
+        "bytes": 5432
+      },
+      {
+        "group": "code:system / WeakFixedArray",
+        "count": 220,
+        "bytes": 4624
+      },
+      {
+        "group": "native:blink::HeapVectorBacking<cppgc::internal::BasicMember<blink::PerformanceScriptTiming, cppgc::internal::StrongMemberTag, cppgc::internal::DijkstraWriteBarrierPolicy>>",
+        "count": 181,
+        "bytes": 4344
+      },
+      {
+        "group": "object:Object",
+        "count": 148,
+        "bytes": 4316
+      },
+      {
+        "group": "code:system / AllocationSite",
+        "count": 142,
+        "bytes": 3904
+      },
+      {
+        "group": "native:system / SharedFunctionInfoWrapper",
+        "count": 478,
+        "bytes": 3824
+      },
+      {
+        "group": "object shape:system / DescriptorArray",
+        "count": 40,
+        "bytes": 2468
+      },
+      {
+        "group": "code:system / WeakArrayList",
+        "count": 81,
+        "bytes": 2288
+      },
+      {
+        "group": "native:blink::HeapVectorBacking<cppgc::internal::BasicMember<blink::PerformanceEntry, cppgc::internal::StrongMemberTag, cppgc::internal::DijkstraWriteBarrierPolicy>>",
+        "count": 0,
+        "bytes": 2176
+      },
+      {
+        "group": "native:blink::HeapVectorBacking<cppgc::internal::BasicMember<blink::TaskAttributionTiming, cppgc::internal::StrongMemberTag, cppgc::internal::DijkstraWriteBarrierPolicy>>",
+        "count": 81,
+        "bytes": 1944
+      },
+      {
+        "group": "object shape:system / TransitionArray",
+        "count": 2,
+        "bytes": 616
+      },
+      {
+        "group": "array:(object elements)",
+        "count": 11,
+        "bytes": 524
+      },
+      {
+        "group": "code:system / StoreHandler",
+        "count": 37,
+        "bytes": 504
+      }
+    ],
+    "selectedGroups": {
+      "object:Cesium3DTilePassState": [
+        7,
+        224
+      ],
+      "object:Cesium3DTile": [
+        235,
+        80840
+      ],
+      "object:Cesium3DTileset": [
+        1,
+        600
+      ],
+      "object:Cesium3DTilesetStatistics": [
+        10,
+        960
+      ],
+      "object:Cesium3DTilesetCache": [
+        1,
+        24
+      ],
+      "object:Cesium3DTileStyleEngine": [
+        1,
+        24
+      ],
+      "object:Cesium3DTilesetHeatmap": [
+        1,
+        40
+      ],
+      "object:Cesium3DTilesetVisualizer": [
+        1,
+        64
+      ]
+    }
+  },
+  {
+    "file": "heap-direct-95.heapsnapshot",
+    "retainingPaths": {},
+    "largestGrowthFromFirst": [
+      {
+        "group": "code:system / InstructionStream",
+        "count": 864,
+        "bytes": 1069184
+      },
+      {
+        "group": "code:system / TrustedByteArray",
+        "count": 2018,
+        "bytes": 349352
+      },
+      {
+        "group": "code:system / ProtectedFixedArray",
+        "count": 663,
+        "bytes": 157884
+      },
+      {
+        "group": "native:system / WeakArrayList",
+        "count": 1410,
+        "bytes": 137028
+      },
+      {
+        "group": "code:system / Code",
+        "count": 864,
+        "bytes": 62208
+      },
+      {
+        "group": "code:system / FeedbackVector",
+        "count": 199,
+        "bytes": 37352
+      },
+      {
+        "group": "native:PerformanceLongAnimationFrameTiming",
+        "count": 189,
+        "bytes": 28728
+      },
+      {
+        "group": "native:PerformanceResourceTiming",
+        "count": 201,
+        "bytes": 27336
+      },
+      {
+        "group": "native:blink::ScriptTimingInfo",
+        "count": 198,
+        "bytes": 26928
+      },
+      {
+        "group": "code:system / TrustedWeakFixedArray",
+        "count": 663,
+        "bytes": 25296
+      },
+      {
+        "group": "native:PerformanceScriptTiming",
+        "count": 198,
+        "bytes": 23760
+      },
+      {
+        "group": "native:TaskAttributionTiming",
+        "count": 192,
+        "bytes": 23040
+      },
+      {
+        "group": "native:PerformanceLongTaskTiming",
+        "count": 192,
+        "bytes": 19968
+      },
+      {
+        "group": "object:Object",
+        "count": 362,
+        "bytes": 11164
+      },
+      {
+        "group": "native:system / ProtectedFixedArray",
+        "count": 663,
+        "bytes": 9968
+      },
+      {
+        "group": "code:system / CodeWrapper",
+        "count": 864,
+        "bytes": 6912
+      },
+      {
+        "group": "code:system / WeakFixedArray",
+        "count": 313,
+        "bytes": 6880
+      },
+      {
+        "group": "object shape:system / Map",
+        "count": 170,
+        "bytes": 6800
+      },
+      {
+        "group": "code:system / LoadHandler",
+        "count": 349,
+        "bytes": 5588
+      },
+      {
+        "group": "native:system / SharedFunctionInfoWrapper",
+        "count": 663,
+        "bytes": 5304
+      },
+      {
+        "group": "native:blink::HeapVectorBacking<cppgc::internal::BasicMember<blink::TaskAttributionTiming, cppgc::internal::StrongMemberTag, cppgc::internal::DijkstraWriteBarrierPolicy>>",
+        "count": 192,
+        "bytes": 4608
+      },
+      {
+        "group": "native:blink::HeapVectorBacking<cppgc::internal::BasicMember<blink::PerformanceScriptTiming, cppgc::internal::StrongMemberTag, cppgc::internal::DijkstraWriteBarrierPolicy>>",
+        "count": 182,
+        "bytes": 4368
+      },
+      {
+        "group": "code:system / AllocationSite",
+        "count": 142,
+        "bytes": 3904
+      },
+      {
+        "group": "code:system / WeakArrayList",
+        "count": 96,
+        "bytes": 2748
+      },
+      {
+        "group": "native:blink::HeapVectorBacking<cppgc::internal::BasicMember<blink::PerformanceEntry, cppgc::internal::StrongMemberTag, cppgc::internal::DijkstraWriteBarrierPolicy>>",
+        "count": 0,
+        "bytes": 2736
+      },
+      {
+        "group": "object shape:system / DescriptorArray",
+        "count": 40,
+        "bytes": 2552
+      },
+      {
+        "group": "array:(object elements)",
+        "count": 9,
+        "bytes": 1496
+      },
+      {
+        "group": "object shape:system / TransitionArray",
+        "count": 2,
+        "bytes": 616
+      },
+      {
+        "group": "code:system / StoreHandler",
+        "count": 38,
+        "bytes": 520
+      },
+      {
+        "group": "object:Array",
+        "count": 28,
+        "bytes": 448
+      }
+    ],
+    "selectedGroups": {
+      "object:Cesium3DTile": [
+        235,
+        80840
+      ],
+      "object:Cesium3DTilePassState": [
+        7,
+        224
+      ],
+      "object:Cesium3DTileset": [
+        1,
+        600
+      ],
+      "object:Cesium3DTilesetHeatmap": [
+        1,
+        40
+      ],
+      "object:Cesium3DTileStyleEngine": [
+        1,
+        24
+      ],
+      "object:Cesium3DTilesetStatistics": [
+        10,
+        960
+      ],
+      "object:Cesium3DTilesetCache": [
+        1,
+        24
+      ],
+      "object:Cesium3DTilesetVisualizer": [
+        1,
+        64
+      ]
+    }
+  }
+]

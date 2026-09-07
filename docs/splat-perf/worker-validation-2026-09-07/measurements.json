@@ -15986,6 +15986,682 @@
     "timingExcluded": false
   },
   {
+    "label": "pool-isolation-bike-newdefault-0-0",
+    "run": {
+      "label": "pool-isolation-bike-newdefault-0-0",
+      "production": "worker",
+      "loading": "worker",
+      "workers": "2",
+      "tileset": "/splat-data/oracle-run/bike-newdefault/tileset.json",
+      "mode": "static",
+      "frames": "60",
+      "warmup": "90",
+      "freeze": "1",
+      "settleFrozen": "120",
+      "capture": "1",
+      "snapshotProbe": "1"
+    },
+    "totalLoadMs": 1611.199999988079,
+    "frameMs": {
+      "count": 59,
+      "mean": 8.854237288741743,
+      "median": 8.800000011920929,
+      "p95": 9.400000035762787,
+      "p99": 9.600000023841858,
+      "min": 8.599999964237213,
+      "max": 9.600000023841858
+    },
+    "gpuMs": {
+      "count": 60,
+      "mean": 1.8051242666666678,
+      "median": 1.806336,
+      "p95": 1.816576,
+      "p99": 1.831936,
+      "min": 1.795072,
+      "max": 1.831936
+    },
+    "splats": {
+      "numSplats": 705883,
+      "sphericalHarmonicsDegree": 3,
+      "textureWidth": 32768,
+      "textureHeight": 44,
+      "sortRequestsDuringRun": 1,
+      "dataGenerationsDuringRun": 0
+    },
+    "renderer": "ANGLE (NVIDIA, Vulkan 1.4.329 (NVIDIA NVIDIA RTX A4000 (0x000024B0)), NVIDIA)",
+    "errors": [],
+    "glError": 0,
+    "sourceHashes": {
+      "tools/splat-perf/loading-hooks.mjs": "307338040018e9ef73769061c356d415a7e1c6d9af54fbc98dd80c868adbbf09",
+      "tools/splat-perf/loading-worker.mjs": "54644ec2c5bd20bd46bab0964009b830d4e5d9ade78c87c53e7b3e46e126101f",
+      "tools/splat-perf/loading-kernels.mjs": "89c30e4c6840a58c4906d26ba7f534775f9298bafb6d3b5e64fdf601c6863107",
+      "tools/splat-perf/loading-harness.html": "f6a1db4735694f0fc1b9a40e19b373e1ef8e38d088accc65f9da24c6952bf712",
+      "tools/splat-perf/streaming-gpu-hooks.js": "c4d74247dd7ed033521b6dc19350f4ad3eba72a7614a70536532e34da46f9ea2",
+      "Build/CesiumUnminified/Cesium.js": "efd5057d8fe419cb82eb9da6df2416982ae60b8376aaafd0f257f65ab4ca1902",
+      "Build/CesiumUnminified/Workers/gaussianSplatSorter.js": "6166a0fd12d5a3f5f56cde0b88a79ad957494724918eb3f247b1f7db67667067",
+      "Build/CesiumUnminified/Workers/gaussianSplatTextureGenerator.js": "f20c658226fcac5ff807e9fc1db1fb683fd8bf0fdbec580111e7f4686225af24",
+      "node_modules/@spz-loader/core/dist/index.js": "9bbceed093fc6add95c3d88ff63637a5269952b505fb5855407852f8b73a2fd0"
+    },
+    "snapshotBuilds": 6,
+    "tileLoads": 72,
+    "tileUnloads": 0,
+    "heap": {
+      "usedSize": 16425732,
+      "totalSize": 18489344,
+      "embedderHeapUsedSize": 881528,
+      "backingStorageSize": 350521509
+    },
+    "worker": [
+      {
+        "bytes": 8470596,
+        "keys": 1,
+        "peak": 8470596,
+        "sets": 6,
+        "releases": 10,
+        "budget": 134217728
+      }
+    ],
+    "timingExcluded": false,
+    "hostBusyFraction": 0.08188851866493474,
+    "pixelSha256": "b1779e5d06a911c6d756d8a9b1e80cffa0615f1c46c596ee4bfe8bd2d064db60",
+    "startupFrameP95": 28.5,
+    "firstVisibleFromFirstStartupSampleMs": [
+      641.8000000119209
+    ]
+  },
+  {
+    "label": "pool-isolation-bike-newdefault-0-1",
+    "run": {
+      "label": "pool-isolation-bike-newdefault-0-1",
+      "production": "worker",
+      "loading": "worker",
+      "workers": "2",
+      "tileset": "/splat-data/oracle-run/bike-newdefault/tileset.json",
+      "mode": "static",
+      "frames": "60",
+      "warmup": "90",
+      "freeze": "1",
+      "settleFrozen": "120",
+      "capture": "1",
+      "snapshotProbe": "1"
+    },
+    "totalLoadMs": 1480.5,
+    "frameMs": {
+      "count": 59,
+      "mean": 9.127118644067796,
+      "median": 9.099999964237213,
+      "p95": 9.800000011920929,
+      "p99": 10.199999988079071,
+      "min": 8.699999988079071,
+      "max": 10.199999988079071
+    },
+    "gpuMs": {
+      "count": 60,
+      "mean": 1.8044416000000008,
+      "median": 1.804288,
+      "p95": 1.820672,
+      "p99": 1.825792,
+      "min": 1.795072,
+      "max": 1.825792
+    },
+    "splats": {
+      "numSplats": 705883,
+      "sphericalHarmonicsDegree": 3,
+      "textureWidth": 32768,
+      "textureHeight": 44,
+      "sortRequestsDuringRun": 1,
+      "dataGenerationsDuringRun": 0
+    },
+    "renderer": "ANGLE (NVIDIA, Vulkan 1.4.329 (NVIDIA NVIDIA RTX A4000 (0x000024B0)), NVIDIA)",
+    "errors": [],
+    "glError": 0,
+    "sourceHashes": {
+      "tools/splat-perf/loading-hooks.mjs": "307338040018e9ef73769061c356d415a7e1c6d9af54fbc98dd80c868adbbf09",
+      "tools/splat-perf/loading-worker.mjs": "54644ec2c5bd20bd46bab0964009b830d4e5d9ade78c87c53e7b3e46e126101f",
+      "tools/splat-perf/loading-kernels.mjs": "89c30e4c6840a58c4906d26ba7f534775f9298bafb6d3b5e64fdf601c6863107",
+      "tools/splat-perf/loading-harness.html": "f6a1db4735694f0fc1b9a40e19b373e1ef8e38d088accc65f9da24c6952bf712",
+      "tools/splat-perf/streaming-gpu-hooks.js": "c4d74247dd7ed033521b6dc19350f4ad3eba72a7614a70536532e34da46f9ea2",
+      "Build/CesiumUnminified/Cesium.js": "efd5057d8fe419cb82eb9da6df2416982ae60b8376aaafd0f257f65ab4ca1902",
+      "Build/CesiumUnminified/Workers/gaussianSplatSorter.js": "6166a0fd12d5a3f5f56cde0b88a79ad957494724918eb3f247b1f7db67667067",
+      "Build/CesiumUnminified/Workers/gaussianSplatTextureGenerator.js": "f20c658226fcac5ff807e9fc1db1fb683fd8bf0fdbec580111e7f4686225af24",
+      "node_modules/@spz-loader/core/dist/index.js": "9bbceed093fc6add95c3d88ff63637a5269952b505fb5855407852f8b73a2fd0"
+    },
+    "snapshotBuilds": 4,
+    "tileLoads": 72,
+    "tileUnloads": 0,
+    "heap": {
+      "usedSize": 16406296,
+      "totalSize": 18489344,
+      "embedderHeapUsedSize": 818792,
+      "backingStorageSize": 346468273
+    },
+    "worker": [
+      {
+        "bytes": 8470596,
+        "keys": 1,
+        "peak": 8470596,
+        "sets": 4,
+        "releases": 7,
+        "budget": 134217728
+      }
+    ],
+    "timingExcluded": false,
+    "hostBusyFraction": 0.08092288458259933,
+    "pixelSha256": "b1779e5d06a911c6d756d8a9b1e80cffa0615f1c46c596ee4bfe8bd2d064db60",
+    "startupFrameP95": 27.600000023841858,
+    "firstVisibleFromFirstStartupSampleMs": [
+      616.1999999880791
+    ]
+  },
+  {
+    "label": "pool-isolation-bike-newdefault-1000-0",
+    "run": {
+      "label": "pool-isolation-bike-newdefault-1000-0",
+      "production": "worker",
+      "loading": "worker",
+      "workers": "2",
+      "tileset": "/splat-data/oracle-run/bike-newdefault/tileset.json",
+      "mode": "static",
+      "frames": "60",
+      "warmup": "90",
+      "freeze": "1",
+      "settleFrozen": "120",
+      "capture": "1",
+      "snapshotProbe": "1",
+      "coalesceMs": "1000"
+    },
+    "totalLoadMs": 1603.699999988079,
+    "frameMs": {
+      "count": 59,
+      "mean": 9.316949152340323,
+      "median": 9.300000011920929,
+      "p95": 9.899999976158142,
+      "p99": 11.600000023841858,
+      "min": 8.699999988079071,
+      "max": 11.600000023841858
+    },
+    "gpuMs": {
+      "count": 60,
+      "mean": 1.8045781333333344,
+      "median": 1.806336,
+      "p95": 1.815552,
+      "p99": 1.819648,
+      "min": 1.795072,
+      "max": 1.819648
+    },
+    "splats": {
+      "numSplats": 705883,
+      "sphericalHarmonicsDegree": 3,
+      "textureWidth": 32768,
+      "textureHeight": 44,
+      "sortRequestsDuringRun": 1,
+      "dataGenerationsDuringRun": 0
+    },
+    "renderer": "ANGLE (NVIDIA, Vulkan 1.4.329 (NVIDIA NVIDIA RTX A4000 (0x000024B0)), NVIDIA)",
+    "errors": [],
+    "glError": 0,
+    "sourceHashes": {
+      "tools/splat-perf/loading-hooks.mjs": "307338040018e9ef73769061c356d415a7e1c6d9af54fbc98dd80c868adbbf09",
+      "tools/splat-perf/loading-worker.mjs": "54644ec2c5bd20bd46bab0964009b830d4e5d9ade78c87c53e7b3e46e126101f",
+      "tools/splat-perf/loading-kernels.mjs": "89c30e4c6840a58c4906d26ba7f534775f9298bafb6d3b5e64fdf601c6863107",
+      "tools/splat-perf/loading-harness.html": "f6a1db4735694f0fc1b9a40e19b373e1ef8e38d088accc65f9da24c6952bf712",
+      "tools/splat-perf/streaming-gpu-hooks.js": "c4d74247dd7ed033521b6dc19350f4ad3eba72a7614a70536532e34da46f9ea2",
+      "Build/CesiumUnminified/Cesium.js": "efd5057d8fe419cb82eb9da6df2416982ae60b8376aaafd0f257f65ab4ca1902",
+      "Build/CesiumUnminified/Workers/gaussianSplatSorter.js": "6166a0fd12d5a3f5f56cde0b88a79ad957494724918eb3f247b1f7db67667067",
+      "Build/CesiumUnminified/Workers/gaussianSplatTextureGenerator.js": "f20c658226fcac5ff807e9fc1db1fb683fd8bf0fdbec580111e7f4686225af24",
+      "node_modules/@spz-loader/core/dist/index.js": "9bbceed093fc6add95c3d88ff63637a5269952b505fb5855407852f8b73a2fd0"
+    },
+    "snapshotBuilds": 3,
+    "tileLoads": 72,
+    "tileUnloads": 0,
+    "heap": {
+      "usedSize": 16400976,
+      "totalSize": 18227200,
+      "embedderHeapUsedSize": 913520,
+      "backingStorageSize": 335761583
+    },
+    "worker": [
+      {
+        "bytes": 8470596,
+        "keys": 1,
+        "peak": 8470596,
+        "sets": 3,
+        "releases": 6,
+        "budget": 134217728
+      }
+    ],
+    "timingExcluded": false,
+    "hostBusyFraction": 0.08112036674679934,
+    "pixelSha256": "b1779e5d06a911c6d756d8a9b1e80cffa0615f1c46c596ee4bfe8bd2d064db60",
+    "startupFrameP95": 19.19999998807907,
+    "firstVisibleFromFirstStartupSampleMs": [
+      632.1999999880791
+    ]
+  },
+  {
+    "label": "pool-isolation-bike-newdefault-1000-1",
+    "run": {
+      "label": "pool-isolation-bike-newdefault-1000-1",
+      "production": "worker",
+      "loading": "worker",
+      "workers": "2",
+      "tileset": "/splat-data/oracle-run/bike-newdefault/tileset.json",
+      "mode": "static",
+      "frames": "60",
+      "warmup": "90",
+      "freeze": "1",
+      "settleFrozen": "120",
+      "capture": "1",
+      "snapshotProbe": "1",
+      "coalesceMs": "1000"
+    },
+    "totalLoadMs": 1403.0999999642372,
+    "frameMs": {
+      "count": 59,
+      "mean": 9.130508474374222,
+      "median": 9,
+      "p95": 10,
+      "p99": 10.400000035762787,
+      "min": 8.599999964237213,
+      "max": 10.400000035762787
+    },
+    "gpuMs": {
+      "count": 60,
+      "mean": 1.8039125333333343,
+      "median": 1.805312,
+      "p95": 1.813504,
+      "p99": 1.828864,
+      "min": 1.795072,
+      "max": 1.828864
+    },
+    "splats": {
+      "numSplats": 705883,
+      "sphericalHarmonicsDegree": 3,
+      "textureWidth": 32768,
+      "textureHeight": 44,
+      "sortRequestsDuringRun": 1,
+      "dataGenerationsDuringRun": 0
+    },
+    "renderer": "ANGLE (NVIDIA, Vulkan 1.4.329 (NVIDIA NVIDIA RTX A4000 (0x000024B0)), NVIDIA)",
+    "errors": [],
+    "glError": 0,
+    "sourceHashes": {
+      "tools/splat-perf/loading-hooks.mjs": "307338040018e9ef73769061c356d415a7e1c6d9af54fbc98dd80c868adbbf09",
+      "tools/splat-perf/loading-worker.mjs": "54644ec2c5bd20bd46bab0964009b830d4e5d9ade78c87c53e7b3e46e126101f",
+      "tools/splat-perf/loading-kernels.mjs": "89c30e4c6840a58c4906d26ba7f534775f9298bafb6d3b5e64fdf601c6863107",
+      "tools/splat-perf/loading-harness.html": "f6a1db4735694f0fc1b9a40e19b373e1ef8e38d088accc65f9da24c6952bf712",
+      "tools/splat-perf/streaming-gpu-hooks.js": "c4d74247dd7ed033521b6dc19350f4ad3eba72a7614a70536532e34da46f9ea2",
+      "Build/CesiumUnminified/Cesium.js": "efd5057d8fe419cb82eb9da6df2416982ae60b8376aaafd0f257f65ab4ca1902",
+      "Build/CesiumUnminified/Workers/gaussianSplatSorter.js": "6166a0fd12d5a3f5f56cde0b88a79ad957494724918eb3f247b1f7db67667067",
+      "Build/CesiumUnminified/Workers/gaussianSplatTextureGenerator.js": "f20c658226fcac5ff807e9fc1db1fb683fd8bf0fdbec580111e7f4686225af24",
+      "node_modules/@spz-loader/core/dist/index.js": "9bbceed093fc6add95c3d88ff63637a5269952b505fb5855407852f8b73a2fd0"
+    },
+    "snapshotBuilds": 3,
+    "tileLoads": 72,
+    "tileUnloads": 0,
+    "heap": {
+      "usedSize": 16400696,
+      "totalSize": 18489344,
+      "embedderHeapUsedSize": 911696,
+      "backingStorageSize": 336456607
+    },
+    "worker": [
+      {
+        "bytes": 8470596,
+        "keys": 1,
+        "peak": 8470596,
+        "sets": 3,
+        "releases": 6,
+        "budget": 134217728
+      }
+    ],
+    "timingExcluded": false,
+    "hostBusyFraction": 0.08191751043990614,
+    "pixelSha256": "b1779e5d06a911c6d756d8a9b1e80cffa0615f1c46c596ee4bfe8bd2d064db60",
+    "startupFrameP95": 22.799999952316284,
+    "firstVisibleFromFirstStartupSampleMs": [
+      627.9000000357628
+    ]
+  },
+  {
+    "label": "pool-isolation-geo-newdefault-0-0",
+    "run": {
+      "label": "pool-isolation-geo-newdefault-0-0",
+      "production": "worker",
+      "loading": "worker",
+      "workers": "2",
+      "tileset": "/splat-data/oracle-run/geo-newdefault/tileset.json",
+      "mode": "static",
+      "frames": "60",
+      "warmup": "90",
+      "freeze": "1",
+      "settleFrozen": "120",
+      "capture": "1",
+      "snapshotProbe": "1"
+    },
+    "totalLoadMs": 4179.800000011921,
+    "frameMs": {
+      "count": 59,
+      "mean": 13.445762712066456,
+      "median": 13.5,
+      "p95": 14.100000023841858,
+      "p99": 14.299999952316284,
+      "min": 12.800000011920929,
+      "max": 14.299999952316284
+    },
+    "gpuMs": {
+      "count": 60,
+      "mean": 5.655415466666664,
+      "median": 5.655552,
+      "p95": 5.6576,
+      "p99": 5.664768,
+      "min": 5.651456,
+      "max": 5.664768
+    },
+    "splats": {
+      "numSplats": 2087136,
+      "sphericalHarmonicsDegree": 3,
+      "textureWidth": 32768,
+      "textureHeight": 128,
+      "sortRequestsDuringRun": 0,
+      "dataGenerationsDuringRun": 0
+    },
+    "renderer": "ANGLE (NVIDIA, Vulkan 1.4.329 (NVIDIA NVIDIA RTX A4000 (0x000024B0)), NVIDIA)",
+    "errors": [],
+    "glError": 0,
+    "sourceHashes": {
+      "tools/splat-perf/loading-hooks.mjs": "307338040018e9ef73769061c356d415a7e1c6d9af54fbc98dd80c868adbbf09",
+      "tools/splat-perf/loading-worker.mjs": "54644ec2c5bd20bd46bab0964009b830d4e5d9ade78c87c53e7b3e46e126101f",
+      "tools/splat-perf/loading-kernels.mjs": "89c30e4c6840a58c4906d26ba7f534775f9298bafb6d3b5e64fdf601c6863107",
+      "tools/splat-perf/loading-harness.html": "f6a1db4735694f0fc1b9a40e19b373e1ef8e38d088accc65f9da24c6952bf712",
+      "tools/splat-perf/streaming-gpu-hooks.js": "c4d74247dd7ed033521b6dc19350f4ad3eba72a7614a70536532e34da46f9ea2",
+      "Build/CesiumUnminified/Cesium.js": "efd5057d8fe419cb82eb9da6df2416982ae60b8376aaafd0f257f65ab4ca1902",
+      "Build/CesiumUnminified/Workers/gaussianSplatSorter.js": "6166a0fd12d5a3f5f56cde0b88a79ad957494724918eb3f247b1f7db67667067",
+      "Build/CesiumUnminified/Workers/gaussianSplatTextureGenerator.js": "f20c658226fcac5ff807e9fc1db1fb683fd8bf0fdbec580111e7f4686225af24",
+      "node_modules/@spz-loader/core/dist/index.js": "9bbceed093fc6add95c3d88ff63637a5269952b505fb5855407852f8b73a2fd0"
+    },
+    "snapshotBuilds": 6,
+    "tileLoads": 139,
+    "tileUnloads": 0,
+    "heap": {
+      "usedSize": 17024112,
+      "totalSize": 19275776,
+      "embedderHeapUsedSize": 848992,
+      "backingStorageSize": 987686981
+    },
+    "worker": [
+      {
+        "bytes": 25045632,
+        "keys": 1,
+        "peak": 25045632,
+        "sets": 6,
+        "releases": 9,
+        "budget": 134217728
+      }
+    ],
+    "timingExcluded": false,
+    "hostBusyFraction": 0.09761680355459812,
+    "pixelSha256": "224b841d3ce2980d91c428b88b30d11ebaa6db5b728abef1d476e797e0b7f57f",
+    "startupFrameP95": 41.90000003576279,
+    "firstVisibleFromFirstStartupSampleMs": [
+      1026.300000011921
+    ]
+  },
+  {
+    "label": "pool-isolation-geo-newdefault-0-1",
+    "run": {
+      "label": "pool-isolation-geo-newdefault-0-1",
+      "production": "worker",
+      "loading": "worker",
+      "workers": "2",
+      "tileset": "/splat-data/oracle-run/geo-newdefault/tileset.json",
+      "mode": "static",
+      "frames": "60",
+      "warmup": "90",
+      "freeze": "1",
+      "settleFrozen": "120",
+      "capture": "1",
+      "snapshotProbe": "1"
+    },
+    "totalLoadMs": 4376.699999988079,
+    "frameMs": {
+      "count": 59,
+      "mean": 13.576271186440678,
+      "median": 13.599999964237213,
+      "p95": 14.199999988079071,
+      "p99": 14.199999988079071,
+      "min": 12.699999988079071,
+      "max": 14.199999988079071
+    },
+    "gpuMs": {
+      "count": 60,
+      "mean": 5.656302933333332,
+      "median": 5.655552,
+      "p95": 5.659648,
+      "p99": 5.66784,
+      "min": 5.65248,
+      "max": 5.66784
+    },
+    "splats": {
+      "numSplats": 2087136,
+      "sphericalHarmonicsDegree": 3,
+      "textureWidth": 32768,
+      "textureHeight": 128,
+      "sortRequestsDuringRun": 0,
+      "dataGenerationsDuringRun": 0
+    },
+    "renderer": "ANGLE (NVIDIA, Vulkan 1.4.329 (NVIDIA NVIDIA RTX A4000 (0x000024B0)), NVIDIA)",
+    "errors": [],
+    "glError": 0,
+    "sourceHashes": {
+      "tools/splat-perf/loading-hooks.mjs": "307338040018e9ef73769061c356d415a7e1c6d9af54fbc98dd80c868adbbf09",
+      "tools/splat-perf/loading-worker.mjs": "54644ec2c5bd20bd46bab0964009b830d4e5d9ade78c87c53e7b3e46e126101f",
+      "tools/splat-perf/loading-kernels.mjs": "89c30e4c6840a58c4906d26ba7f534775f9298bafb6d3b5e64fdf601c6863107",
+      "tools/splat-perf/loading-harness.html": "f6a1db4735694f0fc1b9a40e19b373e1ef8e38d088accc65f9da24c6952bf712",
+      "tools/splat-perf/streaming-gpu-hooks.js": "c4d74247dd7ed033521b6dc19350f4ad3eba72a7614a70536532e34da46f9ea2",
+      "Build/CesiumUnminified/Cesium.js": "efd5057d8fe419cb82eb9da6df2416982ae60b8376aaafd0f257f65ab4ca1902",
+      "Build/CesiumUnminified/Workers/gaussianSplatSorter.js": "6166a0fd12d5a3f5f56cde0b88a79ad957494724918eb3f247b1f7db67667067",
+      "Build/CesiumUnminified/Workers/gaussianSplatTextureGenerator.js": "f20c658226fcac5ff807e9fc1db1fb683fd8bf0fdbec580111e7f4686225af24",
+      "node_modules/@spz-loader/core/dist/index.js": "9bbceed093fc6add95c3d88ff63637a5269952b505fb5855407852f8b73a2fd0"
+    },
+    "snapshotBuilds": 6,
+    "tileLoads": 139,
+    "tileUnloads": 0,
+    "heap": {
+      "usedSize": 17006904,
+      "totalSize": 18227200,
+      "embedderHeapUsedSize": 852088,
+      "backingStorageSize": 987686969
+    },
+    "worker": [
+      {
+        "bytes": 25045632,
+        "keys": 1,
+        "peak": 25045632,
+        "sets": 6,
+        "releases": 9,
+        "budget": 134217728
+      }
+    ],
+    "timingExcluded": false,
+    "hostBusyFraction": 0.08401965768513808,
+    "pixelSha256": "224b841d3ce2980d91c428b88b30d11ebaa6db5b728abef1d476e797e0b7f57f",
+    "startupFrameP95": 40.10000002384186,
+    "firstVisibleFromFirstStartupSampleMs": [
+      1051.2000000476837
+    ]
+  },
+  {
+    "label": "pool-isolation-geo-newdefault-1000-0",
+    "run": {
+      "label": "pool-isolation-geo-newdefault-1000-0",
+      "production": "worker",
+      "loading": "worker",
+      "workers": "2",
+      "tileset": "/splat-data/oracle-run/geo-newdefault/tileset.json",
+      "mode": "static",
+      "frames": "60",
+      "warmup": "90",
+      "freeze": "1",
+      "settleFrozen": "120",
+      "capture": "1",
+      "snapshotProbe": "1",
+      "coalesceMs": "1000"
+    },
+    "totalLoadMs": 4006.7000000476837,
+    "frameMs": {
+      "count": 59,
+      "mean": 13.671186440071818,
+      "median": 13.699999988079071,
+      "p95": 14.300000011920929,
+      "p99": 17.30000001192093,
+      "min": 12.899999976158142,
+      "max": 17.30000001192093
+    },
+    "gpuMs": {
+      "count": 60,
+      "mean": 5.6553642666666635,
+      "median": 5.655552,
+      "p95": 5.659648,
+      "p99": 5.66784,
+      "min": 5.650432,
+      "max": 5.66784
+    },
+    "splats": {
+      "numSplats": 2087136,
+      "sphericalHarmonicsDegree": 3,
+      "textureWidth": 32768,
+      "textureHeight": 128,
+      "sortRequestsDuringRun": 0,
+      "dataGenerationsDuringRun": 0
+    },
+    "renderer": "ANGLE (NVIDIA, Vulkan 1.4.329 (NVIDIA NVIDIA RTX A4000 (0x000024B0)), NVIDIA)",
+    "errors": [],
+    "glError": 0,
+    "sourceHashes": {
+      "tools/splat-perf/loading-hooks.mjs": "307338040018e9ef73769061c356d415a7e1c6d9af54fbc98dd80c868adbbf09",
+      "tools/splat-perf/loading-worker.mjs": "54644ec2c5bd20bd46bab0964009b830d4e5d9ade78c87c53e7b3e46e126101f",
+      "tools/splat-perf/loading-kernels.mjs": "89c30e4c6840a58c4906d26ba7f534775f9298bafb6d3b5e64fdf601c6863107",
+      "tools/splat-perf/loading-harness.html": "f6a1db4735694f0fc1b9a40e19b373e1ef8e38d088accc65f9da24c6952bf712",
+      "tools/splat-perf/streaming-gpu-hooks.js": "c4d74247dd7ed033521b6dc19350f4ad3eba72a7614a70536532e34da46f9ea2",
+      "Build/CesiumUnminified/Cesium.js": "efd5057d8fe419cb82eb9da6df2416982ae60b8376aaafd0f257f65ab4ca1902",
+      "Build/CesiumUnminified/Workers/gaussianSplatSorter.js": "6166a0fd12d5a3f5f56cde0b88a79ad957494724918eb3f247b1f7db67667067",
+      "Build/CesiumUnminified/Workers/gaussianSplatTextureGenerator.js": "f20c658226fcac5ff807e9fc1db1fb683fd8bf0fdbec580111e7f4686225af24",
+      "node_modules/@spz-loader/core/dist/index.js": "9bbceed093fc6add95c3d88ff63637a5269952b505fb5855407852f8b73a2fd0"
+    },
+    "snapshotBuilds": 5,
+    "tileLoads": 139,
+    "tileUnloads": 0,
+    "heap": {
+      "usedSize": 17009520,
+      "totalSize": 18489344,
+      "embedderHeapUsedSize": 876408,
+      "backingStorageSize": 995995787
+    },
+    "worker": [
+      {
+        "bytes": 25045632,
+        "keys": 1,
+        "peak": 25045632,
+        "sets": 5,
+        "releases": 8,
+        "budget": 134217728
+      }
+    ],
+    "timingExcluded": false,
+    "hostBusyFraction": 0.08174181381793244,
+    "pixelSha256": "224b841d3ce2980d91c428b88b30d11ebaa6db5b728abef1d476e797e0b7f57f",
+    "startupFrameP95": 40,
+    "firstVisibleFromFirstStartupSampleMs": [
+      1000.3999999761581
+    ]
+  },
+  {
+    "label": "pool-isolation-geo-newdefault-1000-1",
+    "run": {
+      "label": "pool-isolation-geo-newdefault-1000-1",
+      "production": "worker",
+      "loading": "worker",
+      "workers": "2",
+      "tileset": "/splat-data/oracle-run/geo-newdefault/tileset.json",
+      "mode": "static",
+      "frames": "60",
+      "warmup": "90",
+      "freeze": "1",
+      "settleFrozen": "120",
+      "capture": "1",
+      "snapshotProbe": "1",
+      "coalesceMs": "1000"
+    },
+    "totalLoadMs": 4094.5,
+    "frameMs": {
+      "count": 59,
+      "mean": 13.845762711460308,
+      "median": 13.800000011920929,
+      "p95": 14.300000011920929,
+      "p99": 15,
+      "min": 12.5,
+      "max": 15
+    },
+    "gpuMs": {
+      "count": 60,
+      "mean": 5.6599722666666645,
+      "median": 5.656576,
+      "p95": 5.660672,
+      "p99": 5.873664,
+      "min": 5.651456,
+      "max": 5.873664
+    },
+    "splats": {
+      "numSplats": 2087136,
+      "sphericalHarmonicsDegree": 3,
+      "textureWidth": 32768,
+      "textureHeight": 128,
+      "sortRequestsDuringRun": 0,
+      "dataGenerationsDuringRun": 0
+    },
+    "renderer": "ANGLE (NVIDIA, Vulkan 1.4.329 (NVIDIA NVIDIA RTX A4000 (0x000024B0)), NVIDIA)",
+    "errors": [],
+    "glError": 0,
+    "sourceHashes": {
+      "tools/splat-perf/loading-hooks.mjs": "307338040018e9ef73769061c356d415a7e1c6d9af54fbc98dd80c868adbbf09",
+      "tools/splat-perf/loading-worker.mjs": "54644ec2c5bd20bd46bab0964009b830d4e5d9ade78c87c53e7b3e46e126101f",
+      "tools/splat-perf/loading-kernels.mjs": "89c30e4c6840a58c4906d26ba7f534775f9298bafb6d3b5e64fdf601c6863107",
+      "tools/splat-perf/loading-harness.html": "f6a1db4735694f0fc1b9a40e19b373e1ef8e38d088accc65f9da24c6952bf712",
+      "tools/splat-perf/streaming-gpu-hooks.js": "c4d74247dd7ed033521b6dc19350f4ad3eba72a7614a70536532e34da46f9ea2",
+      "Build/CesiumUnminified/Cesium.js": "efd5057d8fe419cb82eb9da6df2416982ae60b8376aaafd0f257f65ab4ca1902",
+      "Build/CesiumUnminified/Workers/gaussianSplatSorter.js": "6166a0fd12d5a3f5f56cde0b88a79ad957494724918eb3f247b1f7db67667067",
+      "Build/CesiumUnminified/Workers/gaussianSplatTextureGenerator.js": "f20c658226fcac5ff807e9fc1db1fb683fd8bf0fdbec580111e7f4686225af24",
+      "node_modules/@spz-loader/core/dist/index.js": "9bbceed093fc6add95c3d88ff63637a5269952b505fb5855407852f8b73a2fd0"
+    },
+    "snapshotBuilds": 5,
+    "tileLoads": 139,
+    "tileUnloads": 0,
+    "heap": {
+      "usedSize": 17010544,
+      "totalSize": 19275776,
+      "embedderHeapUsedSize": 841080,
+      "backingStorageSize": 995995935
+    },
+    "worker": [
+      {
+        "bytes": 25045632,
+        "keys": 1,
+        "peak": 25045632,
+        "sets": 5,
+        "releases": 8,
+        "budget": 134217728
+      }
+    ],
+    "timingExcluded": false,
+    "hostBusyFraction": 0.0843590004407826,
+    "pixelSha256": "224b841d3ce2980d91c428b88b30d11ebaa6db5b728abef1d476e797e0b7f57f",
+    "startupFrameP95": 39.39999997615814,
+    "firstVisibleFromFirstStartupSampleMs": [
+      1025.6000000238419
+    ]
+  },
+  {
     "label": "pressure-bike-newdefault-0-0",
     "run": {
       "label": "pressure-bike-newdefault-0-0",

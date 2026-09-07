@@ -22,7 +22,7 @@ try {
       check(a.cloud.numPoints===b.cloud.numPoints,"Point count changed");
       check(!Object.keys(b.primitive.attributes).some(k=>k.includes("SH_DEGREE_")),"SH attributes remain");
       for(const field of ["positions","scales","rotations","alphas","colors"]){
-        const x=new Uint8Array(a.cloud[field].buffer),y=new Uint8Array(b.cloud[field].buffer);
+        const x=new Uint8Array(a.cloud[field].buffer,a.cloud[field].byteOffset,a.cloud[field].byteLength),y=new Uint8Array(b.cloud[field].buffer,b.cloud[field].byteOffset,b.cloud[field].byteLength);
         check(x.length===y.length&&x.every((v,i)=>v===y[i]),`Changed ${field}`);
       }
       results.push({file,points:b.cloud.numPoints,degree:0,geometryAndBaseColorIdentical:true});

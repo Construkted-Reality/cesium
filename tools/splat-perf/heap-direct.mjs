@@ -6,6 +6,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { GPU_LAUNCH_ARGS } from "./bench.mjs";
 const out=process.env.SPLAT_RESULTS;
+const label=process.env.SPLAT_HEAP_LABEL||"heap-direct";
+const reuse=process.env.SPLAT_HEAP_REUSE==="1";
 if(!out){throw new Error("SPLAT_RESULTS is required");}
 const profile=mkdtempSync(join(tmpdir(),"splat-heap-"));
 // Obtain the same launch defaults as the comparison runner, then close this server.
@@ -14,9 +16,10 @@ const launcher=await chromium.launchServer({headless:true,channel:"chromium",arg
 const [executable,...launchArgs]=launcher.process().spawnargs;
 await launcher.close();
 const args=launchArgs.filter(a=>!a.startsWith("--user-data-dir=")&&a!=="--remote-debugging-pipe"&&a!=="--no-startup-window");
-writeFileSync(`${out}/heap-direct-launch.json`,JSON.stringify({executable,args},null,2));
+writeFileSync(`${out}/${label}-launch.json`,JSON.stringify({executable,args},null,2));
 const child=spawn(executable,[...args,"--remote-debugging-port=0",`--user-data-dir=${profile}`,"about:blank"],{stdio:"ignore"});
 
+const childExited=new Promise(resolve=>child.once("exit",resolve));
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 let ws;
 try {
@@ -29,7 +32,19 @@ try {
  const pending=new Map();
  ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.method==="HeapProfiler.addHeapSnapshotChunk"){snapshot?.write(m.params.chunk);}if(m.id){const p=pending.get(m.id);if(p){pending.delete(m.id);clearTimeout(p.timer);if(m.error){p.reject(new Error(m.error.message));}else {p.resolve(m.result);}}}};
  const call=(method,params={})=>new Promise((resolve,reject)=>{const id=++next;const timer=setTimeout(()=>{pending.delete(id);reject(new Error(`Timeout: ${method}`));},240000);pending.set(id,{resolve,reject,timer});ws.send(JSON.stringify({id,method,params}));});
- const evaluate=async expression=>{const r=await call("Runtime.evaluate",{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails){throw new Error(JSON.stringify(r.exceptionDetails));}return r.result.value;};
+ const scripts=new Map();
+ const evaluate=async expression=>{
+ let r;
+ if(reuse && expression.startsWith("(async()=>")) {
+   if(!scripts.has(expression)) {
+     const name=`__heapProbe${scripts.size}`;
+     const installed=await call("Runtime.evaluate",{expression:`globalThis.${name} = ${expression.slice(1,-3)}; true`,returnByValue:true});
+     if(installed.exceptionDetails){throw new Error(JSON.stringify(installed.exceptionDetails));}
+     scripts.set(expression,name);
+   }
+   r=await call("Runtime.evaluate",{expression:`globalThis.${scripts.get(expression)}()`,awaitPromise:true,returnByValue:true});
+ } else {r=await call("Runtime.evaluate",{expression,awaitPromise:true,returnByValue:true});}
+if(r.exceptionDetails){throw new Error(JSON.stringify(r.exceptionDetails));}return r.result.value;};
  await call("Emulation.setDeviceMetricsOverride",{width:960,height:540,deviceScaleFactor:1,mobile:false});
  await new Promise(r=>setTimeout(r,1000));
  await call("Page.navigate",{url:"http://127.0.0.1:8099/tools/splat-perf/loading-harness.html?tileset=/splat-data/oracle-run/geo-newdefault/tileset.json&production=candidate&mode=static&sse=8&frames=30&warmup=60&width=960&height=540&capture=1"});
@@ -40,8 +55,8 @@ try {
   const state=await evaluate(`(async()=>{for(const t of window.__round2Tilesets)window.__scene.primitives.remove(t);window.__round2Tilesets.length=0;window.__splatPrimitive=null;for(let i=0;i<120;i++)await new Promise(r=>requestAnimationFrame(r));return {gl:window.__telemetry.gl,telemetryLengths:Object.fromEntries(Object.entries(window.__telemetry).filter(([,v])=>Array.isArray(v)).map(([k,v])=>[k,v.length]))};})()`);
   await call("HeapProfiler.collectGarbage");
   rows.push({cycle,heap:await call("Runtime.getHeapUsage"),state});
-  writeFileSync(`${out}/heap-direct.json`,JSON.stringify(rows,null,2));
-  if([0,23,95].includes(cycle)){snapshot=createWriteStream(`${out}/heap-direct-${cycle}.heapsnapshot`);await call("HeapProfiler.takeHeapSnapshot",{reportProgress:false});const stream=snapshot;await new Promise(r=>stream.end(r));snapshot=undefined;}
+  writeFileSync(`${out}/${label}.json`,JSON.stringify(rows,null,2));
+  if([0,23,95].includes(cycle)){snapshot=createWriteStream(`${out}/${label}-${cycle}.heapsnapshot`);await call("HeapProfiler.takeHeapSnapshot",{reportProgress:false});const stream=snapshot;await new Promise(r=>stream.end(r));snapshot=undefined;}
   console.log(JSON.stringify(rows.at(-1)));
  }
-}finally{ws?.close();child.kill("SIGTERM");await new Promise(r=>child.once("exit",r));rmSync(profile,{recursive:true,force:true});}
+}finally{ws?.close();child.kill("SIGTERM");await childExited;rmSync(profile,{recursive:true,force:true});}

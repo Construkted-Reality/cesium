@@ -45,3 +45,15 @@ Position cache entries return to zero. Worker WebAssembly memory sizes remain st
 Initial heap comparisons show code generation and browser network records as the largest growing groups.
 A 96-cycle direct Chrome DevTools Protocol run omits Playwright network tracking and never enables the Network domain.
 This control will test whether those groups plateau or continue to accumulate.
+
+## Final controls
+
+Two workers also perform well without coalescing: Geo takes 4180 and 4377 ms; Bike takes 1611 and 1480 ms.
+The fixed snapshot delay is therefore not a dependency for production worker integration.
+The direct 96-cycle control has no network-inspector resource records. Its live tile counts and GPU resource counts remain constant.
+Used heap reaches 15.20 MB, with only 358 bytes of buffer-storage change from the first removal.
+Reusing lifecycle functions in a second 96-cycle control does not remove the small late code-heap increase.
+We leave that attribution open and do not claim a complete heap plateau.
+The direct-driver failures occur before any snapshot builds. Logs preserve the missing URL, zero drawing-buffer, and expired script-ID attempts.
+The final driver uses the comparison launch defaults, a startup wait, preserved drawing buffer, and optional persistent lifecycle functions.
+All 235 regenerated fixture hashes match the original derived fixture. Sampled browser field checks pass again.

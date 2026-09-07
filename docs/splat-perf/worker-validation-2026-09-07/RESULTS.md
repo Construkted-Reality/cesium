@@ -92,6 +92,10 @@ Both runs use the same built engine and fixed camera. The prototype has two work
 | Bike | 1908, 1947 | 1638, 1412 | 20.9% | 42.3, 44.5 | 21.4, 20.6 |
 
 Final Vulkan captures match exactly. These gains describe loading and startup responsiveness, not steady-state rendering speed.
+A separate two-worker comparison removes coalescing. Geo loads in 4180 and 4377 ms; Bike loads in 1611 and 1480 ms.
+The corresponding coalesced runs take 4007 and 4094 ms for Geo, and 1604 and 1403 ms for Bike.
+All eight captures match. Most of the loading benefit survives without a fixed snapshot delay.
+Production integration should therefore start with the worker pool and preserve the current snapshot policy.
 A second decoder worker adds another JavaScript heap and another possible native decoder allocation.
 In the 24-cycle pool test, each decoder worker reaches a largest observed native memory allocation of about 26 MB.
 That counter is a per-instance high-water mark, not retained memory after garbage collection or a bound for larger inputs.
@@ -110,7 +114,17 @@ This identifies inspector retention rather than an inference from object names a
 The number of live `Cesium3DTile` objects remains 235 in both snapshots. One original tileset remains referenced by the benchmark harness.
 There is no increase in these object counts across the 24 cycles. This does not constitute a general absence-of-leaks claim.
 The 96-cycle control uses a direct Chrome DevTools Protocol connection and does not enable network inspection.
-Its results are recorded separately when the run completes.
+Its snapshots contain no network-inspector resource records. Tile-object counts remain unchanged.
+Used heap rises from 13.33 MB at cycle 0 to 14.75 MB at cycle 23 and 15.20 MB at cycle 95.
+Buffer storage changes by 358 bytes between the first and last removals. Live GPU resource counts remain constant.
+From cycle 23 to cycle 95, instruction streams add 211328 bytes and code byte arrays add 104100 bytes.
+The growth slows, but these results do not demonstrate a complete heap plateau.
+
+A second 96-cycle control reuses the two lifecycle functions to test repeated driver evaluation as a possible cause.
+Reusing these functions does not eliminate the growth: used heap reaches 15.21 MB after 96 cycles.
+The remaining code growth needs further attribution before a production memory fix is justified.
+The failed direct-driver setup attempts remain in the raw logs. They fail before any splat snapshot builds.
+The working control matches the benchmark launch flags, waits for startup, and preserves the drawing buffer.
 
 ## 5. Hardware OpenGL and degree-0 SPZ
 
@@ -136,7 +150,16 @@ Run a batch with `SPLAT_RESULTS=<output> node tools/splat-perf/loading-run.mjs <
 Run `summarize-worker-validation.py <output> <report-directory>` to produce the compact measurements.
 Run `summarize-heap.py <first.heapsnapshot> <later.heapsnapshot>` to compare node groups and retaining paths.
 Run `SPLAT_RESULTS=<output> node tools/splat-perf/heap-direct.mjs` for the 96-cycle control.
+Set `SPLAT_HEAP_REUSE=1` and `SPLAT_HEAP_LABEL=heap-reused` for the function-reuse control.
 
 Raw captures, heap snapshots, logs, and full telemetry remain under `/mnt/data2/cesium-splat-perf/worker-validation-results` on the server.
 The artifact manifest records hashes. The compact measurements retain errors, configuration, timings, resource counts, and source hashes.
 Run GPU batches sequentially. Restore graphics and memory clocks after measurements.
+
+## Validation status
+
+All completed browser cases report no browser errors and no WebGL errors.
+Both 96-cycle controls and all three 24-cycle resource tests complete.
+The fixture recheck reproduces all 235 hashes and passes the sampled browser field comparisons.
+ESLint and Python syntax checks pass for the changed tools. Normal commit hooks pass.
+Engine source files do not change, so this validation does not repeat the engine unit suite from PR #4.

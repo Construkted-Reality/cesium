@@ -21,6 +21,9 @@ worker decoding, runtime cache budgets, and longer memory tests.
 The [production loading follow-up](production-loading-2026-09-07/RESULTS.md) integrates direct packing
 and documents the application-wide `GaussianSplatPrimitive.maximumCacheByteLength` option.
 
+The [worker validation](worker-validation-2026-09-07/RESULTS.md) tests decoder pools, snapshot coalescing,
+heap retention, hardware OpenGL, and degree-0 SPZ loading. These changes remain experimental.
+
 The remaining sections record the original optimization round. Their file
 counts, cache policy, and test status refer to that historical baseline. Read
 the follow-up results for the current changes and validation.

@@ -9,6 +9,7 @@ from pathlib import Path
 
 source, target = map(Path, sys.argv[1:3])
 assert source.resolve() != target.resolve()
+assert source.resolve() not in target.resolve().parents, "Target must be outside the source tree"
 assert not target.exists(), "Refuse to overwrite an existing fixture"
 target.mkdir(parents=True)
 records = []
@@ -24,6 +25,8 @@ for path in source.rglob("*"):
         assert magic == 0x46546c67 and version == 2 and size == len(data)
         length, kind = struct.unpack_from("<II", data, 12)
         assert kind == 0x4e4f534a
+        binary_length, binary_kind = struct.unpack_from("<II", data, 20+length)
+        assert binary_kind == 0x004e4942 and 28+length+binary_length == len(data)
         gltf = json.loads(data[20:20+length])
         primitive = gltf["meshes"][0]["primitives"][0]
         extension = primitive["extensions"]["KHR_gaussian_splatting"]["extensions"]["KHR_gaussian_splatting_compression_spz_2"]

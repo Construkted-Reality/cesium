@@ -545,6 +545,11 @@
     "sha256": "780d623d4c2f12e0af977f67df70d767f5b91f089831e26fbbffaf1b0f2eb95f"
   },
   {
+    "file": "fixture-recheck.log",
+    "bytes": 439,
+    "sha256": "5fb930d91b54dad566b18e8920534114e7793983afa2622b92a60cb0d9b4bc1b"
+  },
+  {
     "file": "gl-hardware-smoke.json",
     "bytes": 121698,
     "sha256": "8c62991aa60ab2d5ce43404632800c4d7fb91d85511e7cd9b1f71b40d228ee63"
@@ -661,13 +666,23 @@
   },
   {
     "file": "heap-capture.log",
-    "bytes": 5815,
-    "sha256": "b1ba063a81d8382b6166c2aed6cbe42313458fb9cdb8df1783509a34462d996b"
+    "bytes": 40786,
+    "sha256": "8d507ba7380d92414854474bdb6cd1cb8d8ec43d1d7504d610574fb5e5567cc6"
   },
   {
     "file": "heap-direct-0.heapsnapshot",
     "bytes": 29298018,
     "sha256": "f3b75f8702d09967813a350162a854f7fbaf3884f0decebac56f297ab1c06e00"
+  },
+  {
+    "file": "heap-direct-23.heapsnapshot",
+    "bytes": 30092254,
+    "sha256": "98b2539f4cdeb9b581c25eb9be1b4fa19d7e4e6e3c12c73873ac386c5204ab25"
+  },
+  {
+    "file": "heap-direct-95.heapsnapshot",
+    "bytes": 30480867,
+    "sha256": "7be455c89fe32dd71f3881739549b6c5160484572f193555194ddc370b5c80e4"
   },
   {
     "file": "heap-direct-initial-failure.log",
@@ -680,9 +695,14 @@
     "sha256": "7790d9c0779fc18065b4af700373d741eb3bbafd384b291c8b8ca96d0b8f9eb3"
   },
   {
+    "file": "heap-direct-summary.json",
+    "bytes": 21925898,
+    "sha256": "3748895026382885d8f1681a88d465eff01e8e07c59c6814270d5039ca7da13f"
+  },
+  {
     "file": "heap-direct.json",
-    "bytes": 8981,
-    "sha256": "d748d1f7c57a48e6d4c16bbf004588e9e55c9c8bedcfc42cf470119e9a2337c4"
+    "bytes": 62484,
+    "sha256": "5aa8d088f8f8d6822d3bbb61b4287e69075f0c9a88784f91e0c4221630936a13"
   },
   {
     "file": "heap-direct.log",
@@ -713,6 +733,46 @@
     "file": "heap-retry.log",
     "bytes": 1524,
     "sha256": "331c4452d21fe17b72fcf285929596f3b38b862459183b181a3218ab2dc4e176"
+  },
+  {
+    "file": "heap-reused-0.heapsnapshot",
+    "bytes": 29267931,
+    "sha256": "d6e22ef72ba0e6e1fb8e3d12468f6fe4202ad5f842a817d5b4b76fec88f2748e"
+  },
+  {
+    "file": "heap-reused-23.heapsnapshot",
+    "bytes": 30107948,
+    "sha256": "f3d9f213045927536a5604057762636b2696de08744c55764a28a2bce83c3e4c"
+  },
+  {
+    "file": "heap-reused-95.heapsnapshot",
+    "bytes": 30496589,
+    "sha256": "5d5d51c42f89443e32a5da5b5f97208d81395d58000a92d3a8dbf20769e1c176"
+  },
+  {
+    "file": "heap-reused-first-failure.log",
+    "bytes": 1718,
+    "sha256": "ef663e1c232031e2573f078d957509005ed72591c4dccb726f33daa9e3e72e66"
+  },
+  {
+    "file": "heap-reused-launch.json",
+    "bytes": 2191,
+    "sha256": "7790d9c0779fc18065b4af700373d741eb3bbafd384b291c8b8ca96d0b8f9eb3"
+  },
+  {
+    "file": "heap-reused-summary.json",
+    "bytes": 21930805,
+    "sha256": "60aadbfd30faf9837bc11097a81a963e22bec46b343ddcb38963e147d7ec12f6"
+  },
+  {
+    "file": "heap-reused.json",
+    "bytes": 62488,
+    "sha256": "e0244ea7d150a6ae8c39a9f1d22d5a4db1bfd644833beda249c6082bf753d099"
+  },
+  {
+    "file": "heap-reused.log",
+    "bytes": 40790,
+    "sha256": "42761ea39924b4256e8faee045b620252a874e1308d8a3515cdfd861c5556f86"
   },
   {
     "file": "heap-sandbox.log",
@@ -963,6 +1023,136 @@
     "file": "multi-1000.json",
     "bytes": 950238,
     "sha256": "d7d3963290db905420d00e599f11b48043ac7715363a34b82af2ba0acbcd6559"
+  },
+  {
+    "file": "pool-isolation-bike-newdefault-0-0-live.json",
+    "bytes": 103,
+    "sha256": "267001331d399dfbb3601550514fea493d35b2c9397844c5c38accccdb76fa72"
+  },
+  {
+    "file": "pool-isolation-bike-newdefault-0-0.json",
+    "bytes": 188725,
+    "sha256": "2e274f1c4d0865afc41bbb3b375aba3887f547c6cc747ba2672f028fe4cc99ee"
+  },
+  {
+    "file": "pool-isolation-bike-newdefault-0-0.raw",
+    "bytes": 8294400,
+    "sha256": "b1779e5d06a911c6d756d8a9b1e80cffa0615f1c46c596ee4bfe8bd2d064db60"
+  },
+  {
+    "file": "pool-isolation-bike-newdefault-0-1-live.json",
+    "bytes": 106,
+    "sha256": "a980a0acfbcfa638db1fed3033cde2b1bbfdd9e4d7bfc67475a834c2a24d2695"
+  },
+  {
+    "file": "pool-isolation-bike-newdefault-0-1.json",
+    "bytes": 186293,
+    "sha256": "1fbe0bae1ff2fa235e6491597b19cac5beb7fbd68b66c29138b7210071c2eae4"
+  },
+  {
+    "file": "pool-isolation-bike-newdefault-0-1.raw",
+    "bytes": 8294400,
+    "sha256": "b1779e5d06a911c6d756d8a9b1e80cffa0615f1c46c596ee4bfe8bd2d064db60"
+  },
+  {
+    "file": "pool-isolation-bike-newdefault-1000-0-live.json",
+    "bytes": 103,
+    "sha256": "7f4fd9bca8d37f02f8b5fc2384393ee678f2ca858bd7fb940d0ea2652045b965"
+  },
+  {
+    "file": "pool-isolation-bike-newdefault-1000-0.json",
+    "bytes": 190806,
+    "sha256": "5591a99979f39fb31b402e9bcba18185574e05d11068b542ec2e11f28b74b83a"
+  },
+  {
+    "file": "pool-isolation-bike-newdefault-1000-0.raw",
+    "bytes": 8294400,
+    "sha256": "b1779e5d06a911c6d756d8a9b1e80cffa0615f1c46c596ee4bfe8bd2d064db60"
+  },
+  {
+    "file": "pool-isolation-bike-newdefault-1000-1-live.json",
+    "bytes": 106,
+    "sha256": "8812c8e79842c1bb680b48e974adcc964c4d2453bd79f62db3458738c63dd093"
+  },
+  {
+    "file": "pool-isolation-bike-newdefault-1000-1.json",
+    "bytes": 187687,
+    "sha256": "1fb0b37ce4919b19c3a4c41a9f61f57e0a995be2bc66e675463da6e398d5b5a6"
+  },
+  {
+    "file": "pool-isolation-bike-newdefault-1000-1.raw",
+    "bytes": 8294400,
+    "sha256": "b1779e5d06a911c6d756d8a9b1e80cffa0615f1c46c596ee4bfe8bd2d064db60"
+  },
+  {
+    "file": "pool-isolation-geo-newdefault-0-0-live.json",
+    "bytes": 102,
+    "sha256": "8421e5b62aa0b0347b100e29f88c13420a293c5556c5d9d1192b12a675d08d06"
+  },
+  {
+    "file": "pool-isolation-geo-newdefault-0-0.json",
+    "bytes": 233186,
+    "sha256": "2b9a63439735c320be42bc077a3b5d81d67fa83dc646dc3ebd7124d6215a56d4"
+  },
+  {
+    "file": "pool-isolation-geo-newdefault-0-0.raw",
+    "bytes": 8294400,
+    "sha256": "224b841d3ce2980d91c428b88b30d11ebaa6db5b728abef1d476e797e0b7f57f"
+  },
+  {
+    "file": "pool-isolation-geo-newdefault-0-1-live.json",
+    "bytes": 102,
+    "sha256": "8421e5b62aa0b0347b100e29f88c13420a293c5556c5d9d1192b12a675d08d06"
+  },
+  {
+    "file": "pool-isolation-geo-newdefault-0-1.json",
+    "bytes": 233646,
+    "sha256": "1e19fc83788d7c0726206010769a1d6fca024a38bfcd203d489c23d16e0cc0ab"
+  },
+  {
+    "file": "pool-isolation-geo-newdefault-0-1.raw",
+    "bytes": 8294400,
+    "sha256": "224b841d3ce2980d91c428b88b30d11ebaa6db5b728abef1d476e797e0b7f57f"
+  },
+  {
+    "file": "pool-isolation-geo-newdefault-1000-0-live.json",
+    "bytes": 102,
+    "sha256": "f6821f4723abbc88ea28d13aeadff727d8182710b3eca9fa855b0837b288bc8a"
+  },
+  {
+    "file": "pool-isolation-geo-newdefault-1000-0.json",
+    "bytes": 234789,
+    "sha256": "062090c9be9bc799ba244d3901e373c961c1a03174c10299af80720b042266e1"
+  },
+  {
+    "file": "pool-isolation-geo-newdefault-1000-0.raw",
+    "bytes": 8294400,
+    "sha256": "224b841d3ce2980d91c428b88b30d11ebaa6db5b728abef1d476e797e0b7f57f"
+  },
+  {
+    "file": "pool-isolation-geo-newdefault-1000-1-live.json",
+    "bytes": 102,
+    "sha256": "f6821f4723abbc88ea28d13aeadff727d8182710b3eca9fa855b0837b288bc8a"
+  },
+  {
+    "file": "pool-isolation-geo-newdefault-1000-1.json",
+    "bytes": 237945,
+    "sha256": "e2a5867bf36a81eb3a1d1d02fb38c888083c82a82c8ccaa03253d441e0e44861"
+  },
+  {
+    "file": "pool-isolation-geo-newdefault-1000-1.raw",
+    "bytes": 8294400,
+    "sha256": "224b841d3ce2980d91c428b88b30d11ebaa6db5b728abef1d476e797e0b7f57f"
+  },
+  {
+    "file": "pool-isolation.json",
+    "bytes": 2958,
+    "sha256": "87bc7a3ecc2b068525c1e9d51656c4c11d2cb8471c03c21f1c8f231996488f70"
+  },
+  {
+    "file": "pool-isolation.log",
+    "bytes": 4745,
+    "sha256": "02b5eba93288e4c8dc2211ad758b6f5bdd154f499c33b0f54499be8a5c26031a"
   },
   {
     "file": "pressure-bike-newdefault-0-0-live.json",
