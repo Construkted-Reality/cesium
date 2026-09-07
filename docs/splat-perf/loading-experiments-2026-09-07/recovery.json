@@ -1,0 +1,1 @@
+[{"label": "worker-cancellation", "loading": "worker", "cancellation": "1", "mode": "static", "frames": "30", "warmup": "60", "sse": "8", "width": "960", "height": "540", "freeze": "1", "settleFrozen": "120"}]

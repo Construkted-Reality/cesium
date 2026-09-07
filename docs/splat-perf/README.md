@@ -16,6 +16,8 @@ dense harmonics packing.
 
 The [streaming and GPU tests](streaming-gpu-2026-09-07/RESULTS.md) validate PR #2
 under cache pressure and identify the next optimization targets.
+The [loading experiments](loading-experiments-2026-09-07/RESULTS.md) measure direct packing,
+worker decoding, runtime cache budgets, and longer memory tests.
 
 The remaining sections record the original optimization round. Their file
 counts, cache policy, and test status refer to that historical baseline. Read

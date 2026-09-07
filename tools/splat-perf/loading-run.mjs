@@ -27,6 +27,21 @@ for (const run of runs) {
         if(direct)return direct.typedArray.buffer.__packedSH;`);
       await route.fulfill({response,body});
     });
+    if(run.wasmProbe==="1") {
+      await context.route("**/Workers/gaussianSplatTextureGenerator.js",async route=> {
+        const response=await route.fetch();let body=await response.text();
+        const anchor="initSync({ module: wasmConfig.wasmBinary });";
+        if(!body.includes(anchor)){throw new Error("Missing texture WASM anchor");}
+        body=body.replace(anchor,"const wasmInstance=initSync({ module: wasmConfig.wasmBinary }); globalThis.__wasmHeapBytes=()=>wasmInstance.memory.buffer.byteLength;");
+        await route.fulfill({response,body});
+      });
+      await context.route("**/node_modules/@spz-loader/core/dist/index.js",async route=> {
+        const response=await route.fetch();let body=await response.text();const anchor="return xr(a, H), T;";
+        if(!body.includes(anchor)){throw new Error("Missing decoder WASM anchor");}
+        body=body.replace(anchor,`globalThis.__decoderHeapPeak=Math.max(globalThis.__decoderHeapPeak||0,a.HEAPU8.byteLength); ${anchor}`);
+        await route.fulfill({response,body});
+      });
+    }
     await context.route("**/Workers/gaussianSplatSorter.js", async route => {
       const response=await route.fetch(); let body=await response.text();
       if(run.probe === "cache256") {
@@ -34,6 +49,7 @@ for (const run of runs) {
         if(!body.includes(budget)){throw new Error("Cache budget anchor missing");}
         body=body.replace(budget,"GaussianSplatPositionCache.maximumByteLength = 256 * 1024 * 1024;");
       }
+      if(run.wasmProbe==="1"){body=body.replace("initSync({ module: wasmConfig.wasmBinary });","const wasmInstance=initSync({ module: wasmConfig.wasmBinary }); globalThis.__wasmHeapBytes=()=>wasmInstance.memory.buffer.byteLength;");}
       const anchor="var cachedPositions = new GaussianSplatPositionCache_default();";
       if (!body.includes(anchor)) {throw new Error("Worker instrumentation anchor missing");}
       body=body.replace(anchor, `${anchor}
@@ -62,16 +78,17 @@ cachedPositions.set = function(...args) { originalSet(...args); globalThis.__cac
         try {
           ({sessionId}=await bcdp.send("Target.attachToTarget",{targetId:info.targetId,flatten:false}));
           let counter=0;
-          const call=method=>new Promise((resolve,reject)=> {
+          const call=(method,params={})=>new Promise((resolve,reject)=> {
             const id=++counter;
             const timeout = {};
             const onMessage=e=> {if(e.sessionId!==sessionId){return;}const m=JSON.parse(e.message);if(m.id!==id){return;}clearTimeout(timeout.id);bcdp.off("Target.receivedMessageFromTarget",onMessage);if(m.error){reject(new Error(m.error.message));}else{resolve(m.result);}};
             timeout.id=setTimeout(()=>{bcdp.off("Target.receivedMessageFromTarget",onMessage);reject(new Error("Worker heap timeout"));},10000);
             bcdp.on("Target.receivedMessageFromTarget",onMessage);
-            bcdp.send("Target.sendMessageToTarget",{sessionId,message:JSON.stringify({id,method})}).catch(reject);
+            bcdp.send("Target.sendMessageToTarget",{sessionId,message:JSON.stringify({id,method,params})}).catch(reject);
           });
           await call("HeapProfiler.collectGarbage");
-          result.push({url:info.url,heap:await call("Runtime.getHeapUsage")});
+          const memory=(await call("Runtime.evaluate",{expression:"({wasmHeapBytes:globalThis.__wasmHeapBytes?.(),decoderHeapPeak:globalThis.__decoderHeapPeak})",returnByValue:true})).result.value;
+          result.push({url:info.url,heap:await call("Runtime.getHeapUsage"),memory});
         } catch(error) {result.push({url:info.url,error:String(error)});}
         finally {if(sessionId){await bcdp.send("Target.detachFromTarget",{sessionId}).catch(()=>{});}}
       }
@@ -154,6 +171,7 @@ cachedPositions.set = function(...args) { originalSet(...args); globalThis.__cac
           }
           await cdp.send("HeapProfiler.collectGarbage");
           const loaded={cycle,stage:"loaded",workerHeaps:await workerHeaps(),worker:await cache(),heap:await cdp.send("Runtime.getHeapUsage"),state:await page.evaluate(()=>({gl:window.__telemetry.gl,tiles:window.__round2Tilesets.map(t=>({count:t.gaussianSplatPrimitive?._numSplats,bytes:t.totalMemoryUsageInBytes}))}))};
+          if(loaded.workerHeaps.some(x=>x.error)){throw new Error(`Worker heap instrumentation failed: ${JSON.stringify(loaded.workerHeaps)}`);}
           result.lifecycle.push(loaded);
           await page.evaluate(async()=> {
             const scene=window.__scene, list=window.__round2Tilesets;

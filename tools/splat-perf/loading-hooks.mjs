@@ -67,6 +67,14 @@ const install=window.__installTelemetry;
 window.__installTelemetry=(scene,tilesets)=> {
   install(scene,tilesets);
   let frame=0;stats.budgetChanges=[];
+  stats.startup=[];let previous=performance.now();
+  if(params.get("mode")==="static"){scene.postRender.addEventListener(()=> {
+    if(window.__benchPhase==="measuring"||window.__benchPhase==="idle"){return;}
+    const now=performance.now();
+    stats.startup.push({t:now,dt:now-previous,tiles:tilesets.filter(t=>!t.isDestroyed()).map(t=>({count:t.gaussianSplatPrimitive?._numSplats||0,loaded:t.tilesLoaded,pending:!!t.gaussianSplatPrimitive?._pendingSnapshot,selected:t._selectedTiles.length}))});
+    previous=now;
+  });}
+
   scene.preUpdate.addEventListener(()=> {
     if(params.get("budgetChanges")==="1" && window.__benchPhase==="measuring") {
       const values={0:256,120:64,240:0,360:128};
@@ -75,3 +83,11 @@ window.__installTelemetry=(scene,tilesets)=> {
     }
   });
 };
+
+if(params.get("wasmProbe")==="1") {
+  const init=Cesium.TaskProcessor.prototype.initWebAssemblyModule;
+  Cesium.TaskProcessor.prototype.initWebAssemblyModule=function(options) {
+    if(this._workerPath==="gaussianSplatTextureGenerator"){this._workerPath=`${location.origin}/Build/CesiumUnminified/Workers/gaussianSplatTextureGenerator.js`;}
+    return init.call(this,options);
+  };
+}

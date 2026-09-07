@@ -1,0 +1,62 @@
+[
+  {
+    "name": "gl",
+    "args": [
+      "--ignore-gpu-blocklist",
+      "--enable-gpu",
+      "--enable-gpu-rasterization",
+      "--disable-frame-rate-limit",
+      "--disable-gpu-vsync",
+      "--use-angle=gl"
+    ],
+    "available": true,
+    "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+    "timer": false
+  },
+  {
+    "name": "gl-angle",
+    "args": [
+      "--ignore-gpu-blocklist",
+      "--enable-gpu",
+      "--enable-gpu-rasterization",
+      "--disable-frame-rate-limit",
+      "--disable-gpu-vsync",
+      "--use-gl=angle",
+      "--use-angle=gl"
+    ],
+    "available": true,
+    "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+    "timer": false
+  },
+  {
+    "name": "gl-ozone",
+    "args": [
+      "--ignore-gpu-blocklist",
+      "--enable-gpu",
+      "--enable-gpu-rasterization",
+      "--disable-frame-rate-limit",
+      "--disable-gpu-vsync",
+      "--use-gl=angle",
+      "--use-angle=gl",
+      "--ozone-platform=headless"
+    ],
+    "available": true,
+    "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+    "timer": false
+  },
+  {
+    "name": "vulkan",
+    "args": [
+      "--use-angle=vulkan",
+      "--enable-features=Vulkan",
+      "--ignore-gpu-blocklist",
+      "--enable-gpu",
+      "--enable-gpu-rasterization",
+      "--disable-frame-rate-limit",
+      "--disable-gpu-vsync"
+    ],
+    "available": true,
+    "renderer": "ANGLE (NVIDIA, Vulkan 1.4.329 (NVIDIA NVIDIA RTX A4000 (0x000024B0)), NVIDIA)",
+    "timer": true
+  }
+]

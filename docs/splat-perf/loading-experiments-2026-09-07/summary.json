@@ -1,0 +1,985 @@
+{
+  "streaming": [
+    {
+      "name": "stream-geo-newdefault-base-0",
+      "p95": 177.60000002384186,
+      "loads": 636,
+      "unloads": 546,
+      "builds": 25,
+      "backingBytes": 1359031161
+    },
+    {
+      "name": "stream-geo-newdefault-base-1",
+      "p95": 175.5999999642372,
+      "loads": 632,
+      "unloads": 546,
+      "builds": 25,
+      "backingBytes": 1317136155
+    },
+    {
+      "name": "stream-geo-newdefault-direct-0",
+      "p95": 139.0999999642372,
+      "loads": 644,
+      "unloads": 546,
+      "builds": 25,
+      "backingBytes": 1027576619
+    },
+    {
+      "name": "stream-geo-newdefault-direct-1",
+      "p95": 132.80000001192093,
+      "loads": 638,
+      "unloads": 544,
+      "builds": 25,
+      "backingBytes": 1009100725
+    },
+    {
+      "name": "stream-geo-newdefault-worker-0",
+      "p95": 106.90000003576279,
+      "loads": 544,
+      "unloads": 404,
+      "builds": 60,
+      "backingBytes": 1145984378
+    },
+    {
+      "name": "stream-geo-newdefault-worker-1",
+      "p95": 85.60000002384186,
+      "loads": 559,
+      "unloads": 425,
+      "builds": 53,
+      "backingBytes": 1118751946
+    },
+    {
+      "name": "stream-bike-newdefault-base-0",
+      "p95": 121.80000001192093,
+      "loads": 481,
+      "unloads": 358,
+      "builds": 24,
+      "backingBytes": 1004412339
+    },
+    {
+      "name": "stream-bike-newdefault-base-1",
+      "p95": 137.89999997615814,
+      "loads": 481,
+      "unloads": 358,
+      "builds": 24,
+      "backingBytes": 1004412339
+    },
+    {
+      "name": "stream-bike-newdefault-direct-0",
+      "p95": 122.60000002384186,
+      "loads": 463,
+      "unloads": 333,
+      "builds": 25,
+      "backingBytes": 723986451
+    },
+    {
+      "name": "stream-bike-newdefault-direct-1",
+      "p95": 124.30000001192093,
+      "loads": 475,
+      "unloads": 349,
+      "builds": 25,
+      "backingBytes": 705897787
+    },
+    {
+      "name": "stream-bike-newdefault-worker-0",
+      "p95": 54.80000001192093,
+      "loads": 551,
+      "unloads": 445,
+      "builds": 110,
+      "backingBytes": 571144616
+    },
+    {
+      "name": "stream-bike-newdefault-worker-1",
+      "p95": 52.5,
+      "loads": 544,
+      "unloads": 434,
+      "builds": 106,
+      "backingBytes": 580044784
+    }
+  ],
+  "fixed": [
+    {
+      "name": "image-geo-newdefault-base",
+      "count": 2087136,
+      "sha256": "224b841d3ce2980d91c428b88b30d11ebaa6db5b728abef1d476e797e0b7f57f",
+      "readyMs": 5937.199999988079,
+      "maxGapMs": 442.5,
+      "builds": 2,
+      "backingBytes": 1421784981
+    },
+    {
+      "name": "load-geo-newdefault-base-repeat",
+      "count": 2087136,
+      "sha256": "224b841d3ce2980d91c428b88b30d11ebaa6db5b728abef1d476e797e0b7f57f",
+      "readyMs": 6011.100000023842,
+      "maxGapMs": 439.9000000357628,
+      "builds": 2,
+      "backingBytes": 1421785383
+    },
+    {
+      "name": "image-geo-newdefault-direct",
+      "count": 2087136,
+      "sha256": "224b841d3ce2980d91c428b88b30d11ebaa6db5b728abef1d476e797e0b7f57f",
+      "readyMs": 5678.699999988079,
+      "maxGapMs": 463.69999998807907,
+      "builds": 2,
+      "backingBytes": 923409228
+    },
+    {
+      "name": "load-geo-newdefault-direct-repeat",
+      "count": 2087136,
+      "sha256": "224b841d3ce2980d91c428b88b30d11ebaa6db5b728abef1d476e797e0b7f57f",
+      "readyMs": 5717.100000023842,
+      "maxGapMs": 430.60000002384186,
+      "builds": 2,
+      "backingBytes": 923409851
+    },
+    {
+      "name": "image-geo-newdefault-worker",
+      "count": 2087136,
+      "sha256": "224b841d3ce2980d91c428b88b30d11ebaa6db5b728abef1d476e797e0b7f57f",
+      "readyMs": 8260.0,
+      "maxGapMs": 195.30000001192093,
+      "builds": 15,
+      "backingBytes": 1004073021
+    },
+    {
+      "name": "load-geo-newdefault-worker-repeat",
+      "count": 2087136,
+      "sha256": "224b841d3ce2980d91c428b88b30d11ebaa6db5b728abef1d476e797e0b7f57f",
+      "readyMs": 8262.100000023842,
+      "maxGapMs": 195.5,
+      "builds": 15,
+      "backingBytes": 995983715
+    },
+    {
+      "name": "image-bike-newdefault-base",
+      "count": 705883,
+      "sha256": "b1779e5d06a911c6d756d8a9b1e80cffa0615f1c46c596ee4bfe8bd2d064db60",
+      "readyMs": 2439.300000011921,
+      "maxGapMs": 216.80000001192093,
+      "builds": 3,
+      "backingBytes": 501393537
+    },
+    {
+      "name": "load-bike-newdefault-base-repeat",
+      "count": 705883,
+      "sha256": "b1779e5d06a911c6d756d8a9b1e80cffa0615f1c46c596ee4bfe8bd2d064db60",
+      "readyMs": 2304.599999964237,
+      "maxGapMs": 233.9000000357628,
+      "builds": 3,
+      "backingBytes": 499520419
+    },
+    {
+      "name": "image-bike-newdefault-direct",
+      "count": 705883,
+      "sha256": "b1779e5d06a911c6d756d8a9b1e80cffa0615f1c46c596ee4bfe8bd2d064db60",
+      "readyMs": 2144.800000011921,
+      "maxGapMs": 180.10000002384186,
+      "builds": 3,
+      "backingBytes": 330959385
+    },
+    {
+      "name": "load-bike-newdefault-direct-repeat",
+      "count": 705883,
+      "sha256": "b1779e5d06a911c6d756d8a9b1e80cffa0615f1c46c596ee4bfe8bd2d064db60",
+      "readyMs": 2187.800000011921,
+      "maxGapMs": 177.60000002384186,
+      "builds": 3,
+      "backingBytes": 330959787
+    },
+    {
+      "name": "image-bike-newdefault-worker",
+      "count": 705883,
+      "sha256": "b1779e5d06a911c6d756d8a9b1e80cffa0615f1c46c596ee4bfe8bd2d064db60",
+      "readyMs": 2821.5,
+      "maxGapMs": 100.80000001192093,
+      "builds": 12,
+      "backingBytes": 350509585
+    },
+    {
+      "name": "load-bike-newdefault-worker-repeat",
+      "count": 705883,
+      "sha256": "b1779e5d06a911c6d756d8a9b1e80cffa0615f1c46c596ee4bfe8bd2d064db60",
+      "readyMs": 3195.5,
+      "maxGapMs": 86.69999998807907,
+      "builds": 18,
+      "backingBytes": 355062768
+    }
+  ],
+  "memory": [
+    {
+      "name": "soak-geo-newdefault-base",
+      "cycles": 24,
+      "glLive": {
+        "createTexture": 8,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 6,
+        "createBuffer": 2,
+        "createVertexArray": 1,
+        "createProgram": 4
+      },
+      "checkpoints": [
+        {
+          "cycle": 0,
+          "heap": {
+            "usedSize": 14266084,
+            "totalSize": 15511552,
+            "embedderHeapUsedSize": 767008,
+            "backingStorageSize": 22624554
+          },
+          "workerHeaps": [
+            {
+              "url": "http://127.0.0.1:8099/Build/CesiumUnminified/Workers/gaussianSplatSorter.js",
+              "heap": {
+                "usedSize": 368648,
+                "totalSize": 1310720,
+                "embedderHeapUsedSize": 24440,
+                "backingStorageSize": 20277
+              }
+            },
+            {
+              "url": "blob:http://127.0.0.1:8099/f553783c-d4e3-4ea4-b9ab-51771d3b0f98",
+              "heap": {
+                "usedSize": 688956,
+                "totalSize": 1048576,
+                "embedderHeapUsedSize": 21680,
+                "backingStorageSize": 2903045
+              }
+            }
+          ]
+        },
+        {
+          "cycle": 12,
+          "heap": {
+            "usedSize": 15574244,
+            "totalSize": 16822272,
+            "embedderHeapUsedSize": 991856,
+            "backingStorageSize": 22625941
+          },
+          "workerHeaps": [
+            {
+              "url": "http://127.0.0.1:8099/Build/CesiumUnminified/Workers/gaussianSplatSorter.js",
+              "heap": {
+                "usedSize": 390052,
+                "totalSize": 1310720,
+                "embedderHeapUsedSize": 24440,
+                "backingStorageSize": 20277
+              }
+            },
+            {
+              "url": "blob:http://127.0.0.1:8099/f553783c-d4e3-4ea4-b9ab-51771d3b0f98",
+              "heap": {
+                "usedSize": 730472,
+                "totalSize": 1572864,
+                "embedderHeapUsedSize": 21680,
+                "backingStorageSize": 2903045
+              }
+            }
+          ]
+        },
+        {
+          "cycle": 23,
+          "heap": {
+            "usedSize": 15794080,
+            "totalSize": 17346560,
+            "embedderHeapUsedSize": 1213712,
+            "backingStorageSize": 22625941
+          },
+          "workerHeaps": [
+            {
+              "url": "http://127.0.0.1:8099/Build/CesiumUnminified/Workers/gaussianSplatSorter.js",
+              "heap": {
+                "usedSize": 390052,
+                "totalSize": 1310720,
+                "embedderHeapUsedSize": 24440,
+                "backingStorageSize": 20277
+              }
+            },
+            {
+              "url": "blob:http://127.0.0.1:8099/f553783c-d4e3-4ea4-b9ab-51771d3b0f98",
+              "heap": {
+                "usedSize": 730472,
+                "totalSize": 1572864,
+                "embedderHeapUsedSize": 21680,
+                "backingStorageSize": 2903045
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "soak-geo-newdefault-worker",
+      "cycles": 24,
+      "glLive": {
+        "createTexture": 8,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 6,
+        "createBuffer": 2,
+        "createVertexArray": 1,
+        "createProgram": 4
+      },
+      "checkpoints": [
+        {
+          "cycle": 0,
+          "heap": {
+            "usedSize": 14284840,
+            "totalSize": 15605760,
+            "embedderHeapUsedSize": 768520,
+            "backingStorageSize": 22624563
+          },
+          "workerHeaps": [
+            {
+              "url": "blob:http://127.0.0.1:8099/01469f10-2190-4b2e-af2c-3cd409774e80",
+              "heap": {
+                "usedSize": 701944,
+                "totalSize": 1572864,
+                "embedderHeapUsedSize": 21680,
+                "backingStorageSize": 2903045
+              }
+            },
+            {
+              "url": "http://127.0.0.1:8099/tools/splat-perf/loading-worker.mjs",
+              "heap": {
+                "usedSize": 782332,
+                "totalSize": 1216512,
+                "embedderHeapUsedSize": 22216,
+                "backingStorageSize": 244046
+              }
+            },
+            {
+              "url": "http://127.0.0.1:8099/Build/CesiumUnminified/Workers/gaussianSplatSorter.js",
+              "heap": {
+                "usedSize": 378336,
+                "totalSize": 1310720,
+                "embedderHeapUsedSize": 24440,
+                "backingStorageSize": 20277
+              }
+            }
+          ]
+        },
+        {
+          "cycle": 12,
+          "heap": {
+            "usedSize": 15347816,
+            "totalSize": 16654336,
+            "embedderHeapUsedSize": 890288,
+            "backingStorageSize": 22626028
+          },
+          "workerHeaps": [
+            {
+              "url": "blob:http://127.0.0.1:8099/01469f10-2190-4b2e-af2c-3cd409774e80",
+              "heap": {
+                "usedSize": 733564,
+                "totalSize": 1572864,
+                "embedderHeapUsedSize": 21680,
+                "backingStorageSize": 2903045
+              }
+            },
+            {
+              "url": "http://127.0.0.1:8099/tools/splat-perf/loading-worker.mjs",
+              "heap": {
+                "usedSize": 814416,
+                "totalSize": 1216512,
+                "embedderHeapUsedSize": 22216,
+                "backingStorageSize": 244046
+              }
+            },
+            {
+              "url": "http://127.0.0.1:8099/Build/CesiumUnminified/Workers/gaussianSplatSorter.js",
+              "heap": {
+                "usedSize": 392400,
+                "totalSize": 1310720,
+                "embedderHeapUsedSize": 24440,
+                "backingStorageSize": 20277
+              }
+            }
+          ]
+        },
+        {
+          "cycle": 23,
+          "heap": {
+            "usedSize": 15596184,
+            "totalSize": 16916480,
+            "embedderHeapUsedSize": 1144784,
+            "backingStorageSize": 22625288
+          },
+          "workerHeaps": [
+            {
+              "url": "blob:http://127.0.0.1:8099/01469f10-2190-4b2e-af2c-3cd409774e80",
+              "heap": {
+                "usedSize": 734156,
+                "totalSize": 1310720,
+                "embedderHeapUsedSize": 21680,
+                "backingStorageSize": 2903045
+              }
+            },
+            {
+              "url": "http://127.0.0.1:8099/tools/splat-perf/loading-worker.mjs",
+              "heap": {
+                "usedSize": 815580,
+                "totalSize": 1216512,
+                "embedderHeapUsedSize": 22216,
+                "backingStorageSize": 244046
+              }
+            },
+            {
+              "url": "http://127.0.0.1:8099/Build/CesiumUnminified/Workers/gaussianSplatSorter.js",
+              "heap": {
+                "usedSize": 395256,
+                "totalSize": 1048576,
+                "embedderHeapUsedSize": 24440,
+                "backingStorageSize": 20277
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "soak-bike-newdefault-worker",
+      "cycles": 24,
+      "glLive": {
+        "createTexture": 8,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 6,
+        "createBuffer": 2,
+        "createVertexArray": 1,
+        "createProgram": 4
+      },
+      "checkpoints": [
+        {
+          "cycle": 0,
+          "heap": {
+            "usedSize": 15179028,
+            "totalSize": 16392192,
+            "embedderHeapUsedSize": 783168,
+            "backingStorageSize": 22624875
+          },
+          "workerHeaps": [
+            {
+              "url": "blob:http://127.0.0.1:8099/160e1daf-f9e8-45db-a6aa-1f2ddd0f823d",
+              "heap": {
+                "usedSize": 695500,
+                "totalSize": 1572864,
+                "embedderHeapUsedSize": 21680,
+                "backingStorageSize": 2903045
+              }
+            },
+            {
+              "url": "http://127.0.0.1:8099/tools/splat-perf/loading-worker.mjs",
+              "heap": {
+                "usedSize": 783484,
+                "totalSize": 1216512,
+                "embedderHeapUsedSize": 22216,
+                "backingStorageSize": 244046
+              }
+            },
+            {
+              "url": "http://127.0.0.1:8099/Build/CesiumUnminified/Workers/gaussianSplatSorter.js",
+              "heap": {
+                "usedSize": 374248,
+                "totalSize": 1310720,
+                "embedderHeapUsedSize": 24440,
+                "backingStorageSize": 20277
+              }
+            }
+          ]
+        },
+        {
+          "cycle": 12,
+          "heap": {
+            "usedSize": 16087380,
+            "totalSize": 17178624,
+            "embedderHeapUsedSize": 815352,
+            "backingStorageSize": 22624939
+          },
+          "workerHeaps": [
+            {
+              "url": "blob:http://127.0.0.1:8099/160e1daf-f9e8-45db-a6aa-1f2ddd0f823d",
+              "heap": {
+                "usedSize": 731060,
+                "totalSize": 1572864,
+                "embedderHeapUsedSize": 21680,
+                "backingStorageSize": 2903045
+              }
+            },
+            {
+              "url": "http://127.0.0.1:8099/tools/splat-perf/loading-worker.mjs",
+              "heap": {
+                "usedSize": 812976,
+                "totalSize": 1216512,
+                "embedderHeapUsedSize": 22216,
+                "backingStorageSize": 244046
+              }
+            },
+            {
+              "url": "http://127.0.0.1:8099/Build/CesiumUnminified/Workers/gaussianSplatSorter.js",
+              "heap": {
+                "usedSize": 390084,
+                "totalSize": 1310720,
+                "embedderHeapUsedSize": 24440,
+                "backingStorageSize": 20277
+              }
+            }
+          ]
+        },
+        {
+          "cycle": 23,
+          "heap": {
+            "usedSize": 16314096,
+            "totalSize": 17702912,
+            "embedderHeapUsedSize": 904744,
+            "backingStorageSize": 22624939
+          },
+          "workerHeaps": [
+            {
+              "url": "blob:http://127.0.0.1:8099/160e1daf-f9e8-45db-a6aa-1f2ddd0f823d",
+              "heap": {
+                "usedSize": 733524,
+                "totalSize": 1572864,
+                "embedderHeapUsedSize": 21680,
+                "backingStorageSize": 2903045
+              }
+            },
+            {
+              "url": "http://127.0.0.1:8099/tools/splat-perf/loading-worker.mjs",
+              "heap": {
+                "usedSize": 814696,
+                "totalSize": 1216512,
+                "embedderHeapUsedSize": 22216,
+                "backingStorageSize": 244046
+              }
+            },
+            {
+              "url": "http://127.0.0.1:8099/Build/CesiumUnminified/Workers/gaussianSplatSorter.js",
+              "heap": {
+                "usedSize": 392992,
+                "totalSize": 1310720,
+                "embedderHeapUsedSize": 24440,
+                "backingStorageSize": 20277
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "wasm-soak-base",
+      "cycles": 8,
+      "glLive": {
+        "createTexture": 8,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 6,
+        "createBuffer": 2,
+        "createVertexArray": 1,
+        "createProgram": 4
+      },
+      "checkpoints": [
+        {
+          "cycle": 0,
+          "heap": {
+            "usedSize": 14266112,
+            "totalSize": 15511552,
+            "embedderHeapUsedSize": 799264,
+            "backingStorageSize": 22624898
+          },
+          "workerHeaps": [
+            {
+              "url": "http://127.0.0.1:8099/Build/CesiumUnminified/Workers/gaussianSplatTextureGenerator.js",
+              "heap": {
+                "usedSize": 345552,
+                "totalSize": 1048576,
+                "embedderHeapUsedSize": 24440,
+                "backingStorageSize": 18169
+              },
+              "memory": {
+                "wasmHeapBytes": 45940736
+              }
+            },
+            {
+              "url": "http://127.0.0.1:8099/Build/CesiumUnminified/Workers/gaussianSplatSorter.js",
+              "heap": {
+                "usedSize": 373328,
+                "totalSize": 1572864,
+                "embedderHeapUsedSize": 24440,
+                "backingStorageSize": 20366
+              },
+              "memory": {
+                "wasmHeapBytes": 19267584
+              }
+            }
+          ]
+        },
+        {
+          "cycle": 4,
+          "heap": {
+            "usedSize": 15236772,
+            "totalSize": 16560128,
+            "embedderHeapUsedSize": 775664,
+            "backingStorageSize": 22626078
+          },
+          "workerHeaps": [
+            {
+              "url": "http://127.0.0.1:8099/Build/CesiumUnminified/Workers/gaussianSplatTextureGenerator.js",
+              "heap": {
+                "usedSize": 383844,
+                "totalSize": 1572864,
+                "embedderHeapUsedSize": 24440,
+                "backingStorageSize": 18169
+              },
+              "memory": {
+                "wasmHeapBytes": 45940736
+              }
+            },
+            {
+              "url": "http://127.0.0.1:8099/Build/CesiumUnminified/Workers/gaussianSplatSorter.js",
+              "heap": {
+                "usedSize": 394632,
+                "totalSize": 1572864,
+                "embedderHeapUsedSize": 24440,
+                "backingStorageSize": 20366
+              },
+              "memory": {
+                "wasmHeapBytes": 19267584
+              }
+            }
+          ]
+        },
+        {
+          "cycle": 7,
+          "heap": {
+            "usedSize": 15414696,
+            "totalSize": 16822272,
+            "embedderHeapUsedSize": 853384,
+            "backingStorageSize": 22625993
+          },
+          "workerHeaps": [
+            {
+              "url": "http://127.0.0.1:8099/Build/CesiumUnminified/Workers/gaussianSplatTextureGenerator.js",
+              "heap": {
+                "usedSize": 384316,
+                "totalSize": 1572864,
+                "embedderHeapUsedSize": 24440,
+                "backingStorageSize": 18169
+              },
+              "memory": {
+                "wasmHeapBytes": 45940736
+              }
+            },
+            {
+              "url": "http://127.0.0.1:8099/Build/CesiumUnminified/Workers/gaussianSplatSorter.js",
+              "heap": {
+                "usedSize": 394820,
+                "totalSize": 1572864,
+                "embedderHeapUsedSize": 24440,
+                "backingStorageSize": 20366
+              },
+              "memory": {
+                "wasmHeapBytes": 19267584
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "wasm-soak-worker",
+      "cycles": 8,
+      "glLive": {
+        "createTexture": 8,
+        "createRenderbuffer": 2,
+        "createFramebuffer": 6,
+        "createBuffer": 2,
+        "createVertexArray": 1,
+        "createProgram": 4
+      },
+      "checkpoints": [
+        {
+          "cycle": 0,
+          "heap": {
+            "usedSize": 14272980,
+            "totalSize": 15343616,
+            "embedderHeapUsedSize": 762936,
+            "backingStorageSize": 22624465
+          },
+          "workerHeaps": [
+            {
+              "url": "http://127.0.0.1:8099/tools/splat-perf/loading-worker.mjs",
+              "heap": {
+                "usedSize": 786500,
+                "totalSize": 1478656,
+                "embedderHeapUsedSize": 22216,
+                "backingStorageSize": 244138
+              },
+              "memory": {
+                "decoderHeapPeak": 26017792
+              }
+            },
+            {
+              "url": "http://127.0.0.1:8099/Build/CesiumUnminified/Workers/gaussianSplatTextureGenerator.js",
+              "heap": {
+                "usedSize": 353280,
+                "totalSize": 1572864,
+                "embedderHeapUsedSize": 24184,
+                "backingStorageSize": 18169
+              },
+              "memory": {
+                "wasmHeapBytes": 46333952
+              }
+            },
+            {
+              "url": "http://127.0.0.1:8099/Build/CesiumUnminified/Workers/gaussianSplatSorter.js",
+              "heap": {
+                "usedSize": 383128,
+                "totalSize": 1572864,
+                "embedderHeapUsedSize": 24440,
+                "backingStorageSize": 20366
+              },
+              "memory": {
+                "wasmHeapBytes": 18481152
+              }
+            }
+          ]
+        },
+        {
+          "cycle": 4,
+          "heap": {
+            "usedSize": 14911308,
+            "totalSize": 16392192,
+            "embedderHeapUsedSize": 755208,
+            "backingStorageSize": 22626372
+          },
+          "workerHeaps": [
+            {
+              "url": "http://127.0.0.1:8099/tools/splat-perf/loading-worker.mjs",
+              "heap": {
+                "usedSize": 817208,
+                "totalSize": 1478656,
+                "embedderHeapUsedSize": 22216,
+                "backingStorageSize": 244138
+              },
+              "memory": {
+                "decoderHeapPeak": 26017792
+              }
+            },
+            {
+              "url": "http://127.0.0.1:8099/Build/CesiumUnminified/Workers/gaussianSplatTextureGenerator.js",
+              "heap": {
+                "usedSize": 383864,
+                "totalSize": 1572864,
+                "embedderHeapUsedSize": 24184,
+                "backingStorageSize": 18169
+              },
+              "memory": {
+                "wasmHeapBytes": 46333952
+              }
+            },
+            {
+              "url": "http://127.0.0.1:8099/Build/CesiumUnminified/Workers/gaussianSplatSorter.js",
+              "heap": {
+                "usedSize": 395128,
+                "totalSize": 1572864,
+                "embedderHeapUsedSize": 24440,
+                "backingStorageSize": 20366
+              },
+              "memory": {
+                "wasmHeapBytes": 18481152
+              }
+            }
+          ]
+        },
+        {
+          "cycle": 7,
+          "heap": {
+            "usedSize": 15126744,
+            "totalSize": 16130048,
+            "embedderHeapUsedSize": 781144,
+            "backingStorageSize": 22624232
+          },
+          "workerHeaps": [
+            {
+              "url": "http://127.0.0.1:8099/tools/splat-perf/loading-worker.mjs",
+              "heap": {
+                "usedSize": 818260,
+                "totalSize": 1478656,
+                "embedderHeapUsedSize": 22216,
+                "backingStorageSize": 244138
+              },
+              "memory": {
+                "decoderHeapPeak": 26017792
+              }
+            },
+            {
+              "url": "http://127.0.0.1:8099/Build/CesiumUnminified/Workers/gaussianSplatTextureGenerator.js",
+              "heap": {
+                "usedSize": 384964,
+                "totalSize": 1572864,
+                "embedderHeapUsedSize": 24184,
+                "backingStorageSize": 18169
+              },
+              "memory": {
+                "wasmHeapBytes": 46333952
+              }
+            },
+            {
+              "url": "http://127.0.0.1:8099/Build/CesiumUnminified/Workers/gaussianSplatSorter.js",
+              "heap": {
+                "usedSize": 395316,
+                "totalSize": 1572864,
+                "embedderHeapUsedSize": 24440,
+                "backingStorageSize": 20366
+              },
+              "memory": {
+                "wasmHeapBytes": 18481152
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "software": [
+    {
+      "name": "software-base",
+      "splats": {
+        "numSplats": 42279,
+        "sphericalHarmonicsDegree": 3,
+        "textureWidth": 8192,
+        "textureHeight": 11,
+        "sortRequestsDuringRun": 0,
+        "dataGenerationsDuringRun": 0
+      },
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "sha256": "30100944cf7717baea21b47b196b0bbf8f3e6a73adcafb6fcf2113d54be1cef8"
+    },
+    {
+      "name": "software-worker",
+      "splats": {
+        "numSplats": 42279,
+        "sphericalHarmonicsDegree": 3,
+        "textureWidth": 8192,
+        "textureHeight": 11,
+        "sortRequestsDuringRun": 0,
+        "dataGenerationsDuringRun": 0
+      },
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "sha256": "30100944cf7717baea21b47b196b0bbf8f3e6a73adcafb6fcf2113d54be1cef8"
+    }
+  ],
+  "degree0": [
+    {
+      "name": "degree0-base",
+      "splats": {
+        "numSplats": 959630,
+        "sphericalHarmonicsDegree": 3,
+        "textureWidth": 32768,
+        "textureHeight": 59,
+        "sortRequestsDuringRun": 0,
+        "dataGenerationsDuringRun": 0
+      },
+      "renderer": "ANGLE (NVIDIA, Vulkan 1.4.329 (NVIDIA NVIDIA RTX A4000 (0x000024B0)), NVIDIA)",
+      "sha256": "981ea61a2c08da0eadd97845ac150ce5b5fb009ad00cff1b16a68214c2af250d"
+    },
+    {
+      "name": "degree0-direct",
+      "splats": {
+        "numSplats": 959630,
+        "sphericalHarmonicsDegree": 3,
+        "textureWidth": 32768,
+        "textureHeight": 59,
+        "sortRequestsDuringRun": 0,
+        "dataGenerationsDuringRun": 0
+      },
+      "renderer": "ANGLE (NVIDIA, Vulkan 1.4.329 (NVIDIA NVIDIA RTX A4000 (0x000024B0)), NVIDIA)",
+      "sha256": "981ea61a2c08da0eadd97845ac150ce5b5fb009ad00cff1b16a68214c2af250d"
+    },
+    {
+      "name": "degree0-worker",
+      "splats": {
+        "numSplats": 959630,
+        "sphericalHarmonicsDegree": 3,
+        "textureWidth": 32768,
+        "textureHeight": 59,
+        "sortRequestsDuringRun": 0,
+        "dataGenerationsDuringRun": 0
+      },
+      "renderer": "ANGLE (NVIDIA, Vulkan 1.4.329 (NVIDIA NVIDIA RTX A4000 (0x000024B0)), NVIDIA)",
+      "sha256": "981ea61a2c08da0eadd97845ac150ce5b5fb009ad00cff1b16a68214c2af250d"
+    }
+  ],
+  "budget": {
+    "budgetValidation": {
+      "rejected": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "mainLimit": 0
+    },
+    "disabledWorker": [
+      {
+        "bytes": 0,
+        "keys": 0,
+        "peak": 144720072,
+        "sets": 252,
+        "releases": 294,
+        "budget": 0
+      }
+    ]
+  },
+  "cancellation": {
+    "records": [
+      {
+        "cycle": 0,
+        "destroyed": true,
+        "cancelled": 2,
+        "queue": {
+          "active": false,
+          "queued": 0
+        }
+      },
+      {
+        "cycle": 1,
+        "destroyed": true,
+        "cancelled": 3,
+        "queue": {
+          "active": false,
+          "queued": 0
+        }
+      },
+      {
+        "cycle": 2,
+        "destroyed": true,
+        "cancelled": 6,
+        "queue": {
+          "active": false,
+          "queued": 0
+        }
+      },
+      {
+        "cycle": 3,
+        "destroyed": true,
+        "cancelled": 3,
+        "queue": {
+          "active": false,
+          "queued": 0
+        }
+      },
+      {
+        "cycle": 4,
+        "destroyed": true,
+        "cancelled": 7,
+        "queue": {
+          "active": false,
+          "queued": 0
+        }
+      }
+    ],
+    "invalidRejected": true,
+    "recoveredCount": 462015
+  }
+}

@@ -1,0 +1,166 @@
+[
+  {
+    "degree": 0,
+    "count": 262144,
+    "identical": true,
+    "avoidedAttributeBytes": 0,
+    "packedBytes": 0,
+    "times": [
+      {
+        "label": "baseline",
+        "ms": 0.045940000000001646
+      },
+      {
+        "label": "direct",
+        "ms": 0.7258440000000093
+      },
+      {
+        "label": "direct",
+        "ms": 0.6902849999999887
+      },
+      {
+        "label": "baseline",
+        "ms": 0.005050000000011323
+      },
+      {
+        "label": "baseline",
+        "ms": 0.0045300000000025875
+      },
+      {
+        "label": "direct",
+        "ms": 0.6860640000000018
+      },
+      {
+        "label": "direct",
+        "ms": 0.7148150000000015
+      },
+      {
+        "label": "baseline",
+        "ms": 0.00593000000000643
+      }
+    ]
+  },
+  {
+    "degree": 1,
+    "count": 262144,
+    "identical": true,
+    "avoidedAttributeBytes": 9437184,
+    "packedBytes": 6291456,
+    "times": [
+      {
+        "label": "baseline",
+        "ms": 19.241337999999985
+      },
+      {
+        "label": "direct",
+        "ms": 11.920423999999969
+      },
+      {
+        "label": "direct",
+        "ms": 9.695309000000009
+      },
+      {
+        "label": "baseline",
+        "ms": 18.127411999999993
+      },
+      {
+        "label": "baseline",
+        "ms": 17.773038999999983
+      },
+      {
+        "label": "direct",
+        "ms": 10.852086999999983
+      },
+      {
+        "label": "direct",
+        "ms": 10.304083999999989
+      },
+      {
+        "label": "baseline",
+        "ms": 19.833302000000003
+      }
+    ]
+  },
+  {
+    "degree": 2,
+    "count": 262144,
+    "identical": true,
+    "avoidedAttributeBytes": 25165824,
+    "packedBytes": 12582912,
+    "times": [
+      {
+        "label": "baseline",
+        "ms": 48.109695999999985
+      },
+      {
+        "label": "direct",
+        "ms": 23.47543500000006
+      },
+      {
+        "label": "direct",
+        "ms": 23.177271999999903
+      },
+      {
+        "label": "baseline",
+        "ms": 46.18037400000003
+      },
+      {
+        "label": "baseline",
+        "ms": 46.15061400000013
+      },
+      {
+        "label": "direct",
+        "ms": 23.273594000000003
+      },
+      {
+        "label": "direct",
+        "ms": 22.96563100000003
+      },
+      {
+        "label": "baseline",
+        "ms": 48.04633600000011
+      }
+    ]
+  },
+  {
+    "degree": 3,
+    "count": 262144,
+    "identical": true,
+    "avoidedAttributeBytes": 47185920,
+    "packedBytes": 25165824,
+    "times": [
+      {
+        "label": "baseline",
+        "ms": 97.07759699999997
+      },
+      {
+        "label": "direct",
+        "ms": 42.799233000000186
+      },
+      {
+        "label": "direct",
+        "ms": 42.6876229999998
+      },
+      {
+        "label": "baseline",
+        "ms": 76.58398099999977
+      },
+      {
+        "label": "baseline",
+        "ms": 54.90560800000003
+      },
+      {
+        "label": "direct",
+        "ms": 36.95772700000043
+      },
+      {
+        "label": "direct",
+        "ms": 43.879799999999705
+      },
+      {
+        "label": "baseline",
+        "ms": 63.22058900000002
+      }
+    ]
+  }
+]

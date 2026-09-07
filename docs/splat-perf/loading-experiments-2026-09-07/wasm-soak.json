@@ -1,0 +1,32 @@
+[
+  {
+    "label": "wasm-soak-base",
+    "loading": "base",
+    "mode": "static",
+    "frames": "30",
+    "warmup": "120",
+    "sse": "8",
+    "width": "960",
+    "height": "540",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "lifecycle": "1",
+    "cycles": "8",
+    "wasmProbe": "1"
+  },
+  {
+    "label": "wasm-soak-worker",
+    "loading": "worker",
+    "mode": "static",
+    "frames": "30",
+    "warmup": "120",
+    "sse": "8",
+    "width": "960",
+    "height": "540",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "lifecycle": "1",
+    "cycles": "8",
+    "wasmProbe": "1"
+  }
+]
