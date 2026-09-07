@@ -44,6 +44,10 @@ for (const run of runs) {
         swap("const allowRebuild = wantsRebuild && !defined_default(this._pendingSnapshot);", `const coalesced = isBootstrap || snapshotIsStale || tileset.tilesLoaded || performance.now() - (this.__lastExperimentSnapshot || 0) >= ${delay};
       const allowRebuild = wantsRebuild && coalesced && !defined_default(this._pendingSnapshot);`);
       }
+      if (run.invalidationProbe === "1") {
+        swap("GaussianSplatPrimitive.prototype.onTileLoad = function(tile) {", `GaussianSplatPrimitive.prototype.onTileLoad = function(tile) {
+          (globalThis.__tileLoadTrace ||= []).push({t:performance.now(),selected:this._selectedTileSet.has(tile),current:this._tileset._selectedTiles.includes(tile),pending:!!this._pendingSnapshot,dirty:this._dirty,selectedCount:this._selectedTileSet.size});`);
+      }
       if (run.snapshotProbe === "1") {
         swap("        this._splatDataGeneration++;", `
         (globalThis.__snapshotTrace ||= []).push({t:performance.now(),generation:this._splatDataGeneration+1,selected:tileset._selectedTiles.length,dirty:this._dirty,changed:selectedTilesChanged,tiles:tileset._selectedTiles.map(tile=>{globalThis.__snapshotIDs ||= new WeakMap(); if(!globalThis.__snapshotIDs.has(tile))globalThis.__snapshotIDs.set(tile,(globalThis.__snapshotNextID=(globalThis.__snapshotNextID||0)+1));return globalThis.__snapshotIDs.get(tile);}),loaded:tileset.tilesLoaded,bootstrap:isBootstrap,stable:isStable,stale:snapshotIsStale,stallFrames:this._snapshotRebuildStallFrames});
@@ -224,7 +228,7 @@ cachedPositions.set = function(...args) { originalSet(...args); globalThis.__cac
       }
       const glError=await page.evaluate(()=>window.__scene.context._gl.getError());
       if(glError!==0){throw new Error(`WebGL error: ${glError}`);}
-      Object.assign(result,{run,errors,before,after:clock(),glError,loadingFinal:await page.evaluate(()=>window.__loadingStats),snapshotTrace:await page.evaluate(()=>window.__snapshotTrace || [])});
+      Object.assign(result,{run,errors,before,after:clock(),glError,loadingFinal:await page.evaluate(()=>window.__loadingStats),snapshotTrace:await page.evaluate(()=>window.__snapshotTrace || []),tileLoadTrace:await page.evaluate(()=>window.__tileLoadTrace || [])});
       writeFileSync(`${out}/${run.label}.json`,JSON.stringify(result,null,2));
       console.log(JSON.stringify({label:run.label,frame:result.bench.frameMs,gpu:result.bench.gpuMs,splats:result.bench.splats,worker:result.worker,errors}));
       break;
