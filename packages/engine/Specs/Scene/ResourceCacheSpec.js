@@ -254,6 +254,8 @@ describe("ResourceCache", function () {
       const firstTexture = first.texture;
       const secondTexture = second.texture;
       expect(firstTexture).not.toBe(secondTexture);
+      expect(firstTexture._id).toBeDefined();
+      expect(secondTexture._id).toBeDefined();
       if (scene.context.webgl2) {
         expect(firstTexture._texture).toBe(secondTexture._texture);
         expect(ResourceCache.statistics.texturesByteLength).toBe(

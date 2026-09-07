@@ -8,6 +8,7 @@ class GltfTextureView {
     this._entry = entry;
     const texture = entry.texture;
     this._texture = texture._texture;
+    this._id = texture._id;
     this._target = texture._target;
     this._sampler = sampler;
     const gl = texture._context._gl;
