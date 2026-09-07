@@ -21,6 +21,13 @@ describe("Core/GaussianSplatPositionCache", function () {
     expect(cache.get(2)).toBeUndefined();
     expect(cache.byteLength).toBe(16);
   });
+  it("counts the backing storage of subarray views", function () {
+    const cache = new GaussianSplatPositionCache(16);
+    const positions = new Float32Array(24).subarray(0, 2);
+    cache.set(1, positions);
+    expect(cache.get(1)).toBeUndefined();
+    expect(cache.byteLength).toBe(0);
+  });
   it("releases and replaces entries without double counting", function () {
     const cache = new GaussianSplatPositionCache(32);
     cache.set(1, new Float32Array(4));

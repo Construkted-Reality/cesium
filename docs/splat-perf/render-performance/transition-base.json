@@ -1,0 +1,93 @@
+{
+  "records": [
+    {
+      "step": 0,
+      "width": 1024,
+      "height": 576,
+      "count": 1458822,
+      "state": 0,
+      "generation": 2,
+      "glError": 0,
+      "shaderReferences": 1,
+      "nonzeroRGB": true
+    },
+    {
+      "step": 1,
+      "width": 1024,
+      "height": 576,
+      "count": 1458822,
+      "state": 0,
+      "generation": 2,
+      "glError": 0,
+      "shaderReferences": 1,
+      "nonzeroRGB": true
+    },
+    {
+      "step": 2,
+      "width": 1024,
+      "height": 576,
+      "count": 1458822,
+      "state": 0,
+      "generation": 2,
+      "glError": 0,
+      "shaderReferences": 1,
+      "nonzeroRGB": true
+    },
+    {
+      "step": 3,
+      "width": 960,
+      "height": 640,
+      "count": 1458822,
+      "state": 0,
+      "generation": 2,
+      "glError": 0,
+      "shaderReferences": 1,
+      "nonzeroRGB": true
+    },
+    {
+      "step": 4,
+      "width": 960,
+      "height": 640,
+      "count": 1458822,
+      "state": 0,
+      "generation": 2,
+      "glError": 0,
+      "shaderReferences": 1,
+      "nonzeroRGB": true
+    },
+    {
+      "step": 5,
+      "width": 960,
+      "height": 640,
+      "count": 1458822,
+      "state": 0,
+      "generation": 2,
+      "glError": 0,
+      "shaderReferences": 1,
+      "nonzeroRGB": true
+    },
+    {
+      "step": 6,
+      "width": 960,
+      "height": 640,
+      "count": 1458822,
+      "state": 0,
+      "generation": 2,
+      "glError": 0,
+      "shaderReferences": 1,
+      "nonzeroRGB": true
+    },
+    {
+      "step": 7,
+      "width": 960,
+      "height": 640,
+      "count": 1458822,
+      "state": 0,
+      "generation": 3,
+      "glError": 0,
+      "shaderReferences": 1,
+      "nonzeroRGB": true
+    }
+  ],
+  "errors": []
+}

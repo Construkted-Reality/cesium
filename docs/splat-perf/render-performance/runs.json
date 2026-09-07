@@ -1,0 +1,176 @@
+[
+  {
+    "label": "dolly-base-1",
+    "server": "http://127.0.0.1:8099",
+    "mode": "dolly",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "frames": "400"
+  },
+  {
+    "label": "dolly-new-1",
+    "server": "http://127.0.0.1:8101",
+    "mode": "dolly",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "frames": "400"
+  },
+  {
+    "label": "orbit-base-1",
+    "server": "http://127.0.0.1:8099",
+    "mode": "orbit",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "frames": "400"
+  },
+  {
+    "label": "orbit-new-1",
+    "server": "http://127.0.0.1:8101",
+    "mode": "orbit",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "frames": "400"
+  },
+  {
+    "label": "multi-base-1",
+    "server": "http://127.0.0.1:8099",
+    "mode": "orbit",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "frames": "300",
+    "multi": "4"
+  },
+  {
+    "label": "multi-new-1",
+    "server": "http://127.0.0.1:8101",
+    "mode": "orbit",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "frames": "300",
+    "multi": "4"
+  },
+  {
+    "label": "dolly-base-2",
+    "server": "http://127.0.0.1:8099",
+    "mode": "dolly",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "frames": "400"
+  },
+  {
+    "label": "dolly-new-2",
+    "server": "http://127.0.0.1:8101",
+    "mode": "dolly",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "frames": "400"
+  },
+  {
+    "label": "orbit-base-2",
+    "server": "http://127.0.0.1:8099",
+    "mode": "orbit",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "frames": "400"
+  },
+  {
+    "label": "orbit-new-2",
+    "server": "http://127.0.0.1:8101",
+    "mode": "orbit",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "frames": "400"
+  },
+  {
+    "label": "multi-base-2",
+    "server": "http://127.0.0.1:8099",
+    "mode": "orbit",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "frames": "300",
+    "multi": "4"
+  },
+  {
+    "label": "multi-new-2",
+    "server": "http://127.0.0.1:8101",
+    "mode": "orbit",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "frames": "300",
+    "multi": "4"
+  },
+  {
+    "label": "image-wide-base",
+    "server": "http://127.0.0.1:8099",
+    "mode": "static",
+    "frames": "1",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "capture": "1",
+    "width": "1280",
+    "height": "720",
+    "range": "3",
+    "pitch": "-35"
+  },
+  {
+    "label": "image-wide-new",
+    "server": "http://127.0.0.1:8101",
+    "mode": "static",
+    "frames": "1",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "capture": "1",
+    "width": "1280",
+    "height": "720",
+    "range": "3",
+    "pitch": "-35"
+  },
+  {
+    "label": "image-close-base",
+    "server": "http://127.0.0.1:8099",
+    "mode": "static",
+    "frames": "1",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "capture": "1",
+    "width": "1280",
+    "height": "720",
+    "range": "0.5",
+    "pitch": "-20"
+  },
+  {
+    "label": "image-close-new",
+    "server": "http://127.0.0.1:8101",
+    "mode": "static",
+    "frames": "1",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "capture": "1",
+    "width": "1280",
+    "height": "720",
+    "range": "0.5",
+    "pitch": "-20"
+  },
+  {
+    "label": "image-dolly-base",
+    "server": "http://127.0.0.1:8099",
+    "mode": "dolly",
+    "frames": "400",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "capture": "1",
+    "width": "1280",
+    "height": "720"
+  },
+  {
+    "label": "image-dolly-new",
+    "server": "http://127.0.0.1:8101",
+    "mode": "dolly",
+    "frames": "400",
+    "freeze": "1",
+    "settleFrozen": "120",
+    "capture": "1",
+    "width": "1280",
+    "height": "720"
+  }
+]

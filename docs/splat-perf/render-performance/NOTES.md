@@ -23,3 +23,20 @@ All 33 focused specifications pass. The expanded live-command test initially
 used the separately bundled source constructor, which had uninitialized context
 limits. Calling the live primitive's constructor corrects the test setup; no
 renderer change was required.
+
+A targeted backing-buffer test exposed an edge case in the new cache: an
+8-byte view retained a 96-byte buffer under a 16-byte budget. Count backing
+buffer bytes instead of view bytes. Normal worker transfers use exact-size
+copies, so the performance fixtures have identical behavior under this change.
+A regression specification covers the oversized view.
+
+The first transition image probe read outside postRender and captured cleared
+black buffers. All phase hashes were equal, which exposed the invalid check.
+Exclude those captures. Capture synchronously in postRender and require
+nonzero RGB output before comparing images. The normal benchmark captures
+already contain nonzero geometry and are unaffected.
+
+The corrected transition probe passes all eight image pairs with nonzero RGB
+output. Camera and model changes produce distinct hashes. The full suite
+passes 15,749 specifications with the same six baseline failures. Final paired
+measurements and limits appear in RESULTS.md.
