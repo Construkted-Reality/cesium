@@ -300,6 +300,9 @@ function addAttributeToRenderResources(
     index: index,
     value: defined(attribute.buffer) ? undefined : attribute.constant,
     vertexBuffer: attribute.buffer,
+    deferredAttribute: defined(attribute._deferredBufferOwner)
+      ? attribute
+      : undefined,
     count: attribute.count,
     componentsPerAttribute: componentsPerAttribute,
     componentDatatype: componentDatatype,

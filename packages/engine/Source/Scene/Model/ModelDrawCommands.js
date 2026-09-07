@@ -1,3 +1,5 @@
+import Buffer from "../../Renderer/Buffer.js";
+import BufferUsage from "../../Renderer/BufferUsage.js";
 import BoundingSphere from "../../Core/BoundingSphere.js";
 import clone from "../../Core/clone.js";
 import defined from "../../Core/defined.js";
@@ -102,6 +104,39 @@ function buildDrawCommandForModel(
   shaderProgram,
   frameState,
 ) {
+  const attributes = primitiveRenderResources.attributes;
+  const deferred = attributes.filter(function (attribute) {
+    return defined(attribute.deferredAttribute);
+  });
+  if (deferred.length > 0) {
+    const active = new Set(
+      Object.values(shaderProgram.vertexAttributes).map(function (attribute) {
+        return attribute.index;
+      }),
+    );
+    for (const descriptor of deferred) {
+      if (!active.has(descriptor.index)) {
+        continue;
+      }
+      const attribute = descriptor.deferredAttribute;
+      if (!defined(attribute.buffer)) {
+        const buffer = Buffer.createVertexBuffer({
+          context: frameState.context,
+          typedArray: attribute.typedArray,
+          usage: BufferUsage.STATIC_DRAW,
+        });
+        buffer.vertexArrayDestroyable = false;
+        attribute._deferredBufferOwner.push(buffer);
+        attribute.buffer = buffer;
+        attribute.typedArray = undefined;
+        attribute.constant = undefined;
+        attribute._deferredBufferOwner = undefined;
+      }
+      descriptor.vertexBuffer = attribute.buffer;
+      descriptor.value = undefined;
+    }
+  }
+
   const indexBuffer = getIndexBuffer(primitiveRenderResources);
 
   const vertexArray = new VertexArray({

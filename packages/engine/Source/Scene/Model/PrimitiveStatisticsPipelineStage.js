@@ -71,6 +71,8 @@ function countGeometry(statistics, primitive) {
     if (defined(attribute.buffer)) {
       const hasCpuCopy = defined(attribute.typedArray);
       statistics.addBuffer(attribute.buffer, hasCpuCopy);
+    } else if (defined(attribute._deferredBufferOwner)) {
+      statistics.geometryByteLength += attribute.typedArray.byteLength;
     }
   }
 
