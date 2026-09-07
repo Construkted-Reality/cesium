@@ -130,6 +130,11 @@ class GltfSpzLoader extends ResourceLoader {
     this._gltf = gltf;
     this._primitive = primitive;
     this._spz = spz;
+    this._spzInfo = getSpzInfoFromGltf(gltf, primitive);
+    this._packedDegree = getPackedSphericalHarmonicsDegree(
+      primitive.attributes ?? {},
+    );
+    this._lastDecodeAttemptFrame = undefined;
     this._cacheKey = cacheKey;
     this._bufferViewLoader = undefined;
     this._bufferViewTypedArray = undefined;
@@ -205,6 +210,15 @@ class GltfSpzLoader extends ResourceLoader {
       return false;
     }
 
+    // Several attribute loaders share this decoder. A worker response cannot
+    // arrive in the middle of their synchronous processing pass.
+    if (defined(frameState.frameNumber)) {
+      if (this._lastDecodeAttemptFrame === frameState.frameNumber) {
+        return false;
+      }
+      this._lastDecodeAttemptFrame = frameState.frameNumber;
+    }
+
     // Reject oversized SPZ payloads before invoking the WASM decoder.
     // The spz-loader WASM module has a hard 2 GB memory ceiling; exceeding
     // it causes an unrecoverable Aborted() call with no useful diagnostic.
@@ -213,7 +227,7 @@ class GltfSpzLoader extends ResourceLoader {
     // The SPZ binary is gzip-compressed, so its header cannot be read
     // directly. Point count and SH degree are therefore derived from the
     // glTF JSON, which is available at this stage.
-    const spzInfo = getSpzInfoFromGltf(this._gltf, this._primitive);
+    const spzInfo = this._spzInfo;
     if (defined(spzInfo)) {
       const estimatedBytes = estimateSpzMemoryBytes(
         spzInfo.numPoints,
@@ -237,7 +251,7 @@ class GltfSpzLoader extends ResourceLoader {
 
     const decodePromise = SpzDecoder.decode(
       this._bufferViewTypedArray,
-      getPackedSphericalHarmonicsDegree(this._primitive.attributes ?? {}),
+      this._packedDegree,
     );
 
     if (!defined(decodePromise)) {
@@ -261,6 +275,7 @@ class GltfSpzLoader extends ResourceLoader {
     this._decodedData = undefined;
     this._gltf = undefined;
     this._primitive = undefined;
+    this._spzInfo = undefined;
   }
 }
 

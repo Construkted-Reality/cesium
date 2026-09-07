@@ -152,4 +152,15 @@ describe("Scene/GltfSpzLoader", function () {
     expect(loader._state).toBe(ResourceLoaderState.FAILED);
     loader.destroy();
   });
+  it("attempts admission once per frame across shared attribute consumers", function () {
+    const loader = processingLoader();
+    const decode = spyOn(SpzDecoder, "decode").and.returnValue(undefined);
+    for (let attribute = 0; attribute < 20; attribute++) {
+      expect(loader.process({ frameNumber: 7 })).toBe(false);
+    }
+    expect(decode.calls.count()).toBe(1);
+    loader.process({ frameNumber: 8 });
+    expect(decode.calls.count()).toBe(2);
+    loader.destroy();
+  });
 });
