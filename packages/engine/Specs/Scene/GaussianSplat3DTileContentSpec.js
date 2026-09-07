@@ -50,6 +50,59 @@ describe(
       ResourceCache.clearForSpecs();
     });
 
+    for (const degree of [0, 1, 2, 3]) {
+      it(`packs degree ${degree} directly with preserved half values and zero padding`, function () {
+        const count = 3;
+        const attributes = [
+          {
+            name: "POSITION",
+            semantic: VertexAttributeSemantic.POSITION,
+            count,
+            typedArray: new Float32Array(count * 3),
+          },
+          {
+            name: "ROTATION",
+            semantic: VertexAttributeSemantic.ROTATION,
+            typedArray: new Float32Array(count * 4),
+          },
+          {
+            name: "SCALE",
+            semantic: VertexAttributeSemantic.SCALE,
+            typedArray: new Float32Array(count * 3),
+          },
+        ];
+        for (let l = 1; l <= degree; l++) {
+          for (let n = 0; n < 2 * l + 1; n++) {
+            attributes.push({
+              name: `_SH_DEGREE_${l}_COEF_${n}`,
+              typedArray: new Float32Array([
+                1, -2, 0.5, 1, -2, 0.5, 1, -2, 0.5,
+              ]),
+            });
+          }
+        }
+        const content = Object.create(GaussianSplat3DTileContent.prototype);
+        content._resourcesLoaded = true;
+        content._loader = {
+          components: { scene: { nodes: [{ primitives: [{ attributes }] }] } },
+        };
+        content.update(undefined, { afterRender: [] });
+        const coefficients = [0, 9, 24, 45][degree];
+        const stride = Math.ceil(coefficients / 4) * 4;
+        const packed = content.packedSphericalHarmonicsData;
+        expect(packed.byteLength).toBe(count * stride * 2);
+        for (let splat = 0; splat < count; splat++) {
+          for (let half = 0; half < stride; half++) {
+            const index = splat * stride + half;
+            const bits = (packed[index >>> 1] >>> ((index & 1) * 16)) & 65535;
+            expect(bits).toBe(
+              half < coefficients ? [0x3c00, 0xc000, 0x3800][half % 3] : 0,
+            );
+          }
+        }
+      });
+    }
+
     it("loads Gaussian Splat content", function () {
       return Cesium3DTilesTester.loadTileset(scene, tilesetUrl, options).then(
         function (tileset) {

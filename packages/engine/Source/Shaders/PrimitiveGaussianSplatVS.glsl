@@ -28,24 +28,22 @@ const float SH_C3[7] = float[7](
         -0.59004358
 );
 
-//Retrieve SH coefficient. Currently RG32UI format
-uvec2 loadSHCoeff(uint splatID, int index) {
-    ivec2 shTexSize = textureSize(u_sphericalHarmonicsTexture, 0);
-    uint dims = coefficientCount[uint(u_sphericalHarmonicsDegree)-1u];
-    uint splatsPerRow = uint(shTexSize.x) / dims;
-    uint shIndex = (splatID%splatsPerRow) * dims + uint(index);
-    ivec2 shPosCoord = ivec2(shIndex, splatID / splatsPerRow);
-    return texelFetch(u_sphericalHarmonicsTexture, shPosCoord, 0).rg;
-}
-
-//Unpack RG32UI half float coefficients to vec3
-vec3 halfToVec3(uvec2 packed) {
-    return vec3(unpackHalf2x16(packed.x), unpackHalf2x16(packed.y).x);
+// Four half values share each RG32UI texel. Padding is per splat.
+float loadDenseSHHalf(uint splatID, uint halfIndex) {
+    uint dims = (coefficientCount[uint(u_sphericalHarmonicsDegree) - 1u] * 3u + 3u) / 4u;
+    uint perRow = uint(textureSize(u_sphericalHarmonicsTexture, 0).x) / dims;
+    ivec2 coord = ivec2((splatID % perRow) * dims + halfIndex / 4u, splatID / perRow);
+    uvec2 packed = texelFetch(u_sphericalHarmonicsTexture, coord, 0).rg;
+    uint word = (halfIndex & 2u) == 0u ? packed.x : packed.y;
+    vec2 values = unpackHalf2x16(word);
+    return (halfIndex & 1u) == 0u ? values.x : values.y;
 }
 
 vec3 loadAndExpandSHCoeff(uint splatID, int index) {
-    uvec2 coeff = loadSHCoeff(splatID, index);
-    return halfToVec3(coeff);
+    uint halfIndex = uint(index) * 3u;
+    return vec3(loadDenseSHHalf(splatID, halfIndex),
+                loadDenseSHHalf(splatID, halfIndex + 1u),
+                loadDenseSHHalf(splatID, halfIndex + 2u));
 }
 
 vec3 evaluateSH(uint splatID, vec3 viewDir) {

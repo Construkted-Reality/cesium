@@ -1,4 +1,5 @@
 import defined from "../Core/defined.js";
+import GaussianSplatPositionCache from "../Core/GaussianSplatPositionCache.js";
 import FeatureDetection from "../Core/FeatureDetection.js";
 import RuntimeError from "../Core/RuntimeError.js";
 import TaskProcessor from "../Core/TaskProcessor.js";
@@ -9,6 +10,46 @@ import TaskProcessor from "../Core/TaskProcessor.js";
  * @private
  */
 function GaussianSplatSorter() {}
+
+GaussianSplatSorter.maximumCacheByteLength =
+  GaussianSplatPositionCache.maximumByteLength;
+const pendingReleases = new Set();
+let releaseInFlight = false;
+
+function flushReleasedPositions() {
+  if (
+    releaseInFlight ||
+    pendingReleases.size === 0 ||
+    !GaussianSplatSorter._taskProcessorReady
+  ) {
+    return;
+  }
+  const keys = Array.from(pendingReleases);
+  const promise = GaussianSplatSorter._sorterTaskProcessor.scheduleTask({
+    releaseKeys: keys,
+  });
+  if (!defined(promise)) {
+    return;
+  }
+  for (const key of keys) {
+    pendingReleases.delete(key);
+  }
+  releaseInFlight = true;
+  promise
+    .catch(() => {})
+    .finally(() => {
+      releaseInFlight = false;
+      flushReleasedPositions();
+    });
+}
+
+/** Release a snapshot generation without starting an unused worker. @private */
+GaussianSplatSorter.releasePositions = function (key) {
+  if (key !== 0 && defined(key)) {
+    pendingReleases.add(key);
+    flushReleasedPositions();
+  }
+};
 
 GaussianSplatSorter._maxSortingConcurrency = Math.max(
   FeatureDetection.hardwareConcurrency - 1,
@@ -70,7 +111,19 @@ GaussianSplatSorter.radixSortIndexes = function (parameters) {
   // requests reuse the copy that the worker already holds.
   const positions = parameters.primitive.positions;
   const transferableObjects = defined(positions) ? [positions.buffer] : [];
-  return sorterTaskProcessor.scheduleTask(parameters, transferableObjects);
+  parameters.releaseKeys = Array.from(pendingReleases);
+  const promise = sorterTaskProcessor.scheduleTask(
+    parameters,
+    transferableObjects,
+  );
+  if (defined(promise)) {
+    for (const key of parameters.releaseKeys) {
+      pendingReleases.delete(key);
+    }
+    // Retry deferred releases when task capacity becomes available.
+    promise.finally(flushReleasedPositions).catch(() => {});
+  }
+  return promise;
 };
 
 export default GaussianSplatSorter;

@@ -727,7 +727,7 @@ function extractSHDegreeAndCoef(attribute) {
 function packSphericalHarmonicsData(tileContent) {
   const degree = tileContent.sphericalHarmonicsDegree;
   const coefs = tileContent.sphericalHarmonicsCoefficientCount;
-  const totalLength = tileContent.pointsLength * (coefs * (2 / 3)); //3 packs into 2
+  const totalLength = tileContent.pointsLength * Math.ceil(coefs / 4) * 2;
   const packedData = new Uint32Array(totalLength);
 
   const shAttributes = tileContent.gltfPrimitive.attributes.filter((attr) =>
@@ -756,20 +756,25 @@ function packSphericalHarmonicsData(tileContent) {
 
     return 0;
   });
-  const packedStride = stride * (2 / 3);
+  const packedStride = Math.ceil(stride / 4) * 4;
   for (let i = 0; i < shAttributes.length; i++) {
     const { l, n } = extractSHDegreeAndCoef(shAttributes[i].name);
+    const halfOffset = base[l - 1] + n * 3;
+    const wordOffset = halfOffset >>> 1;
+    const odd = (halfOffset & 1) !== 0;
     for (let j = 0; j < tileContent.pointsLength; j++) {
-      //interleave the data
-      const packedBase = (base[l - 1] * 2) / 3;
-      const idx = j * packedStride + packedBase + n * 2;
+      const idx = j * (packedStride / 2) + wordOffset;
       const src = j * 3;
-      packedData[idx] =
-        float32ToFloat16(shAttributes[i].typedArray[src]) |
-        (float32ToFloat16(shAttributes[i].typedArray[src + 1]) << 16);
-      packedData[idx + 1] = float32ToFloat16(
-        shAttributes[i].typedArray[src + 2],
-      );
+      const red = float32ToFloat16(shAttributes[i].typedArray[src]);
+      const green = float32ToFloat16(shAttributes[i].typedArray[src + 1]);
+      const blue = float32ToFloat16(shAttributes[i].typedArray[src + 2]);
+      if (odd) {
+        packedData[idx] |= red << 16;
+        packedData[idx + 1] = green | (blue << 16);
+      } else {
+        packedData[idx] = red | (green << 16);
+        packedData[idx + 1] = blue;
+      }
     }
   }
   return packedData;

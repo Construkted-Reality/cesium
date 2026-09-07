@@ -228,6 +228,142 @@ describe(
       primitive.destroy();
     });
 
+    it("skips an identical depth row but sorts a changed model-view row", async function () {
+      const { primitive, frame } = createSortFixture();
+      const sort = spyOn(
+        GaussianSplatSorter,
+        "radixSortIndexes",
+      ).and.returnValue(Promise.resolve(new Uint32Array([1, 0])));
+      spyOn(GaussianSplatPrimitive, "buildGSplatDrawCommand");
+      primitive.update(frame);
+      await Promise.resolve();
+      primitive.update(frame);
+      frame.frameNumber += 10;
+      frame.camera.positionWC.x = 10;
+      frame.camera.viewMatrix[12] = 10;
+      primitive.update(frame);
+      expect(sort.calls.count()).toBe(1);
+      frame.camera.viewMatrix[2] = 0.25;
+      frame.camera.directionWC.x = 0.25;
+      frame.frameNumber += 10;
+      primitive.update(frame);
+      await Promise.resolve();
+      expect(sort.calls.count()).toBe(2);
+      primitive.destroy();
+    });
+
+    it("reuses command capacity and refreshes texture and debug state", async function () {
+      const tileset = await Cesium3DTilesTester.loadTileset(
+        scene,
+        sphericalHarmonicUrl,
+        options,
+      );
+      scene.camera.lookAt(
+        tileset.boundingSphere.center,
+        new HeadingPitchRange(0, -1.57, tileset.boundingSphere.radius),
+      );
+      await Cesium3DTilesTester.waitForTileContentReady(scene, tileset.root);
+      const p = tileset.gaussianSplatPrimitive;
+      await pollToPromise(function () {
+        scene.renderForSpecs();
+        return p.isStable;
+      });
+      const command = p._drawCommand;
+      const capacity = p._vertexArrayLen;
+      const full = p._indexes;
+      p._indexes = full.subarray(0, Math.max(1, full.length - 1));
+      tileset.debugShowBoundingVolume = true;
+      p.constructor.buildGSplatDrawCommand(p, scene.frameState);
+      expect(p._drawCommand).toBe(command);
+      expect(p._vertexArrayLen).toBe(capacity);
+      expect(command.instanceCount).toBe(p._indexes.length);
+      expect(command.debugShowBoundingVolume).toBe(true);
+      const texture = p.gaussianSplatTexture;
+      p.gaussianSplatTexture = {};
+      expect(command.uniformMap.u_splatAttributeTexture()).toBe(
+        p.gaussianSplatTexture,
+      );
+      p.gaussianSplatTexture = texture;
+      p._indexes = full;
+      p.constructor.buildGSplatDrawCommand(p, scene.frameState);
+      expect(p._drawCommand).toBe(command);
+      expect(command.instanceCount).toBe(full.length);
+      const degree = p._sphericalHarmonicsDegree;
+      p._sphericalHarmonicsDegree = 0;
+      p.constructor.buildGSplatDrawCommand(p, scene.frameState);
+      expect(p._drawCommand).not.toBe(command);
+      p._sphericalHarmonicsDegree = degree;
+      p.constructor.buildGSplatDrawCommand(p, scene.frameState);
+      expect(p._drawCommandDegree).toBe(degree);
+      const grown = new Uint32Array(capacity + 1);
+      p._indexes = grown;
+      const oldArray = p._vertexArray;
+      p.constructor.buildGSplatDrawCommand(p, scene.frameState);
+      expect(p._vertexArray).not.toBe(oldArray);
+      expect(p._vertexArrayLen).toBe(grown.length);
+      p._indexes = full;
+      p.constructor.buildGSplatDrawCommand(p, scene.frameState);
+    });
+
+    it("pads mixed harmonics degrees without borrowing coefficients from adjacent splats", function () {
+      const { primitive, frame, tileset } = createSortFixture();
+      tileset.boundingSphere = {
+        center: Cartesian3.fromDegrees(0, 0),
+        radius: 10,
+      };
+      primitive._snapshot = undefined;
+      primitive._drawCommand = undefined;
+      const makeTile = (degree) => ({
+        computedTransform: Matrix4.IDENTITY,
+        content: {
+          worldTransform: Matrix4.IDENTITY,
+          pointsLength: 2,
+          positions: new Float32Array(6),
+          scales: new Float32Array(6),
+          rotations: new Float32Array(8),
+          gltfPrimitive: {
+            attributes: [
+              {
+                semantic: "COLOR",
+                type: "VEC4",
+                typedArray: new Uint8Array(8),
+              },
+            ],
+          },
+          sphericalHarmonicsDegree: degree,
+          sphericalHarmonicsCoefficientCount: [0, 9, 24, 45][degree],
+          packedSphericalHarmonicsData:
+            degree === 0
+              ? undefined
+              : new Uint32Array(
+                  2 * Math.ceil([0, 9, 24, 45][degree] / 4) * 2,
+                ).fill(degree),
+        },
+      });
+      tileset._selectedTiles = [makeTile(0), makeTile(2), makeTile(3)];
+      spyOn(GaussianSplatPrimitive, "transformTile");
+      spyOn(GaussianSplatPrimitive, "generateSplatTexture");
+      primitive.update(frame);
+      const pending = primitive._pendingSnapshot;
+      expect(pending.sphericalHarmonicsDegree).toBe(3);
+      expect(pending.shData.length).toBe(6 * 24);
+      expect(Array.from(pending.shData.slice(0, 48))).toEqual(
+        new Array(48).fill(0),
+      );
+      for (let splat = 2; splat < 4; splat++) {
+        expect(
+          Array.from(pending.shData.slice(splat * 24, splat * 24 + 12)),
+        ).toEqual(new Array(12).fill(2));
+        expect(
+          Array.from(pending.shData.slice(splat * 24 + 12, (splat + 1) * 24)),
+        ).toEqual(new Array(12).fill(0));
+      }
+      expect(Array.from(pending.shData.slice(96))).toEqual(
+        new Array(48).fill(3),
+      );
+      primitive.destroy();
+    });
+
     it("loads a Gaussian splats tileset", async function () {
       const tileset = await Cesium3DTilesTester.loadTileset(
         scene,

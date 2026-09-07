@@ -1,35 +1,10 @@
 import createTaskProcessorWorker from "./createTaskProcessorWorker.js";
 import defined from "../Core/defined.js";
+import GaussianSplatPositionCache from "../Core/GaussianSplatPositionCache.js";
 
 import { initSync, radix_sort_gaussians_indexes } from "@cesium/wasm-splats";
 
-// Splat positions do not change while a snapshot is active, but the sort runs
-// again every time the camera moves. Holding the positions here lets the main
-// thread send them once per snapshot instead of copying them for every request.
-//
-// The cache holds a few entries so that two visible tilesets do not evict each
-// other. Each entry costs 12 bytes per splat.
-const MAXIMUM_CACHED_POSITION_SETS = 3;
-const cachedPositions = new Map();
-
-function rememberPositions(key, positions) {
-  cachedPositions.delete(key);
-  cachedPositions.set(key, positions);
-  while (cachedPositions.size > MAXIMUM_CACHED_POSITION_SETS) {
-    const oldestKey = cachedPositions.keys().next().value;
-    cachedPositions.delete(oldestKey);
-  }
-}
-
-function recallPositions(key) {
-  const positions = cachedPositions.get(key);
-  if (defined(positions)) {
-    // Refresh the insertion order so an active set is never the one evicted.
-    cachedPositions.delete(key);
-    cachedPositions.set(key, positions);
-  }
-  return positions;
-}
+const cachedPositions = new GaussianSplatPositionCache();
 
 //load built wasm modules for sorting. Ensure we can load webassembly and we support SIMD.
 async function initWorker(parameters, transferableObjects) {
@@ -48,6 +23,9 @@ function generateGaussianSortWorker(parameters, transferableObjects) {
     return initWorker(parameters, transferableObjects);
   }
 
+  for (const key of parameters.releaseKeys ?? []) {
+    cachedPositions.remove(key);
+  }
   const { primitive, sortType, positionsKey } = parameters;
 
   if (sortType !== "Index") {
@@ -55,10 +33,10 @@ function generateGaussianSortWorker(parameters, transferableObjects) {
   }
 
   if (defined(primitive.positions)) {
-    rememberPositions(positionsKey, primitive.positions);
+    cachedPositions.set(positionsKey, primitive.positions);
   }
 
-  const positions = recallPositions(positionsKey);
+  const positions = primitive.positions ?? cachedPositions.get(positionsKey);
   if (!defined(positions)) {
     // The caller believed the worker still held this position set. Return
     // nothing so the caller discards the result and sends the positions again.
