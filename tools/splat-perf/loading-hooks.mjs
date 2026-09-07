@@ -100,3 +100,18 @@ if(params.get("wasmProbe")==="1") {
     return init.call(this,options);
   };
 }
+
+// Observe the production pool without changing its admission policy.
+if (params.get("production") === "candidate" && Cesium.SpzDecoder) {
+  const decoder = Cesium.SpzDecoder;
+  const decode = decoder.decode;
+  decoder.decode = function (...args) {
+    const task = decode.apply(this, args);
+    if (!task) { stats.busyRetries=(stats.busyRetries||0)+1; return task; }
+    stats.started++;
+    const active=decoder._slots.filter(s=>s.busy).length;
+    stats.activePeak=Math.max(stats.activePeak||0,active);
+    return task.then(result=> {stats.completed++;return result;},error=> {stats.failures++;throw error;});
+  };
+  window.__loadingQueueState=()=>({active:decoder._slots.some(s=>s.busy),activeCount:decoder._slots.filter(s=>s.busy).length,queued:0});
+}

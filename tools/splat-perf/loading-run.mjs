@@ -7,9 +7,11 @@ import { execFileSync } from "node:child_process";
 import { GPU_LAUNCH_ARGS } from "./bench.mjs";
 const out = process.env.SPLAT_RESULTS || "/mnt/data2/cesium-splat-perf/loading-experiment-results";
 const runs = JSON.parse(readFileSync(process.argv[2], "utf8"));
-const sourcePaths=["tools/splat-perf/loading-hooks.mjs","tools/splat-perf/loading-worker.mjs","tools/splat-perf/loading-kernels.mjs","tools/splat-perf/loading-harness.html","tools/splat-perf/streaming-gpu-hooks.js","Build/CesiumUnminified/Cesium.js","Build/CesiumUnminified/Workers/gaussianSplatSorter.js","Build/CesiumUnminified/Workers/gaussianSplatTextureGenerator.js","node_modules/@spz-loader/core/dist/index.js"];
+const sourcePaths=["tools/splat-perf/loading-hooks.mjs","tools/splat-perf/loading-worker.mjs","tools/splat-perf/loading-kernels.mjs","tools/splat-perf/loading-harness.html","tools/splat-perf/streaming-gpu-hooks.js","Build/CesiumUnminified/Cesium.js","Build/CesiumUnminified/Workers/gaussianSplatSorter.js","Build/CesiumUnminified/Workers/decodeSpz.js","Build/CesiumUnminified/Workers/gaussianSplatTextureGenerator.js","node_modules/@spz-loader/core/dist/index.js"];
 const frozenSources=Object.fromEntries(sourcePaths.map(path=>[path,readFileSync(path,"utf8")]));
 const sourceHashes=Object.fromEntries(Object.entries(frozenSources).map(([path,body])=>[path,createHash("sha256").update(body).digest("hex")]));
+const poolBaseline=process.env.SPLAT_BASELINE_BUNDLE ? readFileSync(process.env.SPLAT_BASELINE_BUNDLE,"utf8") : undefined;
+if(poolBaseline){sourceHashes.poolBaseline=createHash("sha256").update(poolBaseline).digest("hex");}
 const hostState=()=>({time:new Date().toISOString(),load:loadavg(),cpuTicks:readFileSync("/proc/stat","utf8").split("\n")[0].trim().split(/\s+/).slice(1).map(Number)});
 
 mkdirSync(out, {recursive:true});
@@ -31,6 +33,10 @@ for (const run of runs) {
     await context.route("**/Build/CesiumUnminified/Cesium.js",async route=> {
       const response=await route.fetch();let body=frozenSources[new URL(route.request().url()).pathname.slice(1)] ?? await response.text();
       const swap=(a,b)=>{if(!body.includes(a)){throw new Error(`Bundle anchor missing: ${a}`);}body=body.replace(a,b);};
+      if (run.production === "poolBaseline") {
+        if (!poolBaseline) { throw new Error("SPLAT_BASELINE_BUNDLE is required"); }
+        body=poolBaseline;
+      }
       if (run.production) {
         if (run.production === "baseline") { swap("packSphericalHarmonics: true", "packSphericalHarmonics: false"); }
         if (run.production === "worker") {
@@ -76,6 +82,15 @@ for (const run of runs) {
         this._splatDataGeneration++;`);
       }
       await route.fulfill({response,body});
+    });
+    await context.route("**/Workers/decodeSpz.js", route => {
+      let body=frozenSources["Build/CesiumUnminified/Workers/decodeSpz.js"];
+      if(run.wasmProbe==="1") {
+        const anchor="return xr(a, H), T;";
+        if(!body.includes(anchor)){throw new Error("Missing production SPZ WASM anchor");}
+        body=body.replace(anchor,`globalThis.__decoderHeapPeak=Math.max(globalThis.__decoderHeapPeak||0,a.HEAPU8.byteLength); ${  anchor}`);
+      }
+      return route.fulfill({body,contentType:"text/javascript"});
     });
     if(run.wasmProbe==="1") {
       await context.route("**/Workers/gaussianSplatTextureGenerator.js",async route=> {
@@ -177,7 +192,8 @@ cachedPositions.set = function(...args) { originalSet(...args); globalThis.__cac
       return result;
     };
     try {
-      if(run.profileCPU==="1") {await cdp.send("Profiler.enable");}
+      if(run.profileCPU==="1" || run.profileLoading==="1") {await cdp.send("Profiler.enable");}
+      if(run.profileLoading==="1") {await cdp.send("Profiler.start");}
       const query=new URLSearchParams({tileset:"/splat-data/oracle-run/geo-newdefault/tileset.json",sse:"4",frames:"400",warmup:"120",mode:"orbit",...run});
       await page.goto(`http://127.0.0.1:8099/tools/splat-perf/loading-harness.html?${query}`,{waitUntil:"domcontentloaded"});
       if (wayland) {
@@ -196,7 +212,7 @@ cachedPositions.set = function(...args) { originalSet(...args); globalThis.__cac
       result.worker=await cache();
       await cdp.send("HeapProfiler.collectGarbage");
       result.heap=await cdp.send("Runtime.getHeapUsage");
-      if(run.profileCPU==="1") {const profile=await cdp.send("Profiler.stop");writeFileSync(`${out}/${run.label}.cpuprofile`,JSON.stringify(profile.profile));}
+      if(run.profileCPU==="1" || run.profileLoading==="1") {const profile=await cdp.send("Profiler.stop");writeFileSync(`${out}/${run.label}.cpuprofile`,JSON.stringify(profile.profile));}
       if(run.budgetValidation==="1") {
         result.budgetValidation=await page.evaluate(async()=> {
           const invalid=[-1,0.5,NaN,Infinity,Number.MAX_SAFE_INTEGER+1];const rejected=[];
@@ -229,6 +245,31 @@ cachedPositions.set = function(...args) { originalSet(...args); globalThis.__cac
           });
           timeout.id=setTimeout(()=>{pre();post();window.__probeOwnsCamera=false;reject(new Error("Turn validation timeout"));},45000);
         }));
+      }
+      if (run.poolValidation === "1") {
+        result.poolValidation=await page.evaluate(async()=> {
+          const C=Cesium, scene=window.__scene, list=window.__round2Tilesets;
+          const wait=()=>new Promise(r=>requestAnimationFrame(r));
+          const until=async predicate=>{const start=performance.now();while(!predicate()){if(performance.now()-start>60000){throw new Error("Pool validation timeout");}await wait();}};
+          const idle=()=>C.SpzDecoder._slots.every(s=>!s.busy);
+          for(const t of list){scene.primitives.remove(t);}list.length=0;window.__splatPrimitive=null;
+          await until(idle);
+          const destroyed=[];
+          for(let cycle=0;cycle<5;cycle++) {
+            const t=await C.Cesium3DTileset.fromUrl("/splat-data/oracle-run/geo-newdefault/tileset.json",{maximumScreenSpaceError:8});
+            scene.primitives.add(t);list.push(t);
+            await until(()=>!idle());
+            scene.primitives.remove(t);list.length=0;
+            await until(idle);destroyed.push(t.isDestroyed());
+          }
+          let rejected=false;
+          try {await C.SpzDecoder.decode(new Uint8Array([1,2,3]));}catch{rejected=true;}
+          if(!rejected||!idle()){throw new Error("Malformed SPZ did not release its slot");}
+          const t=await C.Cesium3DTileset.fromUrl("/splat-data/oracle-run/geo-newdefault/tileset.json",{maximumScreenSpaceError:8});
+          scene.primitives.add(t);list.push(t);
+          await until(()=>t.tilesLoaded&&t.gaussianSplatPrimitive?._numSplats>0&&!t.gaussianSplatPrimitive?._pendingSnapshot&&idle());
+          return {destroyed,invalidRejected:rejected,recoveredCount:t.gaussianSplatPrimitive._numSplats,activePeak:window.__loadingStats.activePeak,queue:window.__loadingQueueState()};
+        });
       }
       if(run.cancellation==="1") {
         result.cancellation=await page.evaluate(async options=> {
