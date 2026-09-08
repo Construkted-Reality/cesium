@@ -7,6 +7,7 @@ import {
   Cartesian3,
   GaussianSplat3DTileContent,
   Matrix4,
+  Matrix3,
   Transforms,
   VertexAttributeSemantic,
   GaussianSplatTextureGenerator,
@@ -388,6 +389,103 @@ describe(
       primitive.destroy();
       expect(wake()).toBe(false);
     });
+
+    for (const completionFrame of [2, 10]) {
+      for (const cameraMoves of [false, true]) {
+        it(`drains a completed sort at frame ${completionFrame} with camera movement ${cameraMoves}`, async function () {
+          const tileset = {
+            show: true,
+            splitDirection: 0,
+            modelMatrix: Matrix4.IDENTITY,
+            _selectedTiles: [],
+            tileLoad: { addEventListener: function () {} },
+            tileVisible: { addEventListener: function () {} },
+            update: function () {},
+          };
+          const primitive = new GaussianSplatPrimitive({ tileset });
+          primitive._rootTransform = Matrix4.IDENTITY;
+          primitive._numSplats = 2;
+          primitive._positions = new Float32Array([-1, 0, 10, 1, 0, 10]);
+          primitive._drawCommand = {};
+          primitive._dirty = false;
+          const originalView = Matrix4.fromRotationTranslation(
+            Matrix3.fromRotationY(-Math.PI / 4),
+          );
+          const nextView = Matrix4.fromRotationTranslation(
+            Matrix3.fromRotationY(Math.PI / 4),
+          );
+          const frameState = {
+            frameNumber: 1,
+            afterRender: [],
+            commandList: [],
+            passes: { pick: false },
+            camera: {
+              viewMatrix: originalView,
+              positionWC: Cartesian3.clone(Cartesian3.ZERO),
+              directionWC: new Cartesian3(1, 0, -1),
+            },
+          };
+          const completions = [];
+          const sorter = spyOn(
+            GaussianSplatSorter,
+            "radixSortIndexes",
+          ).and.callFake(
+            () => new Promise((resolve) => completions.push(resolve)),
+          );
+          spyOn(GaussianSplatPrimitive, "buildGSplatDrawCommand").and.callFake(
+            () => {
+              primitive._drawCommand = {};
+            },
+          );
+          primitive.update(frameState);
+          if (cameraMoves) {
+            frameState.camera.viewMatrix = nextView;
+            frameState.camera.directionWC = new Cartesian3(-1, 0, -1);
+          }
+          completions[0](new Uint32Array([1, 0]));
+          await Promise.resolve();
+          expect(
+            frameState.afterRender.splice(0).some((callback) => callback()),
+          ).toBe(true);
+          frameState.frameNumber = completionFrame;
+          primitive.update(frameState);
+          // A camera change while the worker runs needs one further sort.
+          expect(
+            frameState.afterRender.splice(0).some((callback) => callback()),
+          ).toBe(cameraMoves);
+          if (cameraMoves) {
+            frameState.frameNumber++;
+            primitive.update(frameState);
+            if (sorter.calls.count() === 1) {
+              expect(
+                frameState.afterRender.splice(0).some((callback) => callback()),
+              ).toBe(true);
+              frameState.frameNumber++;
+              primitive.update(frameState);
+            }
+          }
+          expect(sorter.calls.count()).toBe(cameraMoves ? 2 : 1);
+          if (cameraMoves) {
+            completions[1](new Uint32Array([0, 1]));
+            await Promise.resolve();
+            frameState.afterRender.splice(0).forEach((callback) => callback());
+            frameState.frameNumber = 20;
+            primitive.update(frameState);
+            frameState.afterRender.splice(0).forEach((callback) => callback());
+            frameState.frameNumber = 21;
+            primitive.update(frameState);
+          }
+          expect(frameState.afterRender.length).toBe(0);
+          expect(
+            Matrix4.equals(
+              primitive._prevViewMatrix,
+              frameState.camera.viewMatrix,
+            ),
+          ).toBe(true);
+          primitive.destroy();
+        });
+      }
+    }
 
     it("inflates maximumScreenSpaceError during traversal and restores it when splatBudgetSSEScale > 1", function () {
       let capturedSSEDuringTraversal;

@@ -171,15 +171,21 @@ const DEFAULT_SORT_MIN_POSITION_DELTA = 1.0;
  *
  * @param {GaussianSplatPrimitive} primitive The splat primitive to check.
  * @param {FrameState} frameState The current frame state.
+ * @param {boolean} [ignoreFrameInterval=false] Check camera movement without the frame cooldown.
  * @returns {boolean} Whether a new steady sort should begin.
  * @private
  */
-function shouldStartSteadySort(primitive, frameState) {
+function shouldStartSteadySort(
+  primitive,
+  frameState,
+  ignoreFrameInterval = false,
+) {
   const framesSinceLastSort =
     primitive._lastSteadySortFrameNumber >= 0
       ? frameState.frameNumber - primitive._lastSteadySortFrameNumber
       : Number.POSITIVE_INFINITY;
   if (
+    !ignoreFrameInterval &&
     primitive._lastSteadySortFrameNumber >= 0 &&
     framesSinceLastSort < DEFAULT_SORT_MIN_FRAME_INTERVAL
   ) {
@@ -2132,13 +2138,18 @@ GaussianSplatPrimitive.prototype.update = function (frameState) {
       return;
     }
 
-    Matrix4.clone(camera.viewMatrix, this._prevViewMatrix);
-    Matrix4.multiply(camera.viewMatrix, this._rootTransform, scratchMatrix4A);
-
     if (!defined(this._sorterPromise)) {
       if (!shouldStartSteadySort(this, frameState)) {
+        if (shouldStartSteadySort(this, frameState, true)) {
+          // Keep the unsorted view pending through the bounded frame cooldown.
+          requestSplatFrame(this, frameState, this._splatDataGeneration);
+        } else {
+          Matrix4.clone(camera.viewMatrix, this._prevViewMatrix);
+        }
         return;
       }
+      Matrix4.clone(camera.viewMatrix, this._prevViewMatrix);
+      Matrix4.multiply(camera.viewMatrix, this._rootTransform, scratchMatrix4A);
       const requestId = ++this._sortRequestId;
       const dataGeneration = this._splatDataGeneration;
       const expectedCount = this._numSplats;
@@ -2227,6 +2238,9 @@ GaussianSplatPrimitive.prototype.update = function (frameState) {
     this._dirty = false;
     this._sorterPromise = undefined; //reset promise for next frame
     this._activeSort = undefined;
+    if (!Matrix4.equals(camera.viewMatrix, this._prevViewMatrix)) {
+      requestSplatFrame(this, frameState, this._splatDataGeneration);
+    }
   } else if (this._sorterState === GaussianSplatSortingState.ERROR) {
     throw this._sorterError;
   }
