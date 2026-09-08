@@ -159,9 +159,10 @@ describe(
       spyOn(Resource.prototype, "fetchImage").and.returnValue(
         Promise.resolve(image),
       );
-      const loader = new GltfTextureLoader({
+      const loader = ResourceCache.getTextureLoader({
         resourceCache: ResourceCache,
-        gltf: gltf,
+        gltf: { ...gltf, images: [{ uri: image.src }] },
+        frameState: scene.frameState,
         gltfResource: gltfResource,
         baseResource: gltfResource,
         textureInfo: gltf.materials[0].emissiveTexture,
@@ -172,6 +173,9 @@ describe(
       spyOn(scene.frameState.jobScheduler, "execute").and.callFake(
         function (job) {
           capturedJob = job;
+          if (scene.context.webgl2) {
+            expect(job.storageKey).toContain(image.src);
+          }
           if (outcome === "refuse") {
             return false;
           }
@@ -191,6 +195,7 @@ describe(
         expect(capturedJob.mipLevels).toBeUndefined();
         expect(capturedJob.context).toBeUndefined();
         expect(capturedJob.texture).toBeUndefined();
+        expect(capturedJob.storageKey).toBeUndefined();
       }
       await loader.load();
       expect(loader.process(scene.frameState)).toBe(false);
@@ -204,7 +209,7 @@ describe(
       expect(loader.process(scene.frameState)).toBe(true);
       expectCleared();
       expect(loader.texture).toBeDefined();
-      loader.destroy();
+      ResourceCache.unload(loader);
     });
 
     it("throws if resourceCache is undefined", function () {

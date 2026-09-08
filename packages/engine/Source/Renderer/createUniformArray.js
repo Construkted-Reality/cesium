@@ -360,6 +360,9 @@ class UniformArraySampler {
       const v = value[i];
       gl.activeTexture(textureUnitIndex + i);
       gl.bindTexture(v._target, v._texture);
+      if (defined(gl.bindSampler)) {
+        gl.bindSampler(this.textureUnitIndex + i, v._samplerObject ?? null);
+      }
     }
   }
 
