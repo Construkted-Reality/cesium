@@ -307,7 +307,7 @@ function createTexture(
     !CesiumMath.isPowerOfTwo(image.width) ||
     !CesiumMath.isPowerOfTwo(image.height);
 
-  const requiresResize = requiresPowerOfTwo && nonPowerOfTwo;
+  const requiresResize = !context.webgl2 && requiresPowerOfTwo && nonPowerOfTwo;
 
   let texture;
   if (defined(internalFormat)) {

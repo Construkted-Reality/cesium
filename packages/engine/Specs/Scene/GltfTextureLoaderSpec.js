@@ -486,7 +486,7 @@ describe(
       expect(generateMipmap).toHaveBeenCalled();
     });
 
-    it("generates power-of-two texture if sampler requires it", async function () {
+    it("resizes textures only when the context requires it", async function () {
       spyOn(Resource.prototype, "fetchImage").and.returnValue(
         Promise.resolve(imageNpot),
       );
@@ -503,9 +503,39 @@ describe(
       await textureLoader.load();
       await waitForLoaderProcess(textureLoader, scene);
 
-      expect(textureLoader.texture.width).toBe(4);
+      expect(textureLoader.texture.width).toBe(scene.context.webgl2 ? 3 : 4);
       expect(textureLoader.texture.height).toBe(2);
     });
+
+    for (const requestWebgl1 of [false, true]) {
+      it(`preserves repeat wrapping with requestWebgl1=${requestWebgl1}`, async function () {
+        const testScene = createScene({
+          contextOptions: { requestWebgl1: requestWebgl1 },
+        });
+        spyOn(Resource.prototype, "fetchImage").and.returnValue(
+          Promise.resolve(imageNpot),
+        );
+        const textureLoader = new GltfTextureLoader({
+          resourceCache: ResourceCache,
+          gltf: gltf,
+          textureInfo: gltf.materials[0].emissiveTexture,
+          gltfResource: gltfResource,
+          baseResource: gltfResource,
+          supportedImageFormats: new SupportedImageFormats(),
+        });
+        try {
+          await textureLoader.load();
+          await waitForLoaderProcess(textureLoader, testScene);
+          expect(textureLoader.texture.width).toBe(
+            testScene.context.webgl2 ? 3 : 4,
+          );
+          expect(textureLoader.texture.height).toBe(2);
+        } finally {
+          textureLoader.destroy();
+          testScene.destroyForSpecs();
+        }
+      });
+    }
 
     it("does not generate power-of-two texture if sampler does not require it", async function () {
       spyOn(Resource.prototype, "fetchImage").and.returnValue(

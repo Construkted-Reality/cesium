@@ -3087,20 +3087,23 @@ describe(
 
       return loadGltf(boomBoxSpecularGlossiness).then(function (gltfLoader) {
         const components = gltfLoader.components;
-        const scene = components.scene;
-        const rootNode = scene.nodes[0];
+        const gltfScene = components.scene;
+        const expectedWidth = scene.context.webgl2 ? 200 : 256;
+        const rootNode = gltfScene.nodes[0];
         const primitive = rootNode.primitives[0];
         const material = primitive.material;
         const specularGlossiness = material.specularGlossiness;
 
         expect(components.upAxis).toBe(Axis.Y);
         expect(components.forwardAxis).toBe(Axis.Z);
-        expect(material.occlusionTexture.texture.width).toBe(256);
-        expect(material.normalTexture.texture.width).toBe(256);
-        expect(material.emissiveTexture.texture.width).toBe(256);
-        expect(specularGlossiness.diffuseTexture.texture.width).toBe(256);
+        expect(material.occlusionTexture.texture.width).toBe(expectedWidth);
+        expect(material.normalTexture.texture.width).toBe(expectedWidth);
+        expect(material.emissiveTexture.texture.width).toBe(expectedWidth);
+        expect(specularGlossiness.diffuseTexture.texture.width).toBe(
+          expectedWidth,
+        );
         expect(specularGlossiness.specularGlossinessTexture.texture.width).toBe(
-          256,
+          expectedWidth,
         );
 
         expect(specularGlossiness.diffuseFactor).toEqual(
