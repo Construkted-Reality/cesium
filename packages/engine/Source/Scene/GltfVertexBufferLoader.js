@@ -396,6 +396,8 @@ async function loadFromSpz(vertexBufferLoader) {
       gltf: vertexBufferLoader._gltf,
       primitive: vertexBufferLoader._primitive,
       spz: vertexBufferLoader._spz,
+      packedSphericalHarmonicsDegree:
+        vertexBufferLoader._packedSphericalHarmonicsDegree,
       gltfResource: vertexBufferLoader._gltfResource,
       baseResource: vertexBufferLoader._baseResource,
     });

@@ -5,7 +5,6 @@ import RuntimeError from "../Core/RuntimeError.js";
 import ResourceLoader from "./ResourceLoader.js";
 import ResourceLoaderState from "./ResourceLoaderState.js";
 import SpzDecoder from "./SpzDecoder.js";
-import { getPackedSphericalHarmonicsDegree } from "./packSpzSphericalHarmonics.js";
 
 // Cumulative number of SH coefficient floats per splat per channel for each
 // degree. Degree 0 has no extra SH data (base color is stored separately in
@@ -101,6 +100,7 @@ class GltfSpzLoader extends ResourceLoader {
    * @param {object} options.spz The SPZ extension object.
    * @param {Resource} options.gltfResource The {@link Resource} containing the glTF.
    * @param {Resource} options.baseResource The {@link Resource} that paths in the glTF JSON are relative to.
+   * @param {number} [options.packedSphericalHarmonicsDegree] The degree requested by a packed consumer.
    * @param {string} [options.cacheKey] The cache key of the resource.
    */
   constructor(options) {
@@ -131,9 +131,7 @@ class GltfSpzLoader extends ResourceLoader {
     this._primitive = primitive;
     this._spz = spz;
     this._spzInfo = getSpzInfoFromGltf(gltf, primitive);
-    this._packedDegree = getPackedSphericalHarmonicsDegree(
-      primitive.attributes ?? {},
-    );
+    this._packedDegree = options.packedSphericalHarmonicsDegree;
     this._lastDecodeAttemptFrame = undefined;
     this._cacheKey = cacheKey;
     this._bufferViewLoader = undefined;
@@ -143,6 +141,18 @@ class GltfSpzLoader extends ResourceLoader {
     this._state = ResourceLoaderState.UNLOADED;
     this._promise = undefined;
     this._spzError = undefined;
+  }
+
+  /**
+   * Request worker packing before admission. A consumer arriving after admission
+   * uses the vertex loader's existing packing fallback without another decode.
+   * @param {number} [degree] The degree requested by a packed consumer.
+   * @private
+   */
+  requestPackedSphericalHarmonics(degree) {
+    if (defined(degree)) {
+      this._packedDegree = degree;
+    }
   }
 
   /**

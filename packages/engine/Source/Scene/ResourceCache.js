@@ -402,12 +402,21 @@ ResourceCache.getDracoLoader = function (options) {
  * @param {Resource} options.gltfResource The {@link Resource} containing the glTF.
  * @param {Resource} options.baseResource The {@link Resource} that paths in the glTF JSON are relative to.
  *
+ * @param {number} [options.packedSphericalHarmonicsDegree] The degree requested by a packed consumer.
+ *
  * @return {GltfSpzLoader} The cached SPZ loader.
  @private
  * */
 ResourceCache.getSpzLoader = function (options) {
   options = options ?? Frozen.EMPTY_OBJECT;
-  const { gltf, primitive, spz, gltfResource, baseResource } = options;
+  const {
+    gltf,
+    primitive,
+    spz,
+    gltfResource,
+    baseResource,
+    packedSphericalHarmonicsDegree,
+  } = options;
 
   //>>includeStart('debug', pragmas.debug);
   Check.typeOf.object("options.gltf", gltf);
@@ -426,6 +435,7 @@ ResourceCache.getSpzLoader = function (options) {
 
   let spzLoader = ResourceCache.get(cacheKey);
   if (defined(spzLoader)) {
+    spzLoader.requestPackedSphericalHarmonics(packedSphericalHarmonicsDegree);
     return spzLoader;
   }
 
@@ -437,6 +447,7 @@ ResourceCache.getSpzLoader = function (options) {
     gltfResource: gltfResource,
     baseResource: baseResource,
     cacheKey: cacheKey,
+    packedSphericalHarmonicsDegree: packedSphericalHarmonicsDegree,
   });
 
   return ResourceCache.add(spzLoader);
