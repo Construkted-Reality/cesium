@@ -186,7 +186,9 @@ describe(
           return release !== undefined;
         });
         // The worker result arrives after the scene has exhausted its frames.
-        for (let i = 0; i < 10; ++i) scene.renderForSpecs();
+        for (let i = 0; i < 10; ++i) {
+          scene.renderForSpecs();
+        }
         release();
         await pollToPromise(function () {
           return primitive._pendingSnapshot.state === "TEXTURE_READY";
@@ -205,10 +207,14 @@ describe(
           return primitive._snapshot !== undefined && primitive.isStable;
         });
         expect(primitive._numSplats).toBeGreaterThan(0);
-        for (let i = 0; i < 10; ++i) scene.renderForSpecs();
+        for (let i = 0; i < 10; ++i) {
+          scene.renderForSpecs();
+        }
         let frames = 0;
         const remove = scene.postRender.addEventListener(() => frames++);
-        for (let i = 0; i < 10; ++i) scene.renderForSpecs();
+        for (let i = 0; i < 10; ++i) {
+          scene.renderForSpecs();
+        }
         remove();
         expect(frames).toBe(0);
         scene.primitives.remove(tileset);
@@ -219,6 +225,7 @@ describe(
       } catch (error) {
         throw new Error(
           `${error.message}; release=${!!release}; pending=${primitive._pendingSnapshot?.state}; sort=${primitive._sorterState}; dirty=${primitive._dirty}`,
+          { cause: error },
         );
       } finally {
         release?.();
