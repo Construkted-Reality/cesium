@@ -18,6 +18,35 @@ describe(
   function () {
     const tilesetUrl = "./Data/Cesium3DTiles/GaussianSplats/tower/tileset.json";
 
+    for (const testCase of [
+      { extensions: [], expected: false },
+      { extensions: ["KHR_gaussian_splatting"], expected: true },
+      {
+        extensions: ["KHR_gaussian_splatting_compression_spz_2"],
+        expected: false,
+      },
+      {
+        extensions: [
+          "KHR_gaussian_splatting",
+          "KHR_gaussian_splatting_compression_spz_2",
+        ],
+        expected: true,
+      },
+    ]) {
+      it(`detects splat content for ${JSON.stringify(testCase.extensions)}`, function () {
+        const tileset = {
+          isGltfExtensionRequired(extension) {
+            return testCase.extensions.includes(extension);
+          },
+        };
+        expect(
+          GaussianSplat3DTileContent.tilesetRequiresGaussianSplattingExt(
+            tileset,
+          ),
+        ).toBe(testCase.expected);
+      });
+    }
+
     let scene;
     let options;
 
