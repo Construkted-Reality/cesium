@@ -66,6 +66,10 @@ class GltfTextureView {
     return false;
   }
   destroy() {
+    // Class methods are not replaced by destroyObject. Release each view once.
+    if (this.isDestroyed()) {
+      return undefined;
+    }
     const entry = this._entry;
     entry.texture._context._gl.deleteSampler(this._samplerObject);
     if (--entry.references === 0) {

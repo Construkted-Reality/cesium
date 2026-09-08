@@ -185,6 +185,7 @@ class GltfTextureLoader extends ResourceLoader {
         textureJob.mipLevels = undefined;
         textureJob.context = undefined;
         textureJob.texture = undefined;
+        textureJob.storageKey = undefined;
       }
     } else {
       texture = createTexture(

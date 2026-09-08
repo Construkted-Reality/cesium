@@ -266,6 +266,12 @@ describe("ResourceCache", function () {
       firstTexture.sampler = new Sampler({ wrapS: 33648 });
       expect(secondTexture.sampler).toBe(originalSampler);
       ResourceCache.unload(first);
+      if (scene.context.webgl2) {
+        const storage = secondTexture._entry.texture;
+        firstTexture.destroy();
+        expect(storage.isDestroyed()).toBe(false);
+        expect(secondTexture._entry.references).toBe(1);
+      }
       expect(secondTexture.isDestroyed()).toBe(false);
       ResourceCache.unload(second);
       expect(secondTexture.isDestroyed()).toBe(true);
