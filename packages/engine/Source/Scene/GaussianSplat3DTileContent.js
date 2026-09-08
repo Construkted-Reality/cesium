@@ -635,6 +635,13 @@ function getShAttributePrefix(attribute) {
   return `${prefix}SH_DEGREE_`;
 }
 
+function isHigherOrderShAttribute(attribute) {
+  // Degree zero contributes to the base color, not the directional SH texture.
+  return /^(?:_|KHR_gaussian_splatting:)SH_DEGREE_[1-3]_COEF_\d+$/.test(
+    attribute.name,
+  );
+}
+
 /**
  * Determine Spherical Harmonics degree and coefficient count from attributes
  * @param {Attribute[]} attributes - The list of glTF attributes.
@@ -642,9 +649,7 @@ function getShAttributePrefix(attribute) {
  * @private
  */
 function degreeAndCoefFromAttributes(attributes) {
-  const shAttributes = attributes.filter((attr) =>
-    attr.name.includes("SH_DEGREE_"),
-  );
+  const shAttributes = attributes.filter(isHigherOrderShAttribute);
 
   switch (shAttributes.length) {
     default:
@@ -728,8 +733,8 @@ function packSphericalHarmonicsData(tileContent) {
   const totalLength = tileContent.pointsLength * (coefs * (2 / 3)); //3 packs into 2
   const packedData = new Uint32Array(totalLength);
 
-  const shAttributes = tileContent.gltfPrimitive.attributes.filter((attr) =>
-    attr.name.includes("SH_DEGREE_"),
+  const shAttributes = tileContent.gltfPrimitive.attributes.filter(
+    isHigherOrderShAttribute,
   );
   let stride = 0;
   const base = [0, 9, 24];

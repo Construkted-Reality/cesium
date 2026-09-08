@@ -50,6 +50,78 @@ describe(
     let scene;
     let options;
 
+    for (const prefix of ["_", "KHR_gaussian_splatting:"]) {
+      for (const degree of [0, 1, 2, 3]) {
+        for (const includeDc of [false, true]) {
+          it(`packs degree ${degree} with prefix ${prefix} and DC ${includeDc}`, function () {
+            const attributes = [
+              {
+                name: "POSITION",
+                semantic: VertexAttributeSemantic.POSITION,
+                count: 1,
+                typedArray: new Float32Array([0, 0, 0]),
+              },
+              {
+                name: `${prefix}ROTATION`,
+                semantic: VertexAttributeSemantic.ROTATION,
+                typedArray: new Float32Array([0, 0, 0, 1]),
+              },
+              {
+                name: `${prefix}SCALE`,
+                semantic: VertexAttributeSemantic.SCALE,
+                typedArray: new Float32Array([1, 1, 1]),
+              },
+            ];
+            if (includeDc) {
+              attributes.push({
+                name: `${prefix}SH_DEGREE_0_COEF_0`,
+                typedArray: new Float32Array([8, 8, 8]),
+              });
+            }
+            for (let l = 1; l <= degree; l++) {
+              for (let n = 0; n < 2 * l + 1; n++) {
+                attributes.push({
+                  name: `${prefix}SH_DEGREE_${l}_COEF_${n}`,
+                  typedArray: new Float32Array([1, 0.5, 0.25]),
+                });
+              }
+            }
+            const loader = {
+              components: {
+                scene: { nodes: [{ primitives: [{ attributes }] }] },
+              },
+              destroy() {},
+            };
+            const content = new GaussianSplat3DTileContent(
+              loader,
+              { gaussianSplatPrimitive: {} },
+              {},
+              {},
+            );
+            content._resourcesLoaded = true;
+            try {
+              content.update(undefined, { afterRender: [] });
+              const count = (degree + 1) ** 2 - 1;
+              expect(content.sphericalHarmonicsDegree).toBe(degree);
+              expect(content.sphericalHarmonicsCoefficientCount).toBe(
+                count * 3,
+              );
+              const expected = [];
+              for (let i = 0; i < count; i++) {
+                // IEEE half encodings: 1 = 0x3c00, 0.5 = 0x3800, 0.25 = 0x3400.
+                expected.push(0x38003c00, 0x3400);
+              }
+              expect(Array.from(content.packedSphericalHarmonicsData)).toEqual(
+                expected,
+              );
+            } finally {
+              content.destroy();
+            }
+          });
+        }
+      }
+    }
+
     beforeAll(function () {
       scene = createScene();
     });
