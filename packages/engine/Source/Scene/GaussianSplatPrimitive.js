@@ -294,6 +294,28 @@ function requestSplatFrame(primitive, frameState, generation) {
   });
 }
 
+function requestWorkerInitializationFrame(primitive, frameState, processor) {
+  // TaskProcessor has no readiness event. Unlike scheduleTask, its cached
+  // WebAssembly initialization promise does not raise taskCompletedEvent.
+  const promise = processor?._webAssemblyPromise;
+  if (!defined(promise)) {
+    return;
+  }
+  primitive._initializationWakeups ??= new WeakSet();
+  if (primitive._initializationWakeups.has(promise)) {
+    return;
+  }
+  primitive._initializationWakeups.add(promise);
+  const wake = function () {
+    if (isSplatOwnerLive(primitive)) {
+      // Initialization is shared by generations. Wake the current generation,
+      // including on rejection so the next update can report the worker error.
+      requestSplatFrame(primitive, frameState, primitive._splatDataGeneration);
+    }
+  };
+  void promise.then(wake, wake);
+}
+
 /**
  * Destroys the GPU textures owned by a snapshot, if any, and clears the
  * references so they are not used after destruction.
@@ -1480,6 +1502,13 @@ GaussianSplatPrimitive.generateSplatTexture = function (
   });
   if (!defined(promise)) {
     snapshot.state = SnapshotState.BUILDING;
+    if (!GaussianSplatTextureGenerator._taskProcessorReady) {
+      requestWorkerInitializationFrame(
+        primitive,
+        frameState,
+        GaussianSplatTextureGenerator._textureTaskProcessor,
+      );
+    }
     return;
   }
   void processGeneratedSplatTextureData(
@@ -2065,6 +2094,13 @@ GaussianSplatPrimitive.prototype.update = function (frameState) {
           this._pendingSortPromise = undefined;
           this._pendingSort = undefined;
           pending.state = SnapshotState.TEXTURE_READY;
+          if (!GaussianSplatSorter._taskProcessorReady) {
+            requestWorkerInitializationFrame(
+              this,
+              frameState,
+              GaussianSplatSorter._sorterTaskProcessor,
+            );
+          }
           return;
         }
         this._pendingSortPromise = sortPromise;
@@ -2131,6 +2167,13 @@ GaussianSplatPrimitive.prototype.update = function (frameState) {
 
     if (!defined(this._sorterPromise)) {
       this._sorterState = GaussianSplatSortingState.WAITING;
+      if (!GaussianSplatSorter._taskProcessorReady) {
+        requestWorkerInitializationFrame(
+          this,
+          frameState,
+          GaussianSplatSorter._sorterTaskProcessor,
+        );
+      }
       return;
     }
     this._sorterState = GaussianSplatSortingState.SORTING;
@@ -2164,6 +2207,13 @@ GaussianSplatPrimitive.prototype.update = function (frameState) {
     }
     if (!defined(this._sorterPromise)) {
       this._sorterState = GaussianSplatSortingState.WAITING;
+      if (!GaussianSplatSorter._taskProcessorReady) {
+        requestWorkerInitializationFrame(
+          this,
+          frameState,
+          GaussianSplatSorter._sorterTaskProcessor,
+        );
+      }
       return;
     }
     this._sorterState = GaussianSplatSortingState.SORTING;
