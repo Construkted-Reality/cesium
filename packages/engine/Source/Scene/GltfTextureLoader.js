@@ -166,11 +166,22 @@ class GltfTextureLoader extends ResourceLoader {
         frameState.context,
       );
       const jobScheduler = frameState.jobScheduler;
-      if (!jobScheduler.execute(textureJob, JobType.TEXTURE)) {
-        // Job scheduler is full. Try again next frame.
-        return false;
+      try {
+        if (!jobScheduler.execute(textureJob, JobType.TEXTURE)) {
+          // Job scheduler is full. Try again next frame.
+          return false;
+        }
+        texture = textureJob.texture;
+      } finally {
+        // Release inputs even when the scheduler defers or throws.
+        textureJob.gltf = undefined;
+        textureJob.textureInfo = undefined;
+        textureJob.textureId = undefined;
+        textureJob.image = undefined;
+        textureJob.mipLevels = undefined;
+        textureJob.context = undefined;
+        textureJob.texture = undefined;
       }
-      texture = textureJob.texture;
     } else {
       texture = createTexture(
         this._gltf,

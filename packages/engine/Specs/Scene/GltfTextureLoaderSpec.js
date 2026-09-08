@@ -155,6 +155,58 @@ describe(
       ResourceCache.clearForSpecs();
     });
 
+    it("clears upload jobs after refusal, failure, and success", async function () {
+      spyOn(Resource.prototype, "fetchImage").and.returnValue(
+        Promise.resolve(image),
+      );
+      const loader = new GltfTextureLoader({
+        resourceCache: ResourceCache,
+        gltf: gltf,
+        gltfResource: gltfResource,
+        baseResource: gltfResource,
+        textureInfo: gltf.materials[0].emissiveTexture,
+        supportedImageFormats: new SupportedImageFormats(),
+      });
+      let capturedJob;
+      let outcome = "refuse";
+      spyOn(scene.frameState.jobScheduler, "execute").and.callFake(
+        function (job) {
+          capturedJob = job;
+          if (outcome === "refuse") {
+            return false;
+          }
+          if (outcome === "throw") {
+            throw new Error("Upload failure");
+          }
+          job.execute();
+          return true;
+        },
+      );
+      function expectCleared() {
+        expect(capturedJob).toBeDefined();
+        expect(capturedJob.gltf).toBeUndefined();
+        expect(capturedJob.textureInfo).toBeUndefined();
+        expect(capturedJob.textureId).toBeUndefined();
+        expect(capturedJob.image).toBeUndefined();
+        expect(capturedJob.mipLevels).toBeUndefined();
+        expect(capturedJob.context).toBeUndefined();
+        expect(capturedJob.texture).toBeUndefined();
+      }
+      await loader.load();
+      expect(loader.process(scene.frameState)).toBe(false);
+      expectCleared();
+      outcome = "throw";
+      expect(function () {
+        loader.process(scene.frameState);
+      }).toThrowError("Upload failure");
+      expectCleared();
+      outcome = "accept";
+      expect(loader.process(scene.frameState)).toBe(true);
+      expectCleared();
+      expect(loader.texture).toBeDefined();
+      loader.destroy();
+    });
+
     it("throws if resourceCache is undefined", function () {
       expect(function () {
         return new GltfTextureLoader({
