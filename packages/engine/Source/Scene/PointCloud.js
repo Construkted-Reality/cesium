@@ -385,32 +385,28 @@ function createResources(pointCloud, frameState) {
     for (const name in styleableProperties) {
       if (styleableProperties.hasOwnProperty(name)) {
         const property = styleableProperties[name];
-        const typedArray = prepareVertexAttribute(property.typedArray, name);
+        const prepared = prepareVertexAttribute(property.typedArray, name);
+        const typedArray =
+          prepared.byteLength === prepared.buffer.byteLength
+            ? prepared
+            : prepared.slice();
         componentsPerAttribute = property.componentCount;
         componentDatatype = ComponentDatatype.fromTypedArray(typedArray);
 
-        const vertexBuffer = Buffer.createVertexBuffer({
-          context: context,
-          typedArray: typedArray,
-          usage: BufferUsage.STATIC_DRAW,
-        });
-
-        pointCloud._geometryByteLength += vertexBuffer.sizeInBytes;
-
+        // Keep unused properties on the CPU until a style needs them.
+        pointCloud._geometryByteLength += typedArray.byteLength;
         const vertexAttribute = {
           index: attributeLocation,
-          vertexBuffer: vertexBuffer,
-          componentsPerAttribute: componentsPerAttribute,
-          componentDatatype: componentDatatype,
-          normalize: false,
-          offsetInBytes: 0,
-          strideInBytes: 0,
+          value: new Array(componentsPerAttribute).fill(0),
+          enabled: false,
         };
 
         styleableVertexAttributes.push(vertexAttribute);
         styleableShaderAttributes[name] = {
           location: attributeLocation,
           componentCount: componentsPerAttribute,
+          componentDatatype: componentDatatype,
+          typedArray: typedArray,
         };
         ++attributeLocation;
       }
@@ -765,6 +761,74 @@ const builtinVariableSubstitutionMap = {
   NORMAL: "czm_3dtiles_builtin_property_NORMAL",
 };
 
+function uploadStyleableProperties(pointCloud, context, propertyIds) {
+  const properties = pointCloud._styleableShaderAttributes;
+  const pending = Object.values(properties).filter(function (property) {
+    return (
+      defined(property.typedArray) &&
+      propertyIds.indexOf(property.location) !== -1
+    );
+  });
+  if (pending.length === 0) {
+    return;
+  }
+
+  const previous = pointCloud._drawCommand.vertexArray;
+  const attributes = [];
+  const retainedBuffers = [];
+  for (let i = 0; i < previous.numberOfAttributes; ++i) {
+    const attribute = previous.getAttribute(i);
+    const descriptor = clone(attribute);
+    descriptor.enabled = defined(attribute.vertexBuffer);
+    if (!defined(attribute.vertexBuffer)) {
+      descriptor.instanceDivisor = undefined;
+    }
+    attributes.push(descriptor);
+    if (defined(attribute.vertexBuffer)) {
+      retainedBuffers.push(attribute.vertexBuffer);
+    }
+  }
+  const createdBuffers = [];
+  let replacement;
+  try {
+    for (const property of pending) {
+      const buffer = Buffer.createVertexBuffer({
+        context: context,
+        typedArray: property.typedArray,
+        usage: BufferUsage.STATIC_DRAW,
+      });
+      createdBuffers.push(buffer);
+      const attribute = attributes.find(function (candidate) {
+        return candidate.index === property.location;
+      });
+      attribute.value = undefined;
+      attribute.enabled = true;
+      attribute.vertexBuffer = buffer;
+      attribute.componentsPerAttribute = property.componentCount;
+      attribute.componentDatatype = property.componentDatatype;
+      attribute.normalize = false;
+    }
+    replacement = new VertexArray({ context: context, attributes: attributes });
+  } catch (error) {
+    for (const buffer of createdBuffers) {
+      buffer.destroy();
+    }
+    throw error;
+  }
+
+  for (const buffer of retainedBuffers) {
+    buffer.vertexArrayDestroyable = false;
+  }
+  previous.destroy();
+  for (const buffer of retainedBuffers) {
+    buffer.vertexArrayDestroyable = true;
+  }
+  pointCloud._drawCommand.vertexArray = replacement;
+  for (const property of pending) {
+    property.typedArray = undefined;
+  }
+}
+
 function createShaders(pointCloud, frameState, style) {
   let i;
   let name;
@@ -783,7 +847,6 @@ function createShaders(pointCloud, frameState, style) {
   const hasBatchIds = pointCloud._hasBatchIds;
   const backFaceCulling = pointCloud._backFaceCulling;
   const normalShading = pointCloud._normalShading;
-  const vertexArray = pointCloud._drawCommand.vertexArray;
   const clippingPlanes = pointCloud.clippingPlanes;
   const attenuation = pointCloud._attenuation;
 
@@ -867,6 +930,9 @@ function createShaders(pointCloud, frameState, style) {
       "Style references the NORMAL semantic but the point cloud does not have normals",
     );
   }
+
+  uploadStyleableProperties(pointCloud, context, styleablePropertyIds);
+  const vertexArray = pointCloud._drawCommand.vertexArray;
 
   // Disable vertex attributes that aren't used in the style, enable attributes that are
   for (name in styleableShaderAttributes) {
@@ -1401,6 +1467,7 @@ PointCloud.prototype.isDestroyed = function () {
 };
 
 PointCloud.prototype.destroy = function () {
+  this._styleableShaderAttributes = undefined;
   const command = this._drawCommand;
   if (defined(command)) {
     command.vertexArray = command.vertexArray && command.vertexArray.destroy();
