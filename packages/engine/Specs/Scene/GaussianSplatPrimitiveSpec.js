@@ -9,9 +9,10 @@ import {
   Matrix4,
   Transforms,
   VertexAttributeSemantic,
+  GaussianSplatTextureGenerator,
 } from "../../index.js";
 import GaussianSplatPrimitive from "../../Source/Scene/GaussianSplatPrimitive.js";
-import GaussianSplatTextureGenerator from "../../Source/Scene/GaussianSplatTextureGenerator.js";
+import GaussianSplatSorter from "../../Source/Scene/GaussianSplatSorter.js";
 
 import Cesium3DTilesTester from "../../../../Specs/Cesium3DTilesTester.js";
 import createScene from "../../../../Specs/createScene.js";
@@ -136,7 +137,7 @@ describe(
     });
 
     it("finishes delayed splat work in request render mode and returns to idle", async function () {
-      const tileset = await Cesium3DTilesTester.loadTileset(
+      let tileset = await Cesium3DTilesTester.loadTileset(
         scene,
         sphericalHarmonicUrl,
         options,
@@ -145,28 +146,40 @@ describe(
         tileset.boundingSphere.center,
         new HeadingPitchRange(0.0, -1.57, tileset.boundingSphere.radius),
       );
-      const primitive = tileset.gaussianSplatPrimitive;
+      let primitive = tileset.gaussianSplatPrimitive;
       await pollToPromise(function () {
         scene.renderForSpecs();
-        return primitive._snapshot !== undefined && primitive.isStable;
+        return (
+          primitive._snapshot !== undefined &&
+          primitive.isStable &&
+          primitive._sorterState === 0 &&
+          primitive._sorterPromise === undefined
+        );
       });
-      const originalSnapshot = primitive._snapshot;
+      scene.primitives.remove(tileset);
       const generate = GaussianSplatTextureGenerator.generateFromAttributes;
       let release;
-      spyOn(GaussianSplatTextureGenerator, "generateFromAttributes").and.callFake(
-        function (attributes) {
-          const promise = generate(attributes);
-          return promise?.then(
-            (data) => new Promise((resolve) => {
+      spyOn(
+        GaussianSplatTextureGenerator,
+        "generateFromAttributes",
+      ).and.callFake(function (attributes) {
+        const promise = generate(attributes);
+        return promise?.then(
+          (data) =>
+            new Promise((resolve) => {
               release = () => resolve(data);
             }),
-          );
-        },
-      );
+        );
+      });
       scene.requestRenderMode = true;
       scene.maximumRenderTimeChange = Infinity;
       try {
-        primitive._dirty = true;
+        tileset = await Cesium3DTilesTester.loadTileset(
+          scene,
+          sphericalHarmonicUrl,
+          options,
+        );
+        primitive = tileset.gaussianSplatPrimitive;
         scene.requestRender();
         await pollToPromise(function () {
           scene.renderForSpecs();
@@ -176,8 +189,20 @@ describe(
         for (let i = 0; i < 10; ++i) scene.renderForSpecs();
         release();
         await pollToPromise(function () {
+          return primitive._pendingSnapshot.state === "TEXTURE_READY";
+        });
+        const wake = scene.frameState.afterRender.at(-1);
+        expect(wake).toBeDefined();
+        expect(wake()).toBe(true);
+        primitive._splatDataGeneration++;
+        expect(wake()).toBe(false);
+        primitive._splatDataGeneration--;
+        tileset.show = false;
+        expect(wake()).toBe(false);
+        tileset.show = true;
+        await pollToPromise(function () {
           scene.renderForSpecs();
-          return primitive._snapshot !== originalSnapshot && primitive.isStable;
+          return primitive._snapshot !== undefined && primitive.isStable;
         });
         expect(primitive._numSplats).toBeGreaterThan(0);
         for (let i = 0; i < 10; ++i) scene.renderForSpecs();
@@ -186,6 +211,15 @@ describe(
         for (let i = 0; i < 10; ++i) scene.renderForSpecs();
         remove();
         expect(frames).toBe(0);
+        scene.primitives.remove(tileset);
+        expect(tileset.isDestroyed()).toBe(true);
+        expect(wake()).toBe(false);
+        primitive.destroy();
+        expect(wake()).toBe(false);
+      } catch (error) {
+        throw new Error(
+          `${error.message}; release=${!!release}; pending=${primitive._pendingSnapshot?.state}; sort=${primitive._sorterState}; dirty=${primitive._dirty}`,
+        );
       } finally {
         release?.();
         scene.requestRenderMode = false;
@@ -263,6 +297,50 @@ describe(
       expect(gsPrim._pendingSnapshot.state).toBe("TEXTURE_READY");
       expect(gsPrim._pendingSortPromise).toBeUndefined();
       gsPrim.destroy();
+    });
+
+    it("requests a frame only after a steady sort completes", async function () {
+      const tileset = {
+        show: true,
+        splitDirection: 0,
+        modelMatrix: Matrix4.IDENTITY,
+        _selectedTiles: [],
+        tileLoad: { addEventListener: function () {} },
+        tileVisible: { addEventListener: function () {} },
+        update: function () {},
+      };
+      const primitive = new GaussianSplatPrimitive({ tileset });
+      primitive._rootTransform = Matrix4.IDENTITY;
+      primitive._numSplats = 2;
+      primitive._positions = new Float32Array([0, 0, 0, 1, 0, 0]);
+      let release;
+      spyOn(GaussianSplatSorter, "radixSortIndexes").and.returnValue(
+        new Promise((resolve) => {
+          release = resolve;
+        }),
+      );
+      const frameState = {
+        frameNumber: 1,
+        afterRender: [],
+        commandList: [],
+        passes: { pick: false },
+        camera: {
+          viewMatrix: Matrix4.clone(Matrix4.IDENTITY),
+          positionWC: Cartesian3.clone(Cartesian3.ZERO),
+          directionWC: Cartesian3.clone(Cartesian3.UNIT_Z),
+        },
+      };
+      primitive.update(frameState);
+      expect(frameState.afterRender.length).toBe(0);
+      release(new Uint32Array([1, 0]));
+      await Promise.resolve();
+      expect(frameState.afterRender.length).toBe(1);
+      const wake = frameState.afterRender[0];
+      expect(wake()).toBe(true);
+      primitive._splatDataGeneration++;
+      expect(wake()).toBe(false);
+      primitive.destroy();
+      expect(wake()).toBe(false);
     });
 
     it("inflates maximumScreenSpaceError during traversal and restores it when splatBudgetSSEScale > 1", function () {

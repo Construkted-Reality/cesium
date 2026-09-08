@@ -271,10 +271,27 @@ function haveSelectedTilesChanged(primitive, selectedTiles) {
  */
 function isActiveSort(primitive, activeSort) {
   return (
+    isSplatOwnerLive(primitive) &&
     defined(activeSort) &&
     activeSort.requestId === primitive._sortRequestId &&
     activeSort.dataGeneration === primitive._splatDataGeneration
   );
+}
+
+function isSplatOwnerLive(primitive) {
+  return !primitive.isDestroyed() && !primitive._tileset.isDestroyed?.();
+}
+
+// FrameState callbacks run even when requestRenderMode skips drawing. Queue one
+// frame when work becomes usable, without drawing while a worker is pending.
+function requestSplatFrame(primitive, frameState, generation) {
+  frameState.afterRender.push(function () {
+    return (
+      isSplatOwnerLive(primitive) &&
+      primitive._tileset.show &&
+      primitive._splatDataGeneration === generation
+    );
+  });
 }
 
 /**
@@ -480,6 +497,12 @@ async function processGeneratedSplatTextureData(
 ) {
   try {
     const splatTextureData = await promise;
+    if (
+      !isSplatOwnerLive(primitive) ||
+      primitive._pendingSnapshot !== snapshot
+    ) {
+      return;
+    }
     const maxTex = ContextLimits.maximumTextureSize;
 
     // Use maximumTextureSize as the texture width; splatsPerRow = maxTex / 2
@@ -625,6 +648,7 @@ async function processGeneratedSplatTextureData(
     }
 
     snapshot.state = SnapshotState.TEXTURE_READY;
+    requestSplatFrame(primitive, frameState, snapshot.generation);
   } catch (error) {
     console.error("Error generating Gaussian splat texture:", error);
     snapshot.state = SnapshotState.BUILDING;
@@ -652,6 +676,7 @@ async function resolvePendingSnapshotSort(
   try {
     const sortedData = await sortPromise;
     if (
+      !isSplatOwnerLive(primitive) ||
       !defined(pendingSort) ||
       pendingSort.snapshot !== primitive._pendingSnapshot
     ) {
@@ -677,6 +702,7 @@ async function resolvePendingSnapshotSort(
     commitSnapshot(primitive, pending, frameState);
     primitive._pendingSnapshot = undefined;
     GaussianSplatPrimitive.buildGSplatDrawCommand(primitive, frameState);
+    requestSplatFrame(primitive, frameState, pending.generation);
   } catch (err) {
     if (
       !defined(pendingSort) ||
@@ -700,12 +726,18 @@ async function resolvePendingSnapshotSort(
  * to {@link GaussianSplatSortingState.SORTED}.
  *
  * @param {GaussianSplatPrimitive} primitive The owning primitive.
+ * @param {FrameState} frameState The current frame state.
  * @param {object|undefined} activeSort Active sort metadata.
  * @param {Promise<Uint32Array>} sortPromise Promise that resolves to sorted indexes.
  * @returns {Promise<void>}
  * @private
  */
-async function resolveSteadySort(primitive, activeSort, sortPromise) {
+async function resolveSteadySort(
+  primitive,
+  frameState,
+  activeSort,
+  sortPromise,
+) {
   try {
     const sortedData = await sortPromise;
     const isActive = isActiveSort(primitive, activeSort);
@@ -723,6 +755,7 @@ async function resolveSteadySort(primitive, activeSort, sortPromise) {
     }
     primitive._indexes = sortedData;
     primitive._sorterState = GaussianSplatSortingState.SORTED;
+    requestSplatFrame(primitive, frameState, activeSort.dataGeneration);
   } catch (err) {
     if (!isActiveSort(primitive, activeSort)) {
       return;
@@ -1744,6 +1777,13 @@ GaussianSplatPrimitive.prototype.update = function (frameState) {
       isStable ||
       isBootstrap ||
       this._snapshotRebuildStallFrames >= DEFAULT_MAX_SNAPSHOT_STALL_FRAMES;
+    if (
+      this._needsSnapshotRebuild &&
+      tileset._selectedTiles.length !== 0 &&
+      !allowRebuild
+    ) {
+      requestSplatFrame(this, frameState, this._splatDataGeneration);
+    }
     const hasPendingWork =
       this._dirty ||
       this._needsSnapshotRebuild ||
@@ -2084,7 +2124,7 @@ GaussianSplatPrimitive.prototype.update = function (frameState) {
         markSteadySortStart(this, frameState);
         const activeSort = this._activeSort;
         this._sorterState = GaussianSplatSortingState.SORTING;
-        void resolveSteadySort(this, activeSort, rawPromise);
+        void resolveSteadySort(this, frameState, activeSort, rawPromise);
         return;
       }
     }
@@ -2118,7 +2158,7 @@ GaussianSplatPrimitive.prototype.update = function (frameState) {
         markSteadySortStart(this, frameState);
         const activeSort = this._activeSort;
         this._sorterState = GaussianSplatSortingState.SORTING;
-        void resolveSteadySort(this, activeSort, rawPromise);
+        void resolveSteadySort(this, frameState, activeSort, rawPromise);
         return;
       }
     }
