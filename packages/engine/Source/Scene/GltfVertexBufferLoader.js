@@ -271,11 +271,18 @@ class GltfVertexBufferLoader extends ResourceLoader {
       const vertexBufferJob = scratchVertexBufferJob;
       vertexBufferJob.set(typedArray, frameState.context);
       const jobScheduler = frameState.jobScheduler;
-      if (!jobScheduler.execute(vertexBufferJob, JobType.BUFFER)) {
-        // Job scheduler is full. Try again next frame.
-        return false;
+      try {
+        if (!jobScheduler.execute(vertexBufferJob, JobType.BUFFER)) {
+          // Job scheduler is full. Try again next frame.
+          return false;
+        }
+        buffer = vertexBufferJob.buffer;
+      } finally {
+        // Release inputs even when the scheduler defers or throws.
+        vertexBufferJob.typedArray = undefined;
+        vertexBufferJob.context = undefined;
+        vertexBufferJob.buffer = undefined;
       }
-      buffer = vertexBufferJob.buffer;
     } else if (this._loadBuffer) {
       buffer = createVertexBuffer(typedArray, frameState.context);
     }

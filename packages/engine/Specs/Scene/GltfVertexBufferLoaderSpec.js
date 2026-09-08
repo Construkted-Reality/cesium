@@ -221,6 +221,55 @@ describe(
       ResourceCache.clearForSpecs();
     });
 
+    it("clears upload jobs after refusal, failure, and success", async function () {
+      spyOn(Resource.prototype, "fetchArrayBuffer").and.returnValue(
+        Promise.resolve(arrayBuffer),
+      );
+      const loader = new GltfVertexBufferLoader({
+        resourceCache: ResourceCache,
+        gltf: gltfUncompressed,
+        gltfResource: gltfResource,
+        baseResource: gltfResource,
+        loadBuffer: true,
+        accessorId: 0,
+        bufferViewId: 0,
+      });
+      let capturedJob;
+      let outcome = "refuse";
+      spyOn(scene.frameState.jobScheduler, "execute").and.callFake(
+        function (job) {
+          capturedJob = job;
+          if (outcome === "refuse") {
+            return false;
+          }
+          if (outcome === "throw") {
+            throw new Error("Upload failure");
+          }
+          job.execute();
+          return true;
+        },
+      );
+      function expectCleared() {
+        expect(capturedJob).toBeDefined();
+        expect(capturedJob.typedArray).toBeUndefined();
+        expect(capturedJob.context).toBeUndefined();
+        expect(capturedJob.buffer).toBeUndefined();
+      }
+      await loader.load();
+      expect(loader.process(scene.frameState)).toBe(false);
+      expectCleared();
+      outcome = "throw";
+      expect(function () {
+        loader.process(scene.frameState);
+      }).toThrowError("Upload failure");
+      expectCleared();
+      outcome = "accept";
+      expect(loader.process(scene.frameState)).toBe(true);
+      expectCleared();
+      expect(loader.buffer).toBeDefined();
+      loader.destroy();
+    });
+
     it("throws if resourceCache is undefined", function () {
       expect(function () {
         return new GltfVertexBufferLoader({
