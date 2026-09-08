@@ -12,7 +12,7 @@ import deprecationWarning from "../Core/deprecationWarning.js";
 /** @import Cesium3DTileContent from "./Cesium3DTileContent.js"; */
 
 /**
- * Represents the contents of a glTF or glb using the {@link https://github.com/CesiumGS/glTF/tree/draft-splat-spz/extensions/2.0/Khronos/KHR_gaussian_splatting | KHR_gaussian_splatting} and {@link https://github.com/CesiumGS/glTF/tree/draft-splat-spz/extensions/2.0/Khronos/KHR_gaussian_splatting_compression_spz_2 | KHR_gaussian_splatting_compression_spz_2} extensions.
+ * Represents glTF or glb content using {@link https://github.com/CesiumGS/glTF/tree/draft-splat-spz/extensions/2.0/Khronos/KHR_gaussian_splatting | KHR_gaussian_splatting}, with optional {@link https://github.com/CesiumGS/glTF/tree/draft-splat-spz/extensions/2.0/Khronos/KHR_gaussian_splatting_compression_spz_2 | KHR_gaussian_splatting_compression_spz_2} compression.
  * <p>
  * Implements the {@link Cesium3DTileContent} interface.
  * </p>
@@ -133,11 +133,9 @@ class GaussianSplat3DTileContent {
   static tilesetRequiresGaussianSplattingExt(tileset) {
     let hasGaussianSplatExtension = false;
     if (tileset.isGltfExtensionRequired instanceof Function) {
-      hasGaussianSplatExtension =
-        tileset.isGltfExtensionRequired("KHR_gaussian_splatting") &&
-        tileset.isGltfExtensionRequired(
-          "KHR_gaussian_splatting_compression_spz_2",
-        );
+      hasGaussianSplatExtension = tileset.isGltfExtensionRequired(
+        "KHR_gaussian_splatting",
+      );
 
       if (
         tileset.isGltfExtensionRequired("KHR_spz_gaussian_splats_compression")
@@ -146,8 +144,8 @@ class GaussianSplat3DTileContent {
           "KHR_spz_gaussian_splats_compression",
           "Support for the original KHR_spz_gaussian_splats_compression extension has been removed in favor " +
             "of the up to date KHR_gaussian_splatting and KHR_gaussian_splatting_compression_spz_2 extensions" +
-            "\n\nPlease retile your tileset with the KHR_gaussian_splatting and " +
-            "KHR_gaussian_splatting_compression_spz_2 extensions.",
+            "\n\nPlease retile your tileset with KHR_gaussian_splatting. " +
+            "SPZ content must also use KHR_gaussian_splatting_compression_spz_2.",
         );
       }
     }
