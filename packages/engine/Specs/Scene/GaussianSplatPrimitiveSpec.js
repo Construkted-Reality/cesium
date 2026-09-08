@@ -11,6 +11,7 @@ import {
   VertexAttributeSemantic,
 } from "../../index.js";
 import GaussianSplatPrimitive from "../../Source/Scene/GaussianSplatPrimitive.js";
+import GaussianSplatTextureGenerator from "../../Source/Scene/GaussianSplatTextureGenerator.js";
 
 import Cesium3DTilesTester from "../../../../Specs/Cesium3DTilesTester.js";
 import createScene from "../../../../Specs/createScene.js";
@@ -132,6 +133,64 @@ describe(
         expect(rgba[samplePosition + 1]).toBe(0);
         expect(rgba[samplePosition + 2]).toBe(0);
       });
+    });
+
+    it("finishes delayed splat work in request render mode and returns to idle", async function () {
+      const tileset = await Cesium3DTilesTester.loadTileset(
+        scene,
+        sphericalHarmonicUrl,
+        options,
+      );
+      scene.camera.lookAt(
+        tileset.boundingSphere.center,
+        new HeadingPitchRange(0.0, -1.57, tileset.boundingSphere.radius),
+      );
+      const primitive = tileset.gaussianSplatPrimitive;
+      await pollToPromise(function () {
+        scene.renderForSpecs();
+        return primitive._snapshot !== undefined && primitive.isStable;
+      });
+      const originalSnapshot = primitive._snapshot;
+      const generate = GaussianSplatTextureGenerator.generateFromAttributes;
+      let release;
+      spyOn(GaussianSplatTextureGenerator, "generateFromAttributes").and.callFake(
+        function (attributes) {
+          const promise = generate(attributes);
+          return promise?.then(
+            (data) => new Promise((resolve) => {
+              release = () => resolve(data);
+            }),
+          );
+        },
+      );
+      scene.requestRenderMode = true;
+      scene.maximumRenderTimeChange = Infinity;
+      try {
+        primitive._dirty = true;
+        scene.requestRender();
+        await pollToPromise(function () {
+          scene.renderForSpecs();
+          return release !== undefined;
+        });
+        // The worker result arrives after the scene has exhausted its frames.
+        for (let i = 0; i < 10; ++i) scene.renderForSpecs();
+        release();
+        await pollToPromise(function () {
+          scene.renderForSpecs();
+          return primitive._snapshot !== originalSnapshot && primitive.isStable;
+        });
+        expect(primitive._numSplats).toBeGreaterThan(0);
+        for (let i = 0; i < 10; ++i) scene.renderForSpecs();
+        let frames = 0;
+        const remove = scene.postRender.addEventListener(() => frames++);
+        for (let i = 0; i < 10; ++i) scene.renderForSpecs();
+        remove();
+        expect(frames).toBe(0);
+      } finally {
+        release?.();
+        scene.requestRenderMode = false;
+        scene.maximumRenderTimeChange = 0.0;
+      }
     });
 
     it("retries pending snapshot sorting when sorter is temporarily unavailable", function () {
