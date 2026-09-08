@@ -11,6 +11,7 @@ import {
   Transforms,
   VertexAttributeSemantic,
 } from "../../index.js";
+import GaussianSplatTextureGenerator from "../../Source/Scene/GaussianSplatTextureGenerator.js";
 import GaussianSplatSorter from "../../Source/Scene/GaussianSplatSorter.js";
 import GaussianSplatPrimitive from "../../Source/Scene/GaussianSplatPrimitive.js";
 
@@ -169,13 +170,8 @@ describe(
       expect(primitive.isDestroyed()).toBe(true);
     });
 
-    it("commits a pending snapshot despite disjoint selection churn", async function () {
-      const { primitive, frame, tileset } = createSortFixture();
-      tileset.boundingSphere = {
-        center: Cartesian3.fromDegrees(0, 0),
-        radius: 10,
-      };
-      const makeTile = () => ({
+    function makeTile() {
+      return {
         computedTransform: Matrix4.IDENTITY,
         content: {
           worldTransform: Matrix4.IDENTITY,
@@ -194,7 +190,71 @@ describe(
           },
           sphericalHarmonicsDegree: 0,
         },
+      };
+    }
+
+    [false, true].forEach(function (selectionChanged) {
+      it(`recovers a failed snapshot, selectionChanged=${selectionChanged}`, async function () {
+        const { primitive, frame, tileset } = createSortFixture();
+        tileset.boundingSphere = {
+          center: Cartesian3.fromDegrees(0, 0),
+          radius: 10,
+        };
+        const a = makeTile();
+        const b = makeTile();
+        tileset._selectedTiles = [a];
+        spyOn(GaussianSplatPrimitive, "transformTile");
+        spyOn(console, "error");
+        spyOn(
+          GaussianSplatTextureGenerator,
+          "generateFromAttributes",
+        ).and.callFake(() => Promise.reject(new Error("Snapshot A fails")));
+        // Force the initial snapshot without waiting for selection stability.
+        primitive._snapshot = undefined;
+        primitive._drawCommand = undefined;
+        primitive.update(frame);
+        await Promise.resolve();
+        const failed = primitive._pendingSnapshot;
+        expect(failed.state).toBe("BUILDING");
+
+        tileset._selectedTiles = [selectionChanged ? b : a];
+        spyOn(GaussianSplatPrimitive, "generateSplatTexture").and.callFake(
+          (owner, state, snapshot) => {
+            snapshot.state = "TEXTURE_READY";
+            snapshot.gaussianSplatTexture = { destroy: function () {} };
+          },
+        );
+        spyOn(GaussianSplatSorter, "radixSortIndexes").and.returnValue(
+          Promise.resolve(new Uint32Array([0])),
+        );
+        spyOn(GaussianSplatPrimitive, "buildGSplatDrawCommand");
+        frame.frameNumber++;
+        primitive.update(frame);
+        const replacement = primitive._pendingSnapshot;
+        if (selectionChanged) {
+          expect(replacement).not.toBe(failed);
+        } else {
+          expect(replacement).toBe(failed);
+        }
+        frame.frameNumber++;
+        primitive.update(frame);
+        await Promise.resolve();
+        expect(primitive._snapshot).toBe(replacement);
+        expect(primitive._selectedTileSet.has(selectionChanged ? b : a)).toBe(
+          true,
+        );
+        expect(primitive._pendingSnapshot).toBeUndefined();
+        primitive.destroy();
       });
+    });
+
+    it("commits a pending snapshot despite disjoint selection churn", async function () {
+      const { primitive, frame, tileset } = createSortFixture();
+      tileset.boundingSphere = {
+        center: Cartesian3.fromDegrees(0, 0),
+        radius: 10,
+      };
+
       const a = makeTile();
       const b = makeTile();
       primitive._selectedTileSet = new Set([a]);
