@@ -103,6 +103,21 @@ describe("Scene/Model/ModelStatistics", function () {
     expect(statistics._batchTextureIdMap).toEqual(emptyMap);
   });
 
+  it("counts a CPU copy after the GPU buffer is counted", function () {
+    const statistics = new ModelStatistics();
+    const buffer = { _id: "shared", sizeInBytes: 10 };
+    statistics.addBuffer(buffer, false);
+    expect(statistics.geometryByteLength).toBe(10);
+    statistics.addBuffer(buffer, true);
+    expect(statistics.geometryByteLength).toBe(20);
+    statistics.addBuffer(buffer, true);
+    statistics.addBuffer(buffer, false);
+    expect(statistics.geometryByteLength).toBe(20);
+    statistics.clear();
+    statistics.addBuffer(buffer, true);
+    expect(statistics.geometryByteLength).toBe(20);
+  });
+
   it("addBuffer de-duplicates buffers", function () {
     const statistics = new ModelStatistics();
 

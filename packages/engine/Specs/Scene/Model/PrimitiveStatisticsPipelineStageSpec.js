@@ -209,11 +209,9 @@ describe(
         const attributes = primitive.attributes;
         let expectedLength = 0;
 
-        // A CPU copy of the positions is made
+        // Positions and normals share one GPU buffer. Positions also need a CPU copy.
+        expect(attributes[0].buffer).toBe(attributes[1].buffer);
         expectedLength += 2 * attributes[0].buffer.sizeInBytes;
-
-        // Normals are stored on the GPU only
-        expectedLength += attributes[1].buffer.sizeInBytes;
 
         // Texture coordinates
         expectedLength += attributes[2].buffer.sizeInBytes;

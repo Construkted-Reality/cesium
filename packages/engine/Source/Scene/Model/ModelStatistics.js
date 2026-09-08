@@ -61,6 +61,7 @@ function ModelStatistics() {
   // Sets of buffers and textures that have already been counted.
   // This is to prevent double-counting cached assets.
   this._bufferIdSet = {};
+  this._cpuBufferIdSet = {};
 
   /**
    * The mapping from `texture.id` strings to the byte length of the
@@ -119,6 +120,7 @@ ModelStatistics.prototype.clear = function () {
   this.propertyTablesByteLength = 0;
 
   this._bufferIdSet = {};
+  this._cpuBufferIdSet = {};
   this._textureIdByteLengths = {};
   this._batchTextureIdMap.removeAll();
 };
@@ -140,9 +142,12 @@ ModelStatistics.prototype.addBuffer = function (buffer, hasCpuCopy) {
   //>>includeEnd('debug');
 
   if (!this._bufferIdSet.hasOwnProperty(buffer._id)) {
-    // If there's a CPU copy, count the memory twice.
-    const copies = hasCpuCopy ? 2 : 1;
-    this.geometryByteLength += buffer.sizeInBytes * copies;
+    this.geometryByteLength += buffer.sizeInBytes;
+  }
+
+  if (hasCpuCopy && !this._cpuBufferIdSet.hasOwnProperty(buffer._id)) {
+    this.geometryByteLength += buffer.sizeInBytes;
+    this._cpuBufferIdSet[buffer._id] = true;
   }
 
   // Simulate set insertion.

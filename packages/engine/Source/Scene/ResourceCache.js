@@ -571,6 +571,12 @@ ResourceCache.getVertexBufferLoader = function (options) {
     attributeSemantic: attributeSemantic,
     accessorId: accessorId,
     cacheKey: cacheKey,
+    bufferCacheKey: loadBuffer
+      ? ResourceCacheKey.getVertexBufferCacheKey({
+          ...options,
+          loadTypedArray: false,
+        })
+      : undefined,
     asynchronous: asynchronous,
     dequantize: dequantize,
     loadBuffer: loadBuffer,
@@ -659,6 +665,12 @@ ResourceCache.getIndexBufferLoader = function (options) {
     primitive: primitive,
     draco: draco,
     cacheKey: cacheKey,
+    bufferCacheKey: loadBuffer
+      ? ResourceCacheKey.getIndexBufferCacheKey({
+          ...options,
+          loadTypedArray: false,
+        })
+      : undefined,
     asynchronous: asynchronous,
     loadBuffer: loadBuffer,
     loadTypedArray: loadTypedArray,

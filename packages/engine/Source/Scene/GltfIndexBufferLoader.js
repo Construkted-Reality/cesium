@@ -1,3 +1,4 @@
+import GltfBufferCache from "./GltfBufferCache.js";
 import Check from "../Core/Check.js";
 import ComponentDatatype from "../Core/ComponentDatatype.js";
 import Frozen from "../Core/Frozen.js";
@@ -29,6 +30,7 @@ class GltfIndexBufferLoader extends ResourceLoader {
    * @param {Resource} options.baseResource The {@link Resource} that paths in the glTF JSON are relative to.
    * @param {object} [options.primitive] The primitive containing the Draco extension.
    * @param {object} [options.draco] The Draco extension object.
+   * @param {string} [options.bufferCacheKey] The shared GPU buffer key.
    * @param {string} [options.cacheKey] The cache key of the resource.
    * @param {boolean} [options.asynchronous=true] Determines if WebGL resource creation will be spread out over several frames or block until all WebGL resources are created.
    * @param {boolean} [options.loadBuffer=false] Load the index buffer as a GPU index buffer.
@@ -74,6 +76,7 @@ class GltfIndexBufferLoader extends ResourceLoader {
     this._primitive = primitive;
     this._draco = draco;
     this._cacheKey = cacheKey;
+    this._bufferCacheKey = options.bufferCacheKey;
     this._asynchronous = asynchronous;
     this._loadBuffer = loadBuffer;
     this._loadTypedArray = loadTypedArray;
@@ -198,8 +201,11 @@ class GltfIndexBufferLoader extends ResourceLoader {
       return false;
     }
 
+    const sharedBuffer = GltfBufferCache.acquire(this._bufferCacheKey);
     let buffer;
-    if (this._loadBuffer && this._asynchronous) {
+    if (defined(sharedBuffer)) {
+      buffer = sharedBuffer;
+    } else if (this._loadBuffer && this._asynchronous) {
       const indexBufferJob = scratchIndexBufferJob;
       indexBufferJob.set(typedArray, indexDatatype, frameState.context);
       const jobScheduler = frameState.jobScheduler;
@@ -224,6 +230,9 @@ class GltfIndexBufferLoader extends ResourceLoader {
     this.unload();
 
     this._buffer = buffer;
+    if (defined(buffer) && !defined(sharedBuffer)) {
+      GltfBufferCache.add(this._bufferCacheKey, buffer);
+    }
     this._typedArray = this._loadTypedArray ? typedArray : undefined;
     this._state = ResourceLoaderState.READY;
 
@@ -237,7 +246,11 @@ class GltfIndexBufferLoader extends ResourceLoader {
    */
   unload() {
     if (defined(this._buffer)) {
-      this._buffer.destroy();
+      if (defined(this._bufferCacheKey)) {
+        GltfBufferCache.release(this._bufferCacheKey);
+      } else {
+        this._buffer.destroy();
+      }
     }
 
     const resourceCache = this._resourceCache;

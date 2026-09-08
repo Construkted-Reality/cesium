@@ -15,6 +15,7 @@ import {
   SupportedImageFormats,
 } from "../../index.js";
 import concatTypedArrays from "../../../../Specs/concatTypedArrays.js";
+import waitForLoaderProcess from "../../../../Specs/waitForLoaderProcess.js";
 import createScene from "../../../../Specs/createScene.js";
 
 describe("ResourceCache", function () {
@@ -216,6 +217,65 @@ describe("ResourceCache", function () {
 
   afterEach(function () {
     ResourceCache.clearForSpecs();
+  });
+
+  ["Vertex", "Index"].forEach(function (kind) {
+    [false, true].forEach(function (reverse) {
+      it(`shares ${kind} buffers across CPU policies, reverse=${reverse}`, async function () {
+        const initialGeometryBytes =
+          ResourceCache.statistics.geometryByteLength;
+        const data = new Uint16Array([0, 1, 2]);
+        spyOn(Resource.prototype, "fetchArrayBuffer").and.returnValue(
+          Promise.resolve(data.buffer),
+        );
+        const gltf = {
+          buffers: [{ uri: "shared.bin", byteLength: data.byteLength }],
+          bufferViews: [
+            { buffer: 0, byteOffset: 0, byteLength: data.byteLength },
+          ],
+          accessors: [
+            {
+              bufferView: 0,
+              byteOffset: 0,
+              componentType: 5123,
+              count: 3,
+              type: "SCALAR",
+            },
+          ],
+        };
+        const options = {
+          gltf: gltf,
+          gltfResource: gltfResource,
+          baseResource: gltfResource,
+          frameState: scene.frameState,
+          bufferViewId: 0,
+          accessorId: 0,
+          loadBuffer: true,
+        };
+        const getLoader = ResourceCache[`get${kind}BufferLoader`];
+        const first = getLoader({ ...options, loadTypedArray: reverse });
+        const second = getLoader({ ...options, loadTypedArray: !reverse });
+        await Promise.all([first.load(), second.load()]);
+        await waitForLoaderProcess(first, scene);
+        await waitForLoaderProcess(second, scene);
+        expect(first).not.toBe(second);
+        expect(first.buffer).toBe(second.buffer);
+        expect(ResourceCache.statistics.geometryByteLength).toBe(
+          initialGeometryBytes + data.byteLength * 2,
+        );
+        expect(reverse ? first.typedArray : second.typedArray).toBeDefined();
+        expect(reverse ? second.typedArray : first.typedArray).toBeUndefined();
+        const buffer = second.buffer;
+        ResourceCache.unload(first);
+        expect(buffer.isDestroyed()).toBe(false);
+        expect(second.buffer).toBe(buffer);
+        ResourceCache.unload(second);
+        expect(buffer.isDestroyed()).toBe(true);
+        expect(ResourceCache.statistics.geometryByteLength).toBe(
+          initialGeometryBytes,
+        );
+      });
+    });
   });
 
   it("adds resource", function () {

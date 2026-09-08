@@ -30,6 +30,8 @@ function ResourceCacheStatistics() {
   // Track the sizes of resources by cache key. This is important so
   // removeLoader() can decrement the counts correctly.
   this._geometrySizes = {};
+  this._geometryBuffers = {};
+  this._bufferReferences = new Map();
   this._textureSizes = {};
 }
 
@@ -43,6 +45,8 @@ ResourceCacheStatistics.prototype.clear = function () {
   this.texturesByteLength = 0;
 
   this._geometrySizes = {};
+  this._geometryBuffers = {};
+  this._bufferReferences = new Map();
   this._textureSizes = {};
 };
 
@@ -79,6 +83,12 @@ ResourceCacheStatistics.prototype.addGeometryLoader = function (loader) {
 
   if (defined(buffer)) {
     totalSize += buffer.sizeInBytes;
+    const references = this._bufferReferences.get(buffer) ?? 0;
+    if (references === 0) {
+      this.geometryByteLength += buffer.sizeInBytes;
+    }
+    this._bufferReferences.set(buffer, references + 1);
+    this._geometryBuffers[cacheKey] = buffer;
   }
 
   if (defined(typedArray)) {
@@ -89,7 +99,8 @@ ResourceCacheStatistics.prototype.addGeometryLoader = function (loader) {
     totalSize += loader.packedSphericalHarmonics.byteLength;
   }
 
-  this.geometryByteLength += totalSize;
+  this.geometryByteLength +=
+    totalSize - (defined(buffer) ? buffer.sizeInBytes : 0);
   this._geometrySizes[cacheKey] = totalSize;
 };
 
@@ -136,10 +147,23 @@ ResourceCacheStatistics.prototype.removeLoader = function (loader) {
 
   const cacheKey = loader.cacheKey;
   const geometrySize = this._geometrySizes[cacheKey];
+  const buffer = this._geometryBuffers[cacheKey];
   delete this._geometrySizes[cacheKey];
 
   if (defined(geometrySize)) {
-    this.geometryByteLength -= geometrySize;
+    this.geometryByteLength -=
+      geometrySize - (defined(buffer) ? buffer.sizeInBytes : 0);
+  }
+
+  delete this._geometryBuffers[cacheKey];
+  if (defined(buffer)) {
+    const references = this._bufferReferences.get(buffer);
+    if (references === 1) {
+      this.geometryByteLength -= buffer.sizeInBytes;
+      this._bufferReferences.delete(buffer);
+    } else {
+      this._bufferReferences.set(buffer, references - 1);
+    }
   }
 
   const textureSize = this._textureSizes[cacheKey];
