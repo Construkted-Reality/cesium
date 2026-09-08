@@ -756,9 +756,11 @@ async function processGeneratedSplatTextureData(
     }
 
     profiling.add("textureProcess", textureProcessStart);
+    snapshot.buildFailed = false;
     snapshot.state = SnapshotState.TEXTURE_READY;
   } catch (error) {
     console.error("Error generating Gaussian splat texture:", error);
+    snapshot.buildFailed = true;
     snapshot.state = SnapshotState.BUILDING;
   }
 }
@@ -2051,7 +2053,15 @@ GaussianSplatPrimitive.prototype.update = function (frameState) {
 
     // Tile identity changes do not prove that a pending snapshot is invisible.
     // Complete it before starting another build so LOD churn cannot starve commits.
-    const allowRebuild = wantsRebuild && !defined(this._pendingSnapshot);
+    const pendingSnapshot = this._pendingSnapshot;
+    const failedBuild =
+      defined(pendingSnapshot) &&
+      pendingSnapshot.state === SnapshotState.BUILDING &&
+      pendingSnapshot.buildFailed;
+    // A failed build must not pin an obsolete selection. An admitted retry
+    // still finishes before replacement, just like other in-flight work.
+    const allowRebuild =
+      wantsRebuild && (!defined(pendingSnapshot) || failedBuild);
     const hasPendingWork =
       this._dirty ||
       this._needsSnapshotRebuild ||
