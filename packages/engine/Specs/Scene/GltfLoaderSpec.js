@@ -220,6 +220,111 @@ describe(
       return gltfLoader;
     }
 
+    function uncompressedSplatGltf() {
+      const values = new Float32Array([
+        2,
+        3,
+        4, // Position
+        0,
+        0,
+        0,
+        1, // Rotation
+        0.125,
+        0.25,
+        0.5, // Scale
+        1,
+        0.5,
+        0.25,
+        1, // Color and opacity
+      ]);
+      const bytes = new Uint8Array(values.buffer);
+      const uri = `data:application/octet-stream;base64,${btoa(
+        String.fromCharCode(...bytes),
+      )}`;
+      return {
+        asset: { version: "2.0" },
+        extensionsUsed: ["KHR_gaussian_splatting"],
+        extensionsRequired: ["KHR_gaussian_splatting"],
+        buffers: [{ byteLength: bytes.length, uri: uri }],
+        bufferViews: [
+          { buffer: 0, byteOffset: 0, byteLength: 12 },
+          { buffer: 0, byteOffset: 12, byteLength: 16 },
+          { buffer: 0, byteOffset: 28, byteLength: 12 },
+          { buffer: 0, byteOffset: 40, byteLength: 16 },
+        ],
+        accessors: [
+          {
+            bufferView: 0,
+            componentType: 5126,
+            count: 1,
+            type: "VEC3",
+            min: [2, 3, 4],
+            max: [2, 3, 4],
+          },
+          { bufferView: 1, componentType: 5126, count: 1, type: "VEC4" },
+          { bufferView: 2, componentType: 5126, count: 1, type: "VEC3" },
+          { bufferView: 3, componentType: 5126, count: 1, type: "VEC4" },
+        ],
+        meshes: [
+          {
+            primitives: [
+              {
+                mode: 0,
+                extensions: { KHR_gaussian_splatting: {} },
+                attributes: {
+                  POSITION: 0,
+                  "KHR_gaussian_splatting:ROTATION": 1,
+                  "KHR_gaussian_splatting:SCALE": 2,
+                  COLOR_0: 3,
+                },
+              },
+            ],
+          },
+        ],
+        nodes: [{ mesh: 0 }],
+        scenes: [{ nodes: [0] }],
+        scene: 0,
+      };
+    }
+
+    it("loads uncompressed Gaussian splat attributes as typed arrays", async function () {
+      const loader = await loadGltf("uncompressed-splat.gltf", {
+        gltfJson: uncompressedSplatGltf(),
+      });
+      const primitive = loader.components.scene.nodes[0].primitives[0];
+      for (const [semantic, expected] of [
+        [VertexAttributeSemantic.POSITION, [2, 3, 4]],
+        [VertexAttributeSemantic.ROTATION, [0, 0, 0, 1]],
+        [VertexAttributeSemantic.SCALE, [0.125, 0.25, 0.5]],
+        [VertexAttributeSemantic.COLOR, [1, 0.5, 0.25, 1]],
+      ]) {
+        const attribute = getAttribute(
+          primitive.attributes,
+          semantic,
+          semantic === VertexAttributeSemantic.COLOR ? 0 : undefined,
+        );
+        expect(attribute.typedArray).toBeDefined();
+        expect(Array.from(attribute.typedArray ?? [])).toEqual(expected);
+        expect(attribute.buffer).toBeUndefined();
+      }
+    });
+
+    it("keeps ordinary point attributes in GPU buffers", async function () {
+      const gltf = uncompressedSplatGltf();
+      delete gltf.extensionsUsed;
+      delete gltf.extensionsRequired;
+      const primitive = gltf.meshes[0].primitives[0];
+      delete primitive.extensions;
+      primitive.attributes = { POSITION: 0 };
+      const loader = await loadGltf("ordinary-points.gltf", { gltfJson: gltf });
+      const position = getAttribute(
+        loader.components.scene.nodes[0].primitives[0].attributes,
+        VertexAttributeSemantic.POSITION,
+      );
+      expect(position.typedArray).toBeUndefined();
+      expect(position.buffer).toBeDefined();
+    });
+
     async function loadGltfFromJson(gltfPath, options) {
       const gltf = await Resource.fetchJson({
         url: gltfPath,

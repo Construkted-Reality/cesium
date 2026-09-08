@@ -12,7 +12,7 @@ import deprecationWarning from "../Core/deprecationWarning.js";
 /** @import Cesium3DTileContent from "./Cesium3DTileContent.js"; */
 
 /**
- * Represents the contents of a glTF or glb using the {@link https://github.com/CesiumGS/glTF/tree/draft-splat-spz/extensions/2.0/Khronos/KHR_gaussian_splatting | KHR_gaussian_splatting} and {@link https://github.com/CesiumGS/glTF/tree/draft-splat-spz/extensions/2.0/Khronos/KHR_gaussian_splatting_compression_spz_2 | KHR_gaussian_splatting_compression_spz_2} extensions.
+ * Represents glTF or glb content using {@link https://github.com/CesiumGS/glTF/tree/draft-splat-spz/extensions/2.0/Khronos/KHR_gaussian_splatting | KHR_gaussian_splatting}, with optional {@link https://github.com/CesiumGS/glTF/tree/draft-splat-spz/extensions/2.0/Khronos/KHR_gaussian_splatting_compression_spz_2 | KHR_gaussian_splatting_compression_spz_2} compression.
  * <p>
  * Implements the {@link Cesium3DTileContent} interface.
  * </p>
@@ -133,11 +133,9 @@ class GaussianSplat3DTileContent {
   static tilesetRequiresGaussianSplattingExt(tileset) {
     let hasGaussianSplatExtension = false;
     if (tileset.isGltfExtensionRequired instanceof Function) {
-      hasGaussianSplatExtension =
-        tileset.isGltfExtensionRequired("KHR_gaussian_splatting") &&
-        tileset.isGltfExtensionRequired(
-          "KHR_gaussian_splatting_compression_spz_2",
-        );
+      hasGaussianSplatExtension = tileset.isGltfExtensionRequired(
+        "KHR_gaussian_splatting",
+      );
 
       if (
         tileset.isGltfExtensionRequired("KHR_spz_gaussian_splats_compression")
@@ -146,8 +144,8 @@ class GaussianSplat3DTileContent {
           "KHR_spz_gaussian_splats_compression",
           "Support for the original KHR_spz_gaussian_splats_compression extension has been removed in favor " +
             "of the up to date KHR_gaussian_splatting and KHR_gaussian_splatting_compression_spz_2 extensions" +
-            "\n\nPlease retile your tileset with the KHR_gaussian_splatting and " +
-            "KHR_gaussian_splatting_compression_spz_2 extensions.",
+            "\n\nPlease retile your tileset with KHR_gaussian_splatting. " +
+            "SPZ content must also use KHR_gaussian_splatting_compression_spz_2.",
         );
       }
     }
@@ -637,6 +635,13 @@ function getShAttributePrefix(attribute) {
   return `${prefix}SH_DEGREE_`;
 }
 
+function isHigherOrderShAttribute(attribute) {
+  // Degree zero contributes to the base color, not the directional SH texture.
+  return /^(?:_|KHR_gaussian_splatting:)SH_DEGREE_[1-3]_COEF_\d+$/.test(
+    attribute.name,
+  );
+}
+
 /**
  * Determine Spherical Harmonics degree and coefficient count from attributes
  * @param {Attribute[]} attributes - The list of glTF attributes.
@@ -644,9 +649,7 @@ function getShAttributePrefix(attribute) {
  * @private
  */
 function degreeAndCoefFromAttributes(attributes) {
-  const shAttributes = attributes.filter((attr) =>
-    attr.name.includes("SH_DEGREE_"),
-  );
+  const shAttributes = attributes.filter(isHigherOrderShAttribute);
 
   switch (shAttributes.length) {
     default:
@@ -730,8 +733,8 @@ function packSphericalHarmonicsData(tileContent) {
   const totalLength = tileContent.pointsLength * (coefs * (2 / 3)); //3 packs into 2
   const packedData = new Uint32Array(totalLength);
 
-  const shAttributes = tileContent.gltfPrimitive.attributes.filter((attr) =>
-    attr.name.includes("SH_DEGREE_"),
+  const shAttributes = tileContent.gltfPrimitive.attributes.filter(
+    isHigherOrderShAttribute,
   );
   let stride = 0;
   const base = [0, 9, 24];

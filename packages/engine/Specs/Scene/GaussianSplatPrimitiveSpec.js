@@ -7,10 +7,13 @@ import {
   Cartesian3,
   GaussianSplat3DTileContent,
   Matrix4,
+  Matrix3,
   Transforms,
   VertexAttributeSemantic,
+  GaussianSplatTextureGenerator,
 } from "../../index.js";
 import GaussianSplatPrimitive from "../../Source/Scene/GaussianSplatPrimitive.js";
+import GaussianSplatSorter from "../../Source/Scene/GaussianSplatSorter.js";
 
 import Cesium3DTilesTester from "../../../../Specs/Cesium3DTilesTester.js";
 import createScene from "../../../../Specs/createScene.js";
@@ -134,77 +137,355 @@ describe(
       });
     });
 
-    it("retries pending snapshot sorting when sorter is temporarily unavailable", function () {
+    it("finishes delayed splat work in request render mode and returns to idle", async function () {
+      let tileset = await Cesium3DTilesTester.loadTileset(
+        scene,
+        sphericalHarmonicUrl,
+        options,
+      );
+      scene.camera.lookAt(
+        tileset.boundingSphere.center,
+        new HeadingPitchRange(0.0, -1.57, tileset.boundingSphere.radius),
+      );
+      let primitive = tileset.gaussianSplatPrimitive;
+      await pollToPromise(function () {
+        scene.renderForSpecs();
+        return (
+          primitive._snapshot !== undefined &&
+          primitive.isStable &&
+          primitive._sorterState === 0 &&
+          primitive._sorterPromise === undefined
+        );
+      });
+      scene.primitives.remove(tileset);
+      const generate = GaussianSplatTextureGenerator.generateFromAttributes;
+      let release;
+      spyOn(
+        GaussianSplatTextureGenerator,
+        "generateFromAttributes",
+      ).and.callFake(function (attributes) {
+        const promise = generate(attributes);
+        return promise?.then(
+          (data) =>
+            new Promise((resolve) => {
+              release = () => resolve(data);
+            }),
+        );
+      });
+      scene.requestRenderMode = true;
+      scene.maximumRenderTimeChange = Infinity;
+      try {
+        tileset = await Cesium3DTilesTester.loadTileset(
+          scene,
+          sphericalHarmonicUrl,
+          options,
+        );
+        primitive = tileset.gaussianSplatPrimitive;
+        scene.requestRender();
+        await pollToPromise(function () {
+          scene.renderForSpecs();
+          return release !== undefined;
+        });
+        // The worker result arrives after the scene has exhausted its frames.
+        for (let i = 0; i < 10; ++i) {
+          scene.renderForSpecs();
+        }
+        release();
+        await pollToPromise(function () {
+          return primitive._pendingSnapshot.state === "TEXTURE_READY";
+        });
+        const wake = scene.frameState.afterRender.at(-1);
+        expect(wake).toBeDefined();
+        expect(wake()).toBe(true);
+        primitive._splatDataGeneration++;
+        expect(wake()).toBe(false);
+        primitive._splatDataGeneration--;
+        tileset.show = false;
+        expect(wake()).toBe(false);
+        tileset.show = true;
+        await pollToPromise(function () {
+          scene.renderForSpecs();
+          return primitive._snapshot !== undefined && primitive.isStable;
+        });
+        expect(primitive._numSplats).toBeGreaterThan(0);
+        for (let i = 0; i < 10; ++i) {
+          scene.renderForSpecs();
+        }
+        let frames = 0;
+        const remove = scene.postRender.addEventListener(() => frames++);
+        for (let i = 0; i < 10; ++i) {
+          scene.renderForSpecs();
+        }
+        remove();
+        expect(frames).toBe(0);
+        scene.primitives.remove(tileset);
+        expect(tileset.isDestroyed()).toBe(true);
+        expect(wake()).toBe(false);
+        primitive.destroy();
+        expect(wake()).toBe(false);
+      } catch (error) {
+        throw new Error(
+          `${error.message}; release=${!!release}; pending=${primitive._pendingSnapshot?.state}; sort=${primitive._sorterState}; dirty=${primitive._dirty}`,
+          { cause: error },
+        );
+      } finally {
+        release?.();
+        scene.requestRenderMode = false;
+        scene.maximumRenderTimeChange = 0.0;
+      }
+    });
+
+    for (const initializationResult of ["resolve", "reject", "removed"]) {
+      it(`handles sorter initialization ${initializationResult} without polling`, async function () {
+        let ownerRemoved = false;
+        const tileset = {
+          isDestroyed: () => ownerRemoved,
+          show: true,
+          splitDirection: 0,
+          modelMatrix: Matrix4.IDENTITY,
+          boundingSphere: undefined,
+          _modelMatrixChanged: false,
+          _selectedTiles: [],
+          tileLoad: {
+            addEventListener: function () {},
+          },
+          tileVisible: {
+            addEventListener: function () {},
+          },
+          update: function () {},
+        };
+        const gsPrim = new GaussianSplatPrimitive({ tileset: tileset });
+        gsPrim._rootTransform = Matrix4.IDENTITY;
+
+        // Force the pending-snapshot TEXTURE_READY path deterministically.
+        // This validates "unavailable sorter -> keep TEXTURE_READY -> retry next frame"
+        // without depending on async texture generation timing.
+        const fakeTexture = {
+          destroy: function () {},
+        };
+        gsPrim._pendingSnapshot = {
+          generation: gsPrim._splatDataGeneration,
+          positions: new Float32Array([0.0, 0.0, 0.0, 1.0, 0.0, 0.0]),
+          rotations: new Float32Array([0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]),
+          scales: new Float32Array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0]),
+          colors: new Uint8Array([255, 255, 255, 255, 255, 255, 255, 255]),
+          shData: undefined,
+          sphericalHarmonicsDegree: 0,
+          shCoefficientCount: 0,
+          numSplats: 2,
+          indexes: undefined,
+          gaussianSplatTexture: fakeTexture,
+          sphericalHarmonicsTexture: undefined,
+          lastTextureWidth: 1,
+          lastTextureHeight: 1,
+          state: "SORTING",
+        };
+        gsPrim._pendingSortPromise = undefined;
+        gsPrim._pendingSort = undefined;
+        gsPrim._sorterPromise = undefined;
+        gsPrim._sorterState = 0;
+        gsPrim._dirty = false;
+        gsPrim._needsSnapshotRebuild = false;
+        gsPrim._selectedTileSet = new Set();
+        gsPrim._selectedTilesStableFrames = 2;
+
+        const frameState = {
+          frameNumber: 1,
+          afterRender: [],
+          camera: {
+            viewMatrix: Matrix4.clone(Matrix4.IDENTITY, new Matrix4()),
+            positionWC: Cartesian3.clone(Cartesian3.ZERO, new Cartesian3()),
+            directionWC: Cartesian3.clone(Cartesian3.UNIT_Z, new Cartesian3()),
+          },
+          commandList: [],
+          passes: {
+            pick: false,
+          },
+        };
+
+        gsPrim.update(frameState);
+
+        expect(gsPrim._pendingSnapshot).toBeDefined();
+        expect(gsPrim._pendingSnapshot.state).toBe("TEXTURE_READY");
+        expect(gsPrim._pendingSortPromise).toBeUndefined();
+        let finishInitialization;
+        let failInitialization;
+        const previousProcessor = GaussianSplatSorter._sorterTaskProcessor;
+        const previousReady = GaussianSplatSorter._taskProcessorReady;
+        GaussianSplatSorter._sorterTaskProcessor = {
+          _webAssemblyPromise: new Promise((resolve, reject) => {
+            finishInitialization = resolve;
+            failInitialization = reject;
+          }),
+        };
+        GaussianSplatSorter._taskProcessorReady = false;
+        spyOn(GaussianSplatSorter, "radixSortIndexes").and.returnValue(
+          undefined,
+        );
+        try {
+          gsPrim.update(frameState);
+          gsPrim.update(frameState);
+          expect(frameState.afterRender.length).toBe(0);
+          gsPrim._splatDataGeneration++;
+          ownerRemoved = initializationResult === "removed";
+          if (initializationResult === "reject") {
+            failInitialization(new Error("Initialization fixture failure"));
+          } else {
+            finishInitialization(true);
+          }
+          await Promise.resolve();
+          expect(frameState.afterRender.length).toBe(ownerRemoved ? 0 : 1);
+          if (!ownerRemoved) {
+            expect(frameState.afterRender[0]()).toBe(true);
+          }
+        } finally {
+          GaussianSplatSorter._sorterTaskProcessor = previousProcessor;
+          GaussianSplatSorter._taskProcessorReady = previousReady;
+          gsPrim.destroy();
+        }
+      });
+    }
+
+    it("requests a frame only after a steady sort completes", async function () {
       const tileset = {
         show: true,
         splitDirection: 0,
         modelMatrix: Matrix4.IDENTITY,
-        boundingSphere: undefined,
-        _modelMatrixChanged: false,
         _selectedTiles: [],
-        tileLoad: {
-          addEventListener: function () {},
-        },
-        tileVisible: {
-          addEventListener: function () {},
-        },
+        tileLoad: { addEventListener: function () {} },
+        tileVisible: { addEventListener: function () {} },
         update: function () {},
       };
-      const gsPrim = new GaussianSplatPrimitive({ tileset: tileset });
-      gsPrim._rootTransform = Matrix4.IDENTITY;
-
-      // Force the pending-snapshot TEXTURE_READY path deterministically.
-      // This validates "unavailable sorter -> keep TEXTURE_READY -> retry next frame"
-      // without depending on async texture generation timing.
-      const fakeTexture = {
-        destroy: function () {},
-      };
-      gsPrim._pendingSnapshot = {
-        generation: gsPrim._splatDataGeneration,
-        positions: new Float32Array([0.0, 0.0, 0.0, 1.0, 0.0, 0.0]),
-        rotations: new Float32Array([0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]),
-        scales: new Float32Array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0]),
-        colors: new Uint8Array([255, 255, 255, 255, 255, 255, 255, 255]),
-        shData: undefined,
-        sphericalHarmonicsDegree: 0,
-        shCoefficientCount: 0,
-        numSplats: 2,
-        indexes: undefined,
-        gaussianSplatTexture: fakeTexture,
-        sphericalHarmonicsTexture: undefined,
-        lastTextureWidth: 1,
-        lastTextureHeight: 1,
-        state: "SORTING",
-      };
-      gsPrim._pendingSortPromise = undefined;
-      gsPrim._pendingSort = undefined;
-      gsPrim._sorterPromise = undefined;
-      gsPrim._sorterState = 0;
-      gsPrim._dirty = false;
-      gsPrim._needsSnapshotRebuild = false;
-      gsPrim._selectedTileSet = new Set();
-      gsPrim._selectedTilesStableFrames = 2;
-
+      const primitive = new GaussianSplatPrimitive({ tileset });
+      primitive._rootTransform = Matrix4.IDENTITY;
+      primitive._numSplats = 2;
+      primitive._positions = new Float32Array([0, 0, 0, 1, 0, 0]);
+      let release;
+      spyOn(GaussianSplatSorter, "radixSortIndexes").and.returnValue(
+        new Promise((resolve) => {
+          release = resolve;
+        }),
+      );
       const frameState = {
         frameNumber: 1,
-        camera: {
-          viewMatrix: Matrix4.clone(Matrix4.IDENTITY, new Matrix4()),
-          positionWC: Cartesian3.clone(Cartesian3.ZERO, new Cartesian3()),
-          directionWC: Cartesian3.clone(Cartesian3.UNIT_Z, new Cartesian3()),
-        },
+        afterRender: [],
         commandList: [],
-        passes: {
-          pick: false,
+        passes: { pick: false },
+        camera: {
+          viewMatrix: Matrix4.clone(Matrix4.IDENTITY),
+          positionWC: Cartesian3.clone(Cartesian3.ZERO),
+          directionWC: Cartesian3.clone(Cartesian3.UNIT_Z),
         },
       };
-
-      gsPrim.update(frameState);
-
-      expect(gsPrim._pendingSnapshot).toBeDefined();
-      expect(gsPrim._pendingSnapshot.state).toBe("TEXTURE_READY");
-      expect(gsPrim._pendingSortPromise).toBeUndefined();
-      gsPrim.destroy();
+      primitive.update(frameState);
+      expect(frameState.afterRender.length).toBe(0);
+      release(new Uint32Array([1, 0]));
+      await Promise.resolve();
+      expect(frameState.afterRender.length).toBe(1);
+      const wake = frameState.afterRender[0];
+      expect(wake()).toBe(true);
+      primitive._splatDataGeneration++;
+      expect(wake()).toBe(false);
+      primitive.destroy();
+      expect(wake()).toBe(false);
     });
+
+    for (const completionFrame of [2, 10]) {
+      for (const cameraMoves of [false, true]) {
+        it(`drains a completed sort at frame ${completionFrame} with camera movement ${cameraMoves}`, async function () {
+          const tileset = {
+            show: true,
+            splitDirection: 0,
+            modelMatrix: Matrix4.IDENTITY,
+            _selectedTiles: [],
+            tileLoad: { addEventListener: function () {} },
+            tileVisible: { addEventListener: function () {} },
+            update: function () {},
+          };
+          const primitive = new GaussianSplatPrimitive({ tileset });
+          primitive._rootTransform = Matrix4.IDENTITY;
+          primitive._numSplats = 2;
+          primitive._positions = new Float32Array([-1, 0, 10, 1, 0, 10]);
+          primitive._drawCommand = {};
+          primitive._dirty = false;
+          const originalView = Matrix4.fromRotationTranslation(
+            Matrix3.fromRotationY(-Math.PI / 4),
+          );
+          const nextView = Matrix4.fromRotationTranslation(
+            Matrix3.fromRotationY(Math.PI / 4),
+          );
+          const frameState = {
+            frameNumber: 1,
+            afterRender: [],
+            commandList: [],
+            passes: { pick: false },
+            camera: {
+              viewMatrix: originalView,
+              positionWC: Cartesian3.clone(Cartesian3.ZERO),
+              directionWC: new Cartesian3(1, 0, -1),
+            },
+          };
+          const completions = [];
+          const sorter = spyOn(
+            GaussianSplatSorter,
+            "radixSortIndexes",
+          ).and.callFake(
+            () => new Promise((resolve) => completions.push(resolve)),
+          );
+          spyOn(GaussianSplatPrimitive, "buildGSplatDrawCommand").and.callFake(
+            () => {
+              primitive._drawCommand = {};
+            },
+          );
+          primitive.update(frameState);
+          if (cameraMoves) {
+            frameState.camera.viewMatrix = nextView;
+            frameState.camera.directionWC = new Cartesian3(-1, 0, -1);
+          }
+          completions[0](new Uint32Array([1, 0]));
+          await Promise.resolve();
+          expect(
+            frameState.afterRender.splice(0).some((callback) => callback()),
+          ).toBe(true);
+          frameState.frameNumber = completionFrame;
+          primitive.update(frameState);
+          // A camera change while the worker runs needs one further sort.
+          expect(
+            frameState.afterRender.splice(0).some((callback) => callback()),
+          ).toBe(cameraMoves);
+          if (cameraMoves) {
+            frameState.frameNumber++;
+            primitive.update(frameState);
+            if (sorter.calls.count() === 1) {
+              expect(
+                frameState.afterRender.splice(0).some((callback) => callback()),
+              ).toBe(true);
+              frameState.frameNumber++;
+              primitive.update(frameState);
+            }
+          }
+          expect(sorter.calls.count()).toBe(cameraMoves ? 2 : 1);
+          if (cameraMoves) {
+            completions[1](new Uint32Array([0, 1]));
+            await Promise.resolve();
+            frameState.afterRender.splice(0).forEach((callback) => callback());
+            frameState.frameNumber = 20;
+            primitive.update(frameState);
+            frameState.afterRender.splice(0).forEach((callback) => callback());
+            frameState.frameNumber = 21;
+            primitive.update(frameState);
+          }
+          expect(frameState.afterRender.length).toBe(0);
+          expect(
+            Matrix4.equals(
+              primitive._prevViewMatrix,
+              frameState.camera.viewMatrix,
+            ),
+          ).toBe(true);
+          primitive.destroy();
+        });
+      }
+    }
 
     it("inflates maximumScreenSpaceError during traversal and restores it when splatBudgetSSEScale > 1", function () {
       let capturedSSEDuringTraversal;
