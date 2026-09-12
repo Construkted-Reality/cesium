@@ -9,3 +9,9 @@ The first candidate waits for snapshot replacement and retirement before changin
 After normal-budget recovery, the baseline retains 573,118,688 unique bytes reachable from tile decode data and loaders. Source GLB buffers account for about 71.28 MiB. The splat loader explicitly disables the existing releaseGltfJson option. A paired release-option experiment is queued. The GPU accounting API documents GPU memory, so CPU estimates must remain separate.
 
 Raw scripts and traces are in the server folder /mnt/data2/cesium-splat-perf/experiments-2026-09-12-budget-cpu. No candidate is accepted yet.
+
+The wait-for-settlement candidate also settles at 32 and 128 MiB. A second 64 MiB run has no load/unload events in its final 10 seconds. However, restoring the normal budget takes 26.2 to 29.1 seconds because every refinement step waits for replacement. Retrying the requested detail when the user increases a budget reduces recovery to 4.27 seconds at 64 MiB and 3.57 seconds at 128 MiB. Those are exploratory single runs.
+
+The zero-budget baseline and candidate both retain a 22,692,624-byte old snapshot, have zero ready tiles, and keep more than 120 processing tiles after 40 seconds. Their screen-space error grows without bound. This is a pre-existing starvation case when the budget cannot hold a snapshot. The controller candidate does not resolve it.
+
+Enabling releaseGltfJson removes exactly 74,743,148 retained bytes in the paired tile-buffer audit. The loaded tile storage changes from 573,118,688 to 498,375,540 bytes. After destroying the tileset while retaining content references, both versions retain 498,375,540 bytes. Releasing those references frees the buffers. The CPU retention branch now clears its array and primitive references during content destruction; validation is pending.
