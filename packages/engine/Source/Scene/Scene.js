@@ -3988,7 +3988,8 @@ function updateAndClearFramebuffers(scene, passState, clearColor) {
     !picking &&
     defined(oit) &&
     oit.isSupported() &&
-    (defined(oit._accumulationTexture) ||
+    (oit._translucentMultipassSupport ||
+      defined(oit._accumulationTexture) ||
       (scene.invertClassification &&
         frameState.invertClassificationColor.alpha < 1.0)));
   if (useOIT) {
