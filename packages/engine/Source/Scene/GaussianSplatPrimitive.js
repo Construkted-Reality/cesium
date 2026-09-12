@@ -541,6 +541,14 @@ function commitSnapshot(primitive, snapshot, frameState) {
     retireTexture(primitive, sphericalHarmonicsTexture, frameNumber);
   }
 
+  // Uploads are complete. Only positions remain necessary for later sorts.
+  // Release snapshot ownership so the next rebuild can reuse scratch arrays.
+  // Keep the scratch pools to avoid allocation stalls during repeated rebuilds.
+  snapshot.rotations = undefined;
+  snapshot.scales = undefined;
+  snapshot.colors = undefined;
+  snapshot.shData = undefined;
+
   primitive._snapshot = snapshot;
   primitive._positions = snapshot.positions;
   primitive._rotations = snapshot.rotations;
