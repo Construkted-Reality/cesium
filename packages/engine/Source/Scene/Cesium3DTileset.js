@@ -43,6 +43,7 @@ import Cesium3DTileStyleEngine from "./Cesium3DTileStyleEngine.js";
 import ClippingPlaneCollection from "./ClippingPlaneCollection.js";
 import ClippingPolygonCollection from "./ClippingPolygonCollection.js";
 import EdgeDisplayMode from "./EdgeDisplayMode.js";
+import GaussianSplat3DTileContent from "./GaussianSplat3DTileContent.js";
 import hasExtension from "./hasExtension.js";
 import ImplicitTileset from "./ImplicitTileset.js";
 import ImplicitTileCoordinates from "./ImplicitTileCoordinates.js";
@@ -2930,14 +2931,46 @@ function processTiles(tileset, frameState) {
   const { cacheBytes, maximumCacheOverflowBytes, statistics } = tileset;
   const cacheByteLimit = cacheBytes + maximumCacheOverflowBytes;
 
-  let memoryExceeded = false;
+  const splat = tileset.gaussianSplatPrimitive;
+  const coarsestScreenSpaceError = Math.max(
+    tileset.maximumScreenSpaceError,
+    tileset.root._screenSpaceError,
+  );
+  if (defined(splat)) {
+    // Further coarsening cannot select fewer descendants than the root level.
+    // Keep the value bounded even after the processing queue becomes empty.
+    tileset._memoryAdjustedScreenSpaceError = Math.min(
+      tileset.memoryAdjustedScreenSpaceError,
+      coarsestScreenSpaceError,
+    );
+  }
+
+  let memoryExceeded = tileset.totalMemoryUsageInBytes > cacheByteLimit;
   for (let i = 0; i < tiles.length; ++i) {
+    const tile = tiles[i];
     if (tileset.totalMemoryUsageInBytes > cacheByteLimit) {
       memoryExceeded = true;
-      break;
+      if (!(tile.content instanceof GaussianSplat3DTileContent)) {
+        break;
+      }
+      if (
+        tile._touchedFrame < frameState.frameNumber - 1 &&
+        !defined(tile.cacheNode) &&
+        !defined(tile._expiredContent)
+      ) {
+        // This decode no longer contributes to the coarser view. It has not
+        // entered the ready-content cache, so only processing counts change.
+        tile.unloadContent();
+        --statistics.numberOfTilesProcessing;
+        continue;
+      }
+      if (tileset.memoryAdjustedScreenSpaceError < coarsestScreenSpaceError) {
+        continue;
+      }
+      // The old shared snapshot can exceed even the smallest budget. Permit
+      // needed fallback content to decode so that it can replace that snapshot.
+      // Splat content processing does not allocate the shared GPU textures.
     }
-
-    const tile = tiles[i];
     try {
       tile.process(tileset, frameState);
 
@@ -2953,7 +2986,6 @@ function processTiles(tileset, frameState) {
 
   // Splat snapshots allocate their GPU resources asynchronously. Adjusting
   // detail during replacement reacts to incomplete or overlapping allocations.
-  const splat = tileset.gaussianSplatPrimitive;
   const snapshotSettled =
     !defined(splat) ||
     (!defined(splat._pendingSnapshot) &&
@@ -2968,8 +3000,18 @@ function processTiles(tileset, frameState) {
     // Leave headroom between coarsening and refinement. A discrete LOD change
     // can otherwise repeatedly cross the same cache budget at a fixed camera.
     decreaseScreenSpaceError(tileset);
-  } else if (snapshotSettled && memoryExceeded && tiles.length > 0) {
+  } else if (
+    snapshotSettled &&
+    memoryExceeded &&
+    (tiles.length > 0 || defined(splat))
+  ) {
     increaseScreenSpaceError(tileset);
+    if (defined(splat)) {
+      tileset._memoryAdjustedScreenSpaceError = Math.min(
+        tileset.memoryAdjustedScreenSpaceError,
+        coarsestScreenSpaceError,
+      );
+    }
   }
 }
 

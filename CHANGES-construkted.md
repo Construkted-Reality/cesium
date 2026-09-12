@@ -24,6 +24,9 @@ This section gets the tag name `construkted-1.146.0-1` at the next rebase. See
 
 ### Fixes
 
+- Gaussian splat loading keeps a root fallback when the cache budget cannot hold it.
+  Memory pressure no longer increases detail error without a limit or retains stale decoding work.
+
 - Gaussian splat tiles render without SPZ compression. Mixed tilesets load compressed and
   uncompressed splat attributes through the same rendering path.
 - Uncompressed splats retain their higher-order spherical harmonics when a degree-zero
