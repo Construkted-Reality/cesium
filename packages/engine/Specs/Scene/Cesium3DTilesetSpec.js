@@ -3591,6 +3591,98 @@ describe(
       expect(spyUpdate.calls.argsFor(3)[0]).toBe(tileset.root.children[3]);
     });
 
+    it("waits for splat snapshots before changing memory detail", async function () {
+      const tileset = await Cesium3DTileset.fromUrl(tilesetUrl, {
+        dynamicScreenSpaceError: false,
+        cacheBytes: 100,
+        maximumCacheOverflowBytes: 0,
+      });
+      const splat = { _retiredTextures: [], _needsSnapshotRebuild: false };
+      tileset.gaussianSplatPrimitive = splat;
+      tileset._memoryAdjustedScreenSpaceError = 32;
+      const frameState = { time: JulianDate.now(), newFrame: false };
+      try {
+        for (const phase of ["pending", "rebuild", "retired"]) {
+          splat._pendingSnapshot = phase === "pending" ? {} : undefined;
+          splat._needsSnapshotRebuild = phase === "rebuild";
+          splat._retiredTextures = phase === "retired" ? [{}] : [];
+          tileset.prePassesUpdate(frameState);
+          expect(tileset.memoryAdjustedScreenSpaceError).toBe(32);
+        }
+        splat._retiredTextures = [];
+        tileset._statistics.geometryByteLength = 90;
+        tileset.prePassesUpdate(frameState);
+        expect(tileset.memoryAdjustedScreenSpaceError).toBe(32);
+        tileset._statistics.geometryByteLength = 50;
+        tileset._statistics.numberOfTilesProcessing = 1;
+        tileset.prePassesUpdate(frameState);
+        expect(tileset.memoryAdjustedScreenSpaceError).toBe(32);
+        tileset._statistics.numberOfTilesProcessing = 0;
+        tileset.prePassesUpdate(frameState);
+        expect(tileset.memoryAdjustedScreenSpaceError).toBeLessThan(32);
+      } finally {
+        tileset.gaussianSplatPrimitive = undefined;
+        tileset.destroy();
+      }
+    });
+
+    it("coarsens splats after overlapping allocations settle", async function () {
+      const tileset = await Cesium3DTileset.fromUrl(tilesetUrl, {
+        dynamicScreenSpaceError: false,
+        cacheBytes: 100,
+        maximumCacheOverflowBytes: 0,
+      });
+      const splat = { _retiredTextures: [], _pendingSnapshot: {} };
+      tileset.gaussianSplatPrimitive = splat;
+      tileset._statistics.geometryByteLength = 200;
+      const tile = {
+        isDestroyed: () => false,
+        _contentState: Cesium3DTileContentState.PROCESSING,
+        process: jasmine.createSpy("process"),
+        updatePriority: jasmine.createSpy("updatePriority"),
+      };
+      tileset._processingQueue.push(tile);
+      const frameState = { time: JulianDate.now(), newFrame: false };
+      try {
+        tileset.prePassesUpdate(frameState);
+        expect(tileset.memoryAdjustedScreenSpaceError).toBe(16);
+        splat._pendingSnapshot = undefined;
+        tileset.prePassesUpdate(frameState);
+        expect(tileset.memoryAdjustedScreenSpaceError).toBeGreaterThan(16);
+        expect(tile.process).not.toHaveBeenCalled();
+        expect(tile.updatePriority).toHaveBeenCalled();
+      } finally {
+        tileset._processingQueue.length = 0;
+        tileset.gaussianSplatPrimitive = undefined;
+        tileset.destroy();
+      }
+    });
+
+    it("retries requested splat detail when a memory budget grows", async function () {
+      const tileset = await Cesium3DTileset.fromUrl(tilesetUrl);
+      try {
+        for (const property of ["cacheBytes", "maximumCacheOverflowBytes"]) {
+          tileset._memoryAdjustedScreenSpaceError = 64;
+          const budget = tileset[property];
+          tileset[property] = budget + 1;
+          expect(tileset.memoryAdjustedScreenSpaceError).toBe(64);
+          tileset.gaussianSplatPrimitive = {};
+          tileset[property] = budget;
+          expect(tileset.memoryAdjustedScreenSpaceError).toBe(64);
+          tileset[property] = budget;
+          expect(tileset.memoryAdjustedScreenSpaceError).toBe(64);
+          tileset[property] = budget + 1;
+          expect(tileset.memoryAdjustedScreenSpaceError).toBe(
+            tileset.maximumScreenSpaceError,
+          );
+          tileset.gaussianSplatPrimitive = undefined;
+        }
+      } finally {
+        tileset.gaussianSplatPrimitive = undefined;
+        tileset.destroy();
+      }
+    });
+
     it("cacheBytes throws when negative", async function () {
       const tileset = await Cesium3DTileset.fromUrl(tilesetUrl, options);
       expect(function () {

@@ -1593,6 +1593,10 @@ Object.defineProperties(Cesium3DTileset.prototype, {
       Check.typeOf.number.greaterThanOrEquals("value", value, 0);
       //>>includeEnd('debug');
 
+      if (defined(this.gaussianSplatPrimitive) && value > this._cacheBytes) {
+        // A larger budget permits another attempt at the requested detail.
+        this._memoryAdjustedScreenSpaceError = this._maximumScreenSpaceError;
+      }
       this._cacheBytes = value;
     },
   },
@@ -1625,6 +1629,13 @@ Object.defineProperties(Cesium3DTileset.prototype, {
       Check.typeOf.number.greaterThanOrEquals("value", value, 0);
       //>>includeEnd('debug');
 
+      if (
+        defined(this.gaussianSplatPrimitive) &&
+        value > this._maximumCacheOverflowBytes
+      ) {
+        // A larger budget permits another attempt at the requested detail.
+        this._memoryAdjustedScreenSpaceError = this._maximumScreenSpaceError;
+      }
       this._maximumCacheOverflowBytes = value;
     },
   },
@@ -2940,9 +2951,24 @@ function processTiles(tileset, frameState) {
     }
   }
 
-  if (tileset.totalMemoryUsageInBytes < cacheBytes) {
+  // Splat snapshots allocate their GPU resources asynchronously. Adjusting
+  // detail during replacement reacts to incomplete or overlapping allocations.
+  const splat = tileset.gaussianSplatPrimitive;
+  const snapshotSettled =
+    !defined(splat) ||
+    (!defined(splat._pendingSnapshot) &&
+      !splat._needsSnapshotRebuild &&
+      splat._retiredTextures.length === 0);
+  const refinementLimit = defined(splat) ? cacheBytes * 0.75 : cacheBytes;
+  if (
+    snapshotSettled &&
+    tileset.totalMemoryUsageInBytes < refinementLimit &&
+    (!defined(splat) || statistics.numberOfTilesProcessing === 0)
+  ) {
+    // Leave headroom between coarsening and refinement. A discrete LOD change
+    // can otherwise repeatedly cross the same cache budget at a fixed camera.
     decreaseScreenSpaceError(tileset);
-  } else if (memoryExceeded && tiles.length > 0) {
+  } else if (snapshotSettled && memoryExceeded && tiles.length > 0) {
     increaseScreenSpaceError(tileset);
   }
 }
