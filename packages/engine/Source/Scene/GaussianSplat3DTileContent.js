@@ -614,6 +614,12 @@ class GaussianSplat3DTileContent {
     this._metadata = undefined;
     this._resourcesLoaded = false;
     this._lastSplatTransform = undefined;
+    this._positions = undefined;
+    this._rotations = undefined;
+    this._scales = undefined;
+    this._packedSphericalHarmonicsData = undefined;
+    this.gltfPrimitive = undefined;
+    this.worldTransform = undefined;
 
     if (defined(this._loader)) {
       this._loader.destroy();

@@ -256,6 +256,20 @@ describe(
       const scales2 = tile2.content._scales;
 
       expect(scales1.every((s, i) => s === scales2[i])).toBe(true);
+
+      scene.primitives.remove(tileset);
+      scene.renderForSpecs();
+      expect(content._positions).toBeUndefined();
+      expect(content2.positions).toBe(positions2);
+      expect(content2.rotations).toBe(rotations2);
+      expect(content2.scales).toBe(scales2);
+      expect(content2._loader.isDestroyed()).toBe(false);
+      expect(
+        ModelUtility.getAttributeBySemantic(
+          content2.gltfPrimitive,
+          VertexAttributeSemantic.POSITION,
+        ).typedArray.length,
+      ).toBe(content2.pointsLength * 3);
     });
 
     it("keeps transformed attribute buffers separate from the original glTF attributes", async function () {
@@ -378,6 +392,13 @@ describe(
       // tile content is destroyed, because other tiles in the tileset still
       // rely on it.
       expect(gaussianSplatPrimitive.isDestroyed()).toBe(false);
+      expect(content._positions).toBeUndefined();
+      expect(content._rotations).toBeUndefined();
+      expect(content._scales).toBeUndefined();
+      expect(content._packedSphericalHarmonicsData).toBeUndefined();
+      expect(content.gltfPrimitive).toBeUndefined();
+      expect(content.worldTransform).toBeUndefined();
+      expect(content._loader).toBeUndefined();
     });
   },
   "WebGL",
