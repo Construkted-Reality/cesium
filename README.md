@@ -1,20 +1,5 @@
 # CesiumJS
 
-## Construkted Reality fork
-
-[Construkted-Reality/cesium](https://github.com/Construkted-Reality/cesium) is the
-selected Cesium source for Construkted Reality projects. Pin a reviewed commit
-when building a consumer. The upstream installation instructions below describe
-the public Cesium package; installing that package alone does not include this
-fork's corrections.
-
-[PR 14](https://github.com/Construkted-Reality/cesium/pull/14) adds uncompressed
-Gaussian splat rendering, preserves directional color coefficients, and requests
-frames after asynchronous initialization and sorting. Existing consumer builds
-apply the pinned correction to Cesium 1.142 or 1.143. Keep those reviewed versions
-until a separate upgrade passes validation. Selecting this fork does not merge
-the PR or deploy a consumer.
-
 [![Build Status](https://github.com/CesiumGS/cesium/actions/workflows/dev.yml/badge.svg)](https://github.com/CesiumGS/cesium/actions/workflows/dev.yml)
 [![npm](https://img.shields.io/npm/v/cesium)](https://www.npmjs.com/package/cesium)
 [![Docs](https://img.shields.io/badge/docs-online-orange.svg)](https://cesium.com/learn/)
