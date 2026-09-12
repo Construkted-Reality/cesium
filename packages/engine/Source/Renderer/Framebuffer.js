@@ -4,7 +4,6 @@ import defined from "../Core/defined.js";
 import destroyObject from "../Core/destroyObject.js";
 import DeveloperError from "../Core/DeveloperError.js";
 import PixelFormat from "../Core/PixelFormat.js";
-import ContextLimits from "./ContextLimits.js";
 import PixelDatatype from "./PixelDatatype.js";
 
 function attachTexture(framebuffer, attachment, texture) {
@@ -90,7 +89,7 @@ function Framebuffer(options) {
   //>>includeEnd('debug');
 
   const gl = context._gl;
-  const maximumColorAttachments = ContextLimits.maximumColorAttachments;
+  const maximumColorAttachments = context._maximumColorAttachments;
 
   this._gl = gl;
   this._framebuffer = gl.createFramebuffer();
