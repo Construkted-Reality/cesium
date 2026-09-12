@@ -2685,6 +2685,22 @@ Cesium3DTileset.prototype.postPassesUpdate = function (frameState) {
   raiseLoadProgressEvent(this, frameState);
   this._cache.unloadTiles(this, unloadTile);
 
+  // An empty selection can be a temporary loading gap. Release the shared
+  // snapshot only after every cached tile is unloaded and traversal is complete.
+  // This runs after all passes, so no current-frame command needs the resources.
+  const statistics = this._statistics;
+  if (
+    defined(this.gaussianSplatPrimitive) &&
+    frameState.passes.render &&
+    this.tilesLoaded &&
+    this._selectedTiles.length === 0 &&
+    statistics.numberOfTilesWithContentReady === 0 &&
+    statistics.numberOfPendingRequests === 0 &&
+    statistics.numberOfTilesProcessing === 0
+  ) {
+    this.gaussianSplatPrimitive.destroy();
+  }
+
   // If the style wasn't able to be applied this frame (for example,
   // the tileset was hidden), keep it dirty so the engine can try
   // to apply the style next frame.

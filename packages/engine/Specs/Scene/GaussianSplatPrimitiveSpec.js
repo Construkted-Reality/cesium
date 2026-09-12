@@ -95,6 +95,113 @@ describe(
       return { primitive, frame, tileset };
     }
 
+    it("retains the primitive during incomplete traversal and non-render passes", async function () {
+      const tileset = await Cesium3DTileset.fromUrl(sphericalHarmonicUrl);
+      const primitive = new GaussianSplatPrimitive({ tileset });
+      tileset.gaussianSplatPrimitive = primitive;
+      const frame = {
+        frameNumber: 1,
+        passes: { render: true },
+        afterRender: [],
+      };
+      const statistics = tileset._statistics;
+      for (const field of [
+        "numberOfTilesWithContentReady",
+        "numberOfPendingRequests",
+        "numberOfTilesProcessing",
+        "numberOfAttemptedRequests",
+      ]) {
+        statistics[field] = 1;
+        tileset.postPassesUpdate(frame);
+        expect(primitive.isDestroyed()).toBe(false);
+        statistics[field] = 0;
+      }
+      tileset._selectedTiles.push({});
+      tileset.postPassesUpdate(frame);
+      expect(primitive.isDestroyed()).toBe(false);
+      tileset._selectedTiles.length = 0;
+      frame.passes.render = false;
+      tileset.postPassesUpdate(frame);
+      expect(primitive.isDestroyed()).toBe(false);
+      frame.passes.render = true;
+      tileset.postPassesUpdate(frame);
+      expect(primitive.isDestroyed()).toBe(true);
+      expect(tileset.gaussianSplatPrimitive).toBeUndefined();
+      tileset.destroy();
+    });
+
+    it("ignores texture completion after an empty primitive is destroyed", async function () {
+      const { primitive, tileset, frame } = createSortFixture();
+      tileset._statistics = { texturesByteLength: 100, geometryByteLength: 20 };
+      let complete;
+      spyOn(
+        GaussianSplatTextureGenerator,
+        "generateFromAttributes",
+      ).and.returnValue(
+        new Promise((resolve) => {
+          complete = resolve;
+        }),
+      );
+      const pending = {
+        state: "BUILDING",
+        positions: new Float32Array(6),
+        rotations: new Float32Array(8),
+        scales: new Float32Array(6),
+        colors: new Uint8Array(8),
+        numSplats: 2,
+      };
+      primitive._pendingSnapshot = pending;
+      GaussianSplatPrimitive.generateSplatTexture(primitive, frame, pending);
+      expect(pending.state).toBe("TEXTURE_PENDING");
+      primitive.destroy();
+      const replacement = new GaussianSplatPrimitive({ tileset });
+      tileset.gaussianSplatPrimitive = replacement;
+      complete({ width: 1, height: 1, data: new Uint32Array(4) });
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(pending.gaussianSplatTexture).toBeUndefined();
+      expect(tileset.gaussianSplatPrimitive).toBe(replacement);
+      expect(tileset._statistics.texturesByteLength).toBe(100);
+      expect(tileset._statistics.geometryByteLength).toBe(20);
+      replacement.destroy();
+    });
+
+    it("releases an unloaded snapshot and renders after reloading", async function () {
+      const tileset = await Cesium3DTilesTester.loadTileset(
+        scene,
+        sphericalHarmonicUrl,
+        options,
+      );
+      camera.lookAt(
+        tileset.boundingSphere.center,
+        new HeadingPitchRange(0, -1.57, tileset.boundingSphere.radius * 2),
+      );
+      await pollToPromise(function () {
+        scene.renderForSpecs();
+        return !!tileset.gaussianSplatPrimitive?._drawCommand;
+      });
+      const primitive = tileset.gaussianSplatPrimitive;
+      const count = primitive._numSplats;
+      camera.lookRight(Math.PI);
+      scene.renderForSpecs();
+      expect(tileset._selectedTiles.length).toBe(0);
+      expect(primitive.isDestroyed()).toBe(false);
+      tileset.trimLoadedTiles();
+      scene.renderForSpecs();
+      expect(tileset.statistics.numberOfTilesWithContentReady).toBe(0);
+      expect(primitive.isDestroyed()).toBe(true);
+      expect(tileset.totalMemoryUsageInBytes).toBe(0);
+
+      camera.lookLeft(Math.PI);
+      await pollToPromise(function () {
+        scene.renderForSpecs();
+        return !!tileset.gaussianSplatPrimitive?._drawCommand;
+      });
+      expect(tileset.gaussianSplatPrimitive).not.toBe(primitive);
+      expect(tileset.gaussianSplatPrimitive._numSplats).toBe(count);
+      expect(tileset.totalMemoryUsageInBytes).toBeGreaterThan(0);
+    });
+
     it("counts shared resources through allocation and retirement", function () {
       const { primitive, tileset } = createSortFixture();
       tileset._statistics = { texturesByteLength: 100, geometryByteLength: 20 };
