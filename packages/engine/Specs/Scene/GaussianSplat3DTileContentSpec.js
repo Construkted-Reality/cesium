@@ -172,6 +172,29 @@ describe(
       expect(tile.content).toBeUndefined();
     });
 
+    it("releases source glTF data after decoding", async function () {
+      const tileset = await Cesium3DTilesTester.loadTileset(
+        scene,
+        tilesetUrl,
+        options,
+      );
+      scene.camera.lookAt(
+        tileset.boundingSphere.center,
+        new HeadingPitchRange(0.0, -1.57, tileset.boundingSphere.radius),
+      );
+      const tile = await Cesium3DTilesTester.waitForTileContentReady(
+        scene,
+        tileset.root,
+      );
+      const content = tile.content;
+      expect(content._loader._gltfJsonLoader).toBeUndefined();
+      expect(content._loader._typedArray).toBeUndefined();
+      expect(content.positions.length).toBe(content.pointsLength * 3);
+      expect(content.rotations.length).toBe(content.pointsLength * 4);
+      expect(content.scales.length).toBe(content.pointsLength * 3);
+      expect(content.gltfPrimitive.attributes.length).toBeGreaterThan(0);
+    });
+
     it("Load multiple instances of Gaussian splat tileset and validate transformed attributes", async function () {
       const tileset = await Cesium3DTilesTester.loadTileset(
         scene,
