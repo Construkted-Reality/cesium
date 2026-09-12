@@ -599,6 +599,9 @@ ResourceCacheKey.getTextureCacheKey = function (options) {
   // Include the sampler cache key in the texture cache key since textures and
   // samplers are coupled in WebGL 1. When upgrading to WebGL 2 consider
   // removing the sampleCacheKey here.
+  if (options.ignoreSampler) {
+    return `texture:${imageCacheKey}-context-${frameState.context.id}`;
+  }
   const samplerCacheKey = getSamplerCacheKey(gltf, textureInfo);
 
   return `texture:${imageCacheKey}-sampler-${samplerCacheKey}-context-${frameState.context.id}`;
