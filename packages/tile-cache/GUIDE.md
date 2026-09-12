@@ -77,6 +77,10 @@ It applies to disk retention. RAM uses the established library's LRU policy.
 
 ## Service Worker ownership
 
+The worker may finish a download and cache write after its consumer aborts.
+Tests verify consumer cancellation and complete cached bodies. They do not
+promise immediate cancellation of the underlying network transfer.
+
 The standalone registration refuses to replace a different root Service Worker.
 Applications with an existing worker need an integration at that worker's routing
 layer before using this package. All tabs sharing a namespace must configure the

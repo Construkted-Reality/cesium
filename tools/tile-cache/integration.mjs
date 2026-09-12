@@ -134,6 +134,7 @@ try {
 
   // An aborted consumer must not publish a partial body as a valid response.
   server.state.latencyMs = 200;
+  const cancelStart = server.state.requests.length;
   const aborted = await page.evaluate(async () => {
     const controller = new AbortController();
     const pending = fetch("/tile-data/v1/identity.bin?cancel", {
@@ -155,7 +156,13 @@ try {
     (await fetchResult(page, "/tile-data/v1/identity.bin?cancel")).text,
     "public",
   );
-  report.tests.push({ test: "cancel-and-retry-complete-body", pass: true });
+  report.tests.push({
+    test: "cancel-and-retry-complete-body",
+    pass: true,
+    consumerAborted: aborted,
+    retryTier: complete.tier,
+    serverRequests: server.state.requests.slice(cancelStart),
+  });
   report.stats = await page.evaluate(() => window.tileCache.stats());
   const unavailableContext = await browser.newContext();
   const unavailable = await unavailableContext.newPage();
