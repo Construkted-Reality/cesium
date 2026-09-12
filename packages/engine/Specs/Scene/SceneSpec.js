@@ -1075,7 +1075,7 @@ describe(
 
     it("allocates OIT targets on the first translucent frame", function () {
       const oit = scene._view.oit;
-      if (!defined(oit) || !oit.isSupported()) {
+      if (!defined(oit) || !oit._translucentMRTSupport) {
         return;
       }
 
@@ -1106,7 +1106,7 @@ describe(
 
     it("does not allocate OIT targets when picking translucent geometry", function () {
       const oit = scene._view.oit;
-      if (!defined(oit) || !oit.isSupported()) {
+      if (!defined(oit) || !oit._translucentMRTSupport) {
         return;
       }
 
