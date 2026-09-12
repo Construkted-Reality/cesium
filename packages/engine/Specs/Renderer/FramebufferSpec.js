@@ -923,6 +923,39 @@ describe(
       }).toThrowDeveloperError();
     });
 
+    it("keeps its attachment limit when another context lacks draw buffers", function () {
+      if (!context.drawBuffers || window.webglStub) {
+        return;
+      }
+      const savedLimits = { ...ContextLimits };
+      let otherContext;
+      try {
+        otherContext = createContext({
+          getWebGLStub: function (canvas, options) {
+            const gl = canvas.getContext("webgl", options);
+            const getExtension = gl.getExtension.bind(gl);
+            spyOn(gl, "getExtension").and.callFake(function (name) {
+              return name === "WEBGL_draw_buffers" ? null : getExtension(name);
+            });
+            return gl;
+          },
+        });
+        expect(otherContext.drawBuffers).toBe(false);
+        expect(ContextLimits.maximumColorAttachments).toBe(1);
+        framebuffer = new Framebuffer({
+          context: context,
+          colorTextures: [
+            new Texture({ context: context, width: 1, height: 1 }),
+            new Texture({ context: context, width: 1, height: 1 }),
+          ],
+        });
+        expect(framebuffer.status).toBe(WebGLConstants.FRAMEBUFFER_COMPLETE);
+      } finally {
+        otherContext?.destroyForSpecs();
+        Object.assign(ContextLimits, savedLimits);
+      }
+    });
+
     it("throws when the number of color texture exceeds the number color attachments supported", function () {
       expect(function () {
         return new Framebuffer({

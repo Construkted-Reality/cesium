@@ -324,9 +324,10 @@ function Context(canvas, options) {
   ContextLimits._maximumDrawBuffers = this.drawBuffers
     ? gl.getParameter(WebGLConstants.MAX_DRAW_BUFFERS)
     : 1;
-  ContextLimits._maximumColorAttachments = this.drawBuffers
+  this._maximumColorAttachments = this.drawBuffers
     ? gl.getParameter(WebGLConstants.MAX_COLOR_ATTACHMENTS)
     : 1;
+  ContextLimits._maximumColorAttachments = this._maximumColorAttachments;
 
   this._clearColor = new Color(0.0, 0.0, 0.0, 0.0);
   this._clearDepth = 1.0;
