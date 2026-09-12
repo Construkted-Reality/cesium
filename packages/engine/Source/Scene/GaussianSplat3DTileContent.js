@@ -420,7 +420,7 @@ class GaussianSplat3DTileContent {
     const baseResource = Resource.createIfNeeded(basePath);
 
     const loaderOptions = {
-      releaseGltfJson: false,
+      releaseGltfJson: true,
       packSphericalHarmonics: true,
       upAxis: Axis.Y,
       forwardAxis: Axis.Z,
