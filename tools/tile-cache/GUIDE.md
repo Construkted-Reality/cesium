@@ -71,11 +71,19 @@ decoded image loaders within a 16 MiB RGBA pixel estimate. It does not retain GP
 textures, compressed images, or decoded geometry. The runner checks image reuse,
 identical pixels, and zero loader references after teardown. Browser allocation
 overhead is not included in this estimate. It is not a supported production hook.
+An ImageBitmap's backing storage is browser-managed; this experiment does not
+prove that every retained decoded byte resides exclusively in system RAM.
 
 The idle test allows a Service Worker to lose its RAM state. Disk hits are valid
 after the wait. Each cache phase also restarts the entire browser and verifies A
 with the tile endpoint unavailable and the HTTP cache disabled. Source hashes in
 the output identify the exact engine bundle, worker, fixture, and harness code.
+
+Add `--instrument=true` to record image bitmap decode durations and synchronous
+WebGL texture/buffer submission calls. These probes add overhead and are optional.
+WebGL call durations are not GPU completion times. The probe does not measure
+Draco, meshopt, SPZ, or KTX2 decoding. Keep instrumented runs separate from the
+unmodified baseline when reporting timings.
 
 Keep raw measurements and investigation notes on `research/tile-cache-results`.
 Keep implementation on `feature/tile-cache-harness`. Do not push without approval.

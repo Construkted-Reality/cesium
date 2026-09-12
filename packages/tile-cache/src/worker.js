@@ -33,7 +33,12 @@ async function storeFor(config) {
 
 class TieredStrategy extends Strategy {
   async _handle(request, handler) {
-    const config = await settings(handler.event.clientId);
+    let config;
+    try {
+      config = await settings(handler.event.clientId);
+    } catch {
+      return handler.fetch(request);
+    }
     if (
       !config ||
       request.method !== "GET" ||
@@ -97,6 +102,20 @@ self.addEventListener("message", (event) => {
           clients.set(event.source.id, config);
           const db = await openCacheDatabase();
           await db.put("clients", config, event.source.id);
+          const live = new Set(
+            (
+              await self.clients.matchAll({
+                type: "window",
+                includeUncontrolled: true,
+              })
+            ).map((client) => client.id),
+          );
+          for (const id of await db.getAllKeys("clients")) {
+            if (!live.has(id)) {
+              await db.delete("clients", id);
+              clients.delete(id);
+            }
+          }
           db.close();
         }
         if (!config) {

@@ -43,6 +43,7 @@ for (const path of [
   "Build/TileCache/worker.js",
   "Build/TileCache/decoded-images.js",
   "tools/tile-cache/harness.js",
+  "tools/tile-cache/instrument.js",
   "tools/tile-cache/run.mjs",
   "tools/tile-cache/fixture.mjs",
   "tools/tile-cache/server.mjs",
@@ -119,6 +120,9 @@ if (options.phase === "retention") {
     memoryBytes: 0,
     diskBytes: 2 * 1024 * 1024,
   }));
+}
+for (const configuration of configurations) {
+  configuration.instrument = options.instrument === "true";
 }
 
 async function save() {

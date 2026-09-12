@@ -87,6 +87,20 @@ try {
     pass: true,
   });
 
+  const workerSession = await context.newCDPSession(page);
+  await workerSession.send("ServiceWorker.enable");
+  await workerSession.send("ServiceWorker.stopAllWorkers");
+  server.state.offline = true;
+  assert.equal(
+    (await fetchResult(page, path, { "X-Account": "red" })).tier,
+    "disk",
+  );
+  server.state.offline = false;
+  report.tests.push({
+    test: "worker-termination-restores-client-and-disk",
+    pass: true,
+  });
+
   for (const [suffix, headers] of [
     ["?cache=no-store", {}],
     ["", { Range: "bytes=0-1" }],
@@ -142,6 +156,32 @@ try {
   );
   report.tests.push({ test: "cancel-and-retry-complete-body", pass: true });
   report.stats = await page.evaluate(() => window.tileCache.stats());
+  const unavailableContext = await browser.newContext();
+  const unavailable = await unavailableContext.newPage();
+  await unavailable.goto(`${server.url}/tools/tile-cache/contracts.html`);
+  const fallback = await unavailable.evaluate(async () => {
+    await navigator.serviceWorker.register(
+      "/tools/tile-cache/failing-storage-worker.js",
+      { scope: "/" },
+    );
+    await navigator.serviceWorker.ready;
+    if (!navigator.serviceWorker.controller) {
+      await new Promise((resolve) =>
+        navigator.serviceWorker.addEventListener("controllerchange", resolve, {
+          once: true,
+        }),
+      );
+    }
+    return (
+      await fetch("/tile-data/v1/identity.bin?storage-unavailable")
+    ).text();
+  });
+  assert.equal(fallback, "public");
+  await unavailableContext.close();
+  report.tests.push({
+    test: "metadata-unavailable-network-fallback",
+    pass: true,
+  });
   console.log(JSON.stringify(report, null, 2));
 } catch (error) {
   report.error = String(error.stack);

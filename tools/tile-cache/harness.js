@@ -1,4 +1,5 @@
 /* global Cesium */
+import { instrument } from "./instrument.js";
 const viewer = new Cesium.Viewer("view", {
   baseLayer: false,
   globe: false,
@@ -21,6 +22,7 @@ viewer.scene.backgroundColor = Cesium.Color.BLACK;
 let tileset;
 let active;
 let decoded;
+let probes;
 const events = [];
 const frameTimes = [];
 let lastFrame = performance.now();
@@ -78,6 +80,9 @@ window.harness = {
       active?.visible.add(tileUrl(tile)),
     );
     const gl = viewer.scene.context._gl;
+    if (config.instrument && !probes) {
+      probes = instrument(Cesium, gl);
+    }
     const extension = gl.getExtension("WEBGL_debug_renderer_info");
     return {
       renderer: gl.getParameter(
@@ -92,6 +97,7 @@ window.harness = {
   },
   async visit(index, { timeoutMs = 30000, camera } = {}) {
     const started = performance.now();
+    probes?.reset();
     const eventStart = events.length;
     const frameStart = frameTimes.length;
     performance.clearResourceTimings();
@@ -131,6 +137,7 @@ window.harness = {
       settleMs: performance.now() - started,
       residentBytes: tileset.totalMemoryUsageInBytes,
       decoded: decoded?.stats(),
+      probes: probes?.snapshot(),
       visible: [...active.visible].sort(),
       events: events.slice(eventStart),
       frameMs: frameTimes.slice(frameStart),
@@ -148,6 +155,7 @@ window.harness = {
     viewer.scene.primitives.remove(tileset);
     tileset = undefined;
     decoded?.destroy();
+    probes?.destroy();
     return {
       loaders: Object.keys(Cesium.ResourceCache.cacheEntries).length,
       decoded: decoded?.stats(),
