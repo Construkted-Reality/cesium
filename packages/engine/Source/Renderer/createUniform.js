@@ -257,6 +257,9 @@ class UniformSampler {
 
     const v = this.value;
     gl.bindTexture(v._target, v._texture);
+    if (defined(gl.bindSampler)) {
+      gl.bindSampler(this.textureUnitIndex, v._samplerObject ?? null);
+    }
   }
 
   /**
