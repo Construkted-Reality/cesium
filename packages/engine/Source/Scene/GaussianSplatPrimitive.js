@@ -770,6 +770,10 @@ async function processGeneratedSplatTextureData(
     console.error("Error generating Gaussian splat texture:", error);
     snapshot.buildFailed = true;
     snapshot.state = SnapshotState.BUILDING;
+  } finally {
+    if (!primitive.isDestroyed()) {
+      primitive._updateMemoryStatistics();
+    }
   }
 }
 
@@ -841,6 +845,10 @@ async function resolvePendingSnapshotSort(
     }
     primitive._sorterState = GaussianSplatSortingState.ERROR;
     primitive._sorterError = err;
+  } finally {
+    if (!primitive.isDestroyed()) {
+      primitive._updateMemoryStatistics();
+    }
   }
 }
 
@@ -1011,6 +1019,8 @@ function GaussianSplatPrimitive(options) {
   this._snapshot = undefined;
   this._pendingSnapshot = undefined;
   this._retiredTextures = [];
+  this._texturesByteLength = 0;
+  this._geometryByteLength = 0;
   this._aggregateScratchBuffers = {
     positions: [],
     scales: [],
@@ -1421,6 +1431,61 @@ GaussianSplatPrimitive.prototype._invalidateSorterPositions = function () {
   this._sorterPositionsKey = 0;
 };
 
+/**
+ * Updates the tileset counters from the GPU resources owned by this primitive.
+ * Pending and retired resources still occupy memory and must remain counted.
+ * @private
+ */
+GaussianSplatPrimitive.prototype._updateMemoryStatistics = function () {
+  const statistics = this._tileset._statistics;
+  if (!defined(statistics)) {
+    return;
+  }
+  const textures = new Set();
+  for (const snapshot of [this._snapshot, this._pendingSnapshot]) {
+    if (defined(snapshot?.gaussianSplatTexture)) {
+      textures.add(snapshot.gaussianSplatTexture);
+    }
+    if (defined(snapshot?.sphericalHarmonicsTexture)) {
+      textures.add(snapshot.sphericalHarmonicsTexture);
+    }
+  }
+  for (const entry of this._retiredTextures) {
+    textures.add(entry.texture);
+  }
+  let texturesByteLength = 0;
+  for (const texture of textures) {
+    texturesByteLength += texture.sizeInBytes;
+  }
+
+  const buffers = new Set();
+  const vertexArrays = [
+    this._vertexArray,
+    ...this._retiredDrawResources.map((entry) => entry.vertexArray),
+  ];
+  for (const vertexArray of vertexArrays) {
+    if (!defined(vertexArray)) {
+      continue;
+    }
+    for (let i = 0; i < vertexArray.numberOfAttributes; i++) {
+      const buffer = vertexArray.getAttribute(i).vertexBuffer;
+      if (defined(buffer)) {
+        buffers.add(buffer);
+      }
+    }
+  }
+  let geometryByteLength = 0;
+  for (const buffer of buffers) {
+    geometryByteLength += buffer.sizeInBytes;
+  }
+  statistics.texturesByteLength +=
+    texturesByteLength - this._texturesByteLength;
+  statistics.geometryByteLength +=
+    geometryByteLength - this._geometryByteLength;
+  this._texturesByteLength = texturesByteLength;
+  this._geometryByteLength = geometryByteLength;
+};
+
 GaussianSplatPrimitive.prototype.destroy = function () {
   this._positions = undefined;
   this._shData = undefined;
@@ -1459,6 +1524,8 @@ GaussianSplatPrimitive.prototype.destroy = function () {
     this._vertexArray.destroy();
     this._vertexArray = undefined;
   }
+
+  this._updateMemoryStatistics();
 
   this._removeTileLoadListener?.();
   this._removeTileVisibleListener?.();
@@ -1998,6 +2065,14 @@ GaussianSplatPrimitive.buildGSplatDrawCommand = function (
  * @private
  */
 GaussianSplatPrimitive.prototype.update = function (frameState) {
+  try {
+    update.call(this, frameState);
+  } finally {
+    this._updateMemoryStatistics();
+  }
+};
+
+function update(frameState) {
   const tileset = this._tileset;
 
   releaseRetiredTextures(this, frameState.frameNumber);
@@ -2542,7 +2617,7 @@ GaussianSplatPrimitive.prototype.update = function (frameState) {
   }
 
   this._dirty = false;
-};
+}
 
 GaussianSplatPrimitive.profiling = profiling;
 

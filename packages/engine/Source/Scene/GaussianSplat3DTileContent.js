@@ -206,16 +206,9 @@ class GaussianSplat3DTileContent {
    * @readonly
    */
   get texturesByteLength() {
-    const primitive = this._tileset?.gaussianSplatPrimitive;
-    if (!defined(primitive)) {
-      return 0;
-    }
-    const texture = primitive.gaussianSplatTexture;
-    const selectedTileLength = primitive.selectedTileLength;
-    if (!defined(texture) || selectedTileLength === 0) {
-      return 0;
-    }
-    return texture.sizeInBytes / selectedTileLength;
+    // The tileset primitive owns the shared snapshot textures. Their size can
+    // change between this content's load and unload, so count them at the owner.
+    return 0;
   }
 
   /**

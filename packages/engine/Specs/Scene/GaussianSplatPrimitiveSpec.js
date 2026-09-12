@@ -95,6 +95,86 @@ describe(
       return { primitive, frame, tileset };
     }
 
+    it("counts shared resources through allocation and retirement", function () {
+      const { primitive, tileset } = createSortFixture();
+      tileset._statistics = { texturesByteLength: 100, geometryByteLength: 20 };
+      const texture = (sizeInBytes) => ({
+        sizeInBytes,
+        destroy: jasmine.createSpy("destroy"),
+      });
+      const active = texture(128);
+      const pending = texture(256);
+      const harmonics = texture(64);
+      const retired = texture(32);
+      primitive._snapshot = { gaussianSplatTexture: active };
+      primitive._pendingSnapshot = {
+        gaussianSplatTexture: pending,
+        sphericalHarmonicsTexture: harmonics,
+      };
+      primitive._retiredTextures = [{ texture: retired, frameNumber: 0 }];
+      const buffer = { sizeInBytes: 48 };
+      const vertexArray = {
+        numberOfAttributes: 2,
+        getAttribute: () => ({ vertexBuffer: buffer }),
+        destroy: jasmine.createSpy("destroy"),
+      };
+      primitive._vertexArray = vertexArray;
+      primitive._updateMemoryStatistics();
+      expect(tileset._statistics.texturesByteLength).toBe(580);
+      expect(tileset._statistics.geometryByteLength).toBe(68);
+      primitive._updateMemoryStatistics();
+      expect(tileset._statistics.texturesByteLength).toBe(580);
+
+      // Promotion and retirement must not count the same texture twice.
+      primitive._snapshot = primitive._pendingSnapshot;
+      primitive._pendingSnapshot = undefined;
+      primitive._retiredTextures.push({ texture: active, frameNumber: 1 });
+      primitive._updateMemoryStatistics();
+      expect(tileset._statistics.texturesByteLength).toBe(580);
+      primitive.destroy();
+      expect(tileset._statistics.texturesByteLength).toBe(100);
+      expect(tileset._statistics.geometryByteLength).toBe(20);
+      expect(vertexArray.destroy).toHaveBeenCalledTimes(1);
+      for (const resource of [active, pending, harmonics, retired]) {
+        expect(resource.destroy).toHaveBeenCalledTimes(1);
+      }
+    });
+
+    it("counts uploaded spherical harmonics and draw buffers", async function () {
+      const tileset = await Cesium3DTilesTester.loadTileset(
+        scene,
+        sphericalHarmonicUrl,
+        options,
+      );
+      camera.lookAt(
+        tileset.boundingSphere.center,
+        new HeadingPitchRange(0, -1.57, tileset.boundingSphere.radius * 2),
+      );
+      await pollToPromise(function () {
+        scene.renderForSpecs();
+        const primitive = tileset.gaussianSplatPrimitive;
+        return primitive?._drawCommand && !primitive._pendingSnapshot;
+      });
+      scene.renderForSpecs();
+      const primitive = tileset.gaussianSplatPrimitive;
+      expect(primitive.sphericalHarmonicsTexture).toBeDefined();
+      const textureBytes =
+        primitive.gaussianSplatTexture.sizeInBytes +
+        primitive.sphericalHarmonicsTexture.sizeInBytes;
+      const vertexArray = primitive._vertexArray;
+      const bufferBytes =
+        vertexArray.getAttribute(0).vertexBuffer.sizeInBytes +
+        vertexArray.getAttribute(1).vertexBuffer.sizeInBytes;
+      expect(tileset.statistics.texturesByteLength).toBe(textureBytes);
+      expect(tileset.statistics.geometryByteLength).toBe(bufferBytes);
+      expect(tileset.totalMemoryUsageInBytes).toBe(textureBytes + bufferBytes);
+      const content = tileset._selectedTiles[0].content;
+      expect(content.texturesByteLength).toBe(0);
+      tileset._statistics.decrementLoadCounts(content);
+      tileset._statistics.incrementLoadCounts(content);
+      expect(tileset.totalMemoryUsageInBytes).toBe(textureBytes + bufferBytes);
+    });
+
     it("trims unused staging arrays while preserving both snapshots", function () {
       const { primitive, tileset } = createSortFixture();
       const active = new Float32Array(6);
