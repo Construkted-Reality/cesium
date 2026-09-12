@@ -1384,6 +1384,30 @@ GaussianSplatPrimitive.prototype._prepareSorterPositions = function (
 };
 
 /**
+ * Releases staging arrays that are not owned by a live snapshot.
+ * @private
+ */
+GaussianSplatPrimitive.prototype.trimScratchBuffers = function () {
+  const active = this._snapshot;
+  const pending = this._pendingSnapshot;
+  for (const [key, pool] of Object.entries(this._aggregateScratchBuffers)) {
+    const activeBuffer = getSnapshotArrayBuffer(active, key);
+    const pendingBuffer = getSnapshotArrayBuffer(pending, key);
+    this._aggregateScratchBuffers[key] = pool.filter(
+      (array) =>
+        array.buffer === activeBuffer || array.buffer === pendingBuffer,
+    );
+  }
+  const shBuffer = this._scratchAggregateShBuffer?.buffer;
+  if (
+    shBuffer !== getSnapshotArrayBuffer(active, "shData") &&
+    shBuffer !== getSnapshotArrayBuffer(pending, "shData")
+  ) {
+    this._scratchAggregateShBuffer = undefined;
+  }
+};
+
+/**
  * Forgets which position set the worker holds, so the next sort request sends
  * the positions again. Called when a sort result is discarded, because a
  * discarded result may mean the worker lost its copy.
