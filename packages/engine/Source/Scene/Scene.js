@@ -3642,13 +3642,21 @@ function updateOITForTranslucentCommands(scene, passState) {
 
   // Commands are available before derived shaders are created. Initialize OIT
   // now so its framebuffer fallback also selects the correct derived shaders.
-  oit.update(
-    context,
-    passState,
-    globeDepth.colorFramebufferManager,
-    scene._hdr,
-    scene.msaaSamples,
-  );
+  // Composite the full view when 2D wrapping splits command execution into
+  // smaller viewports. A first translucent command can appear in either part.
+  const viewport = passState.viewport;
+  passState.viewport = scene._view.viewport;
+  try {
+    oit.update(
+      context,
+      passState,
+      globeDepth.colorFramebufferManager,
+      scene._hdr,
+      scene.msaaSamples,
+    );
+  } finally {
+    passState.viewport = viewport;
+  }
   scene._environmentState.useOIT = oit.isSupported();
   if (scene._environmentState.useOIT) {
     // A previous viewport can already contain opaque geometry.

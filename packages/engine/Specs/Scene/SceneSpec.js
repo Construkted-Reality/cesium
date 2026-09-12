@@ -1104,6 +1104,29 @@ describe(
       expect(oit._accumulationTexture).toBe(accumulationTexture);
     });
 
+    it("composites both wrapped viewports on the first translucent frame", function () {
+      scene.canvas.width = 5;
+      scene.canvas.height = 5;
+      scene.morphTo2D(0.0);
+      const rectangle = Rectangle.fromDegrees(-180.0, -90.0, 180.0, 90.0);
+      const primitive = scene.primitives.add(createRectangle(rectangle));
+      primitive.appearance.material.uniforms.color = Color.RED.clone();
+      scene.camera.setView({
+        destination: new Cartesian3(
+          Ellipsoid.WGS84.maximumRadius * Math.PI,
+          0.0,
+          10000.0,
+        ),
+        convert: false,
+      });
+      scene.renderForSpecs();
+      primitive.appearance.material.uniforms.color.alpha = 0.5;
+      scene.renderForSpecs();
+      const pixels = scene.context.readPixels({ width: 5, height: 5 });
+      expect(pixels[0]).toBeGreaterThan(0);
+      expect(pixels[4 * 4]).toBeGreaterThan(0);
+    });
+
     it("does not allocate OIT targets when picking translucent geometry", function () {
       const oit = scene._view.oit;
       if (!defined(oit) || !oit._translucentMRTSupport) {
