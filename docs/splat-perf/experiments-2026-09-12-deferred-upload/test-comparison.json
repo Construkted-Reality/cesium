@@ -1,0 +1,50 @@
+{
+  "candidate": {
+    "failures": [
+      "\u2717 Model casts shadows onto another model",
+      "\u2717 Model with cutout texture casts shadows onto another model",
+      "\u2717 Model without normals casts shadows onto another model",
+      "\u2717 Supports back face culling when there are per-point normals",
+      "\u2717 changes light direction",
+      "\u2717 clipping planes union regions (Uint8)",
+      "\u2717 enable soft shadows",
+      "\u2717 picks a voxel cell from a VoxelPrimitive",
+      "\u2717 picks based on batchId",
+      "\u2717 primitive casts shadows onto another primitive",
+      "\u2717 produces radiance values with mainly blue direct light",
+      "\u2717 produces radiance values with mainly blue direct light",
+      "\u2717 produces radiance values with more light reflected from the ground",
+      "\u2717 renders a point",
+      "\u2717 translucent Model casts shadows onto another model",
+      "\u2717 translucent primitive casts shadows onto another primitive"
+    ],
+    "totals": [
+      "TOTAL: 16 FAILED, 15816 SUCCESS",
+      "TOTAL: 16 FAILED, 15816 SUCCESS"
+    ]
+  },
+  "baseline": {
+    "failures": [
+      "\u2717 Model casts shadows onto another model",
+      "\u2717 Model with cutout texture casts shadows onto another model",
+      "\u2717 Model without normals casts shadows onto another model",
+      "\u2717 Supports back face culling when there are per-point normals",
+      "\u2717 changes light direction",
+      "\u2717 clipping planes union regions (Uint8)",
+      "\u2717 enable soft shadows",
+      "\u2717 picks a voxel cell from a VoxelPrimitive",
+      "\u2717 picks based on batchId",
+      "\u2717 primitive casts shadows onto another primitive",
+      "\u2717 produces radiance values with mainly blue direct light",
+      "\u2717 produces radiance values with mainly blue direct light",
+      "\u2717 produces radiance values with more light reflected from the ground",
+      "\u2717 renders a point",
+      "\u2717 translucent Model casts shadows onto another model",
+      "\u2717 translucent primitive casts shadows onto another primitive"
+    ],
+    "totals": [
+      "TOTAL: 16 FAILED, 15811 SUCCESS",
+      "TOTAL: 16 FAILED, 15811 SUCCESS"
+    ]
+  }
+}

@@ -1,0 +1,14 @@
+--- /mnt/data2/cesium-splat-perf/experiments-2026-09-12-deferred-upload/source-v1-Cesium.js	2026-09-12 14:33:35.902802441 -0400
++++ /mnt/data2/cesium-splat-perf/experiments-2026-09-12-deferred-upload/arrival-Cesium.js	2026-09-12 14:30:04.452537995 -0400
+@@ -150263,9 +150263,8 @@
+       pending.state = SnapshotState.READY;
+       primitive._pendingSortPromise = void 0;
+       primitive._pendingSort = void 0;
+-      frameState.afterRender.push(
+-        () => uploadPendingSnapshot(primitive, pending, frameState)
+-      );
++      uploadPendingSnapshot(primitive, pending, frameState);
++      frameState.afterRender.push(() => !primitive.isDestroyed());
+     } catch (err) {
+       if (primitive.isDestroyed()) {
+         return;

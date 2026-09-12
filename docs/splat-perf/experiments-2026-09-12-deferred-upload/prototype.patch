@@ -1,0 +1,54 @@
+--- /mnt/data2/cesium-splat-perf/experiments-2026-09-12-deferred-upload/baseline-GaussianSplatPrimitive.js	2026-09-12 14:17:41.440065761 -0400
++++ /mnt/data2/cesium-splat-perf/experiments-2026-09-12-deferred-upload/prototype-GaussianSplatPrimitive.js	2026-09-12 14:20:27.599751082 -0400
+@@ -675,6 +675,7 @@
+       snapshot.state = SnapshotState.BUILDING;
+       return;
+     }
++    snapshot.uploadTextures = () => {
+     if (!defined(snapshot.gaussianSplatTexture)) {
+       snapshot.gaussianSplatTexture = createGaussianSplatTexture(
+         frameState.context,
+@@ -763,6 +764,8 @@
+       profiling.add("shTextureBuild", shRepackStart);
+     }
+ 
++    };
++
+     profiling.add("textureProcess", textureProcessStart);
+     snapshot.buildFailed = false;
+     snapshot.state = SnapshotState.TEXTURE_READY;
+@@ -824,9 +827,22 @@
+     pending.state = SnapshotState.READY;
+     primitive._pendingSortPromise = undefined;
+     primitive._pendingSort = undefined;
+-    commitSnapshot(primitive, pending, frameState);
+-    primitive._pendingSnapshot = undefined;
+-    GaussianSplatPrimitive.buildGSplatDrawCommand(primitive, frameState);
++    frameState.afterRender.push(() => {
++      if (primitive.isDestroyed() || primitive._pendingSnapshot !== pending) {
++        return false;
++      }
++      destroySnapshotTextures(primitive._snapshot);
++      primitive.gaussianSplatTexture = undefined;
++      primitive.sphericalHarmonicsTexture = undefined;
++      releaseRetiredTextures(primitive, Number.POSITIVE_INFINITY);
++      pending.uploadTextures();
++      pending.uploadTextures = undefined;
++      commitSnapshot(primitive, pending, frameState);
++      primitive._pendingSnapshot = undefined;
++      GaussianSplatPrimitive.buildGSplatDrawCommand(primitive, frameState);
++      primitive._updateMemoryStatistics();
++      return true;
++    });
+   } catch (err) {
+     if (primitive.isDestroyed()) {
+       return;
+@@ -2418,7 +2434,7 @@
+       }
+       if (
+         pending.state === SnapshotState.TEXTURE_READY &&
+-        !defined(pending.gaussianSplatTexture)
++        !defined(pending.gaussianSplatTexture) && !defined(pending.uploadTextures)
+       ) {
+         return;
+       }
