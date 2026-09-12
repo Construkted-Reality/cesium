@@ -24,6 +24,9 @@ This section gets the tag name `construkted-1.146.0-1` at the next rebase. See
 
 ### Fixes
 
+- Gaussian splat replacements prepare texture data and sort before the old frame finishes.
+  They release old textures before the replacement upload to reduce overlapping GPU allocations.
+
 - Gaussian splat loading keeps a root fallback when the cache budget cannot hold it.
   Memory pressure no longer increases detail error without a limit or retains stale decoding work.
 
