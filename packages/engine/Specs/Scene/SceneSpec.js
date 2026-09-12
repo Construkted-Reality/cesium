@@ -1105,8 +1105,11 @@ describe(
     });
 
     it("composites both wrapped viewports on the first translucent frame", function () {
-      scene.canvas.width = 5;
-      scene.canvas.height = 5;
+      if (webglStub) {
+        return;
+      }
+      scene.canvas.width = 256;
+      scene.canvas.height = 256;
       scene.morphTo2D(0.0);
       const rectangle = Rectangle.fromDegrees(-180.0, -90.0, 180.0, 90.0);
       const primitive = scene.primitives.add(createRectangle(rectangle));
@@ -1122,9 +1125,9 @@ describe(
       scene.renderForSpecs();
       primitive.appearance.material.uniforms.color.alpha = 0.5;
       scene.renderForSpecs();
-      const pixels = scene.context.readPixels({ width: 5, height: 5 });
-      expect(pixels[0]).toBeGreaterThan(0);
-      expect(pixels[4 * 4]).toBeGreaterThan(0);
+      const pixels = scene.context.readPixels({ width: 256, height: 256 });
+      expect(pixels[(128 * 256 + 64) * 4]).toBeGreaterThan(0);
+      expect(pixels[(128 * 256 + 192) * 4]).toBeGreaterThan(0);
     });
 
     it("does not allocate OIT targets when picking translucent geometry", function () {
