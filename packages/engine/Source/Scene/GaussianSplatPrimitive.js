@@ -1877,6 +1877,7 @@ GaussianSplatPrimitive.generateSplatTexture = function (
       colors: new Uint8Array(snapshot.colors),
     },
     count: snapshot.numSplats,
+    textureWidth: ContextLimits.maximumTextureSize,
   });
   if (!defined(promise)) {
     snapshot.state = SnapshotState.BUILDING;
