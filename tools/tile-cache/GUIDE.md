@@ -85,5 +85,9 @@ WebGL call durations are not GPU completion times. The probe does not measure
 Draco, meshopt, SPZ, or KTX2 decoding. Keep instrumented runs separate from the
 unmodified baseline when reporting timings.
 
+Add `--crossOrigin=true` to serve the tileset and all of its resources from a
+second origin with CORS enabled. The same return and offline-restart assertions
+then check cross-origin response caching, including external glTF images.
+
 Keep raw measurements and investigation notes on `research/tile-cache-results`.
 Keep implementation on `feature/tile-cache-harness`. Do not push without approval.

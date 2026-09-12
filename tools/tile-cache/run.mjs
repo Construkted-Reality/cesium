@@ -35,10 +35,18 @@ assert.ok(
     Number(options.idleMs || 0) >= 0,
   "idleMs must be nonnegative",
 );
-const server = await startServer({
+const appServer = await startServer({
   latencyMs: Number(options.latency || 100),
   textureSize: Number(options.textureSize || 512),
 });
+const server =
+  options.crossOrigin === "true"
+    ? await startServer({
+        latencyMs: Number(options.latency || 100),
+        textureSize: Number(options.textureSize || 512),
+        cors: true,
+      })
+    : appServer;
 const report = {
   startedAt: new Date().toISOString(),
   host: hostname(),
@@ -53,6 +61,7 @@ const report = {
     textureSize: Number(options.textureSize || 512),
     viewport: { width: 800, height: 600 },
     synthetic: true,
+    crossOrigin: options.crossOrigin === "true",
     idleMs: Number(options.idleMs || 0),
   },
   runs: [],
@@ -104,7 +113,7 @@ async function enableCache(page, configuration) {
   await page.evaluate(async (config) => {
     await window.harness.enableCache({
       workerUrl: "/Build/TileCache/worker.js",
-      urlPrefix: "/tile-data/v1/",
+      urlPrefix: config.urlPrefix,
       scope: "fixture",
       version: "v1",
       memoryBytes: config.memoryBytes,
@@ -152,6 +161,8 @@ async function save() {
 
 try {
   for (const configuration of configurations) {
+    configuration.url = `${server.url}/tile-data/v1/tileset.json`;
+    configuration.urlPrefix = `${server.url}/tile-data/v1/`;
     for (let repetition = 0; repetition < repetitions; repetition++) {
       const profile = await mkdtemp(join(tmpdir(), "cesium-cache-"));
       const launchOptions = {
@@ -176,7 +187,7 @@ try {
         await cdp.send("Network.setCacheDisabled", {
           cacheDisabled: !configuration.httpCache,
         });
-        await page.goto(`${server.url}/tools/tile-cache/harness.html`);
+        await page.goto(`${appServer.url}/tools/tile-cache/harness.html`);
         await page.waitForFunction(() => !!window.harness);
         await enableCache(page, configuration);
         const environment = await page.evaluate(
@@ -308,7 +319,9 @@ try {
           await restartedCdp.send("Network.setCacheDisabled", {
             cacheDisabled: true,
           });
-          await restarted.goto(`${server.url}/tools/tile-cache/harness.html`);
+          await restarted.goto(
+            `${appServer.url}/tools/tile-cache/harness.html`,
+          );
           await restarted.waitForFunction(() => !!window.harness);
           await enableCache(restarted, configuration);
           const requestStart = server.state.requests.length;
@@ -360,4 +373,7 @@ try {
   report.completedAt = new Date().toISOString();
   await save();
   await server.close();
+  if (server !== appServer) {
+    await appServer.close();
+  }
 }

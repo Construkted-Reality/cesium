@@ -20,11 +20,22 @@ export async function startServer({
   port = 0,
   latencyMs = 100,
   textureSize = 512,
+  cors = false,
 } = {}) {
   const fixture = createFixture({ textureSize });
   const state = { offline: false, requests: [], latencyMs };
   const server = http.createServer(async (req, res) => {
     const url = new URL(req.url, "http://localhost");
+    if (cors) {
+      res.setHeader("Access-Control-Allow-Origin", req.headers.origin || "*");
+      res.setHeader("Vary", "Origin");
+      res.setHeader("Access-Control-Allow-Headers", "Authorization, X-Account");
+      res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+      if (req.method === "OPTIONS") {
+        res.writeHead(204).end();
+        return;
+      }
+    }
     res.setHeader("Timing-Allow-Origin", "*");
     const prefix = "/tile-data/";
     if (url.pathname.startsWith(prefix)) {
