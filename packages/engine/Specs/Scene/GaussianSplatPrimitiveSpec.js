@@ -8,13 +8,13 @@ import {
   HeadingPitchRange,
   Cartesian3,
   GaussianSplat3DTileContent,
+  GaussianSplatPrimitive,
+  GaussianSplatSorter,
+  GaussianSplatTextureGenerator,
   Matrix4,
   Transforms,
   VertexAttributeSemantic,
 } from "../../index.js";
-import GaussianSplatTextureGenerator from "../../Source/Scene/GaussianSplatTextureGenerator.js";
-import GaussianSplatSorter from "../../Source/Scene/GaussianSplatSorter.js";
-import GaussianSplatPrimitive from "../../Source/Scene/GaussianSplatPrimitive.js";
 
 import Cesium3DTilesTester from "../../../../Specs/Cesium3DTilesTester.js";
 import createScene from "../../../../Specs/createScene.js";
@@ -84,6 +84,8 @@ describe(
       primitive._snapshot = {};
       const frame = {
         frameNumber: 100,
+        context: scene.context,
+        afterRender: [],
         passes: {},
         commandList: [],
         camera: {
@@ -93,6 +95,20 @@ describe(
         },
       };
       return { primitive, frame, tileset };
+    }
+
+    function prepareTextureData(snapshot) {
+      snapshot.attributeTextureData = {
+        width: 4,
+        height: 1,
+        data: new Uint32Array(16),
+      };
+      snapshot.state = "DATA_READY";
+    }
+
+    function finishFrame(frame) {
+      const callbacks = frame.afterRender.splice(0);
+      return callbacks.map((callback) => callback());
     }
 
     it("retains the primitive during incomplete traversal and non-render passes", async function () {
@@ -164,6 +180,87 @@ describe(
       expect(tileset._statistics.texturesByteLength).toBe(100);
       expect(tileset._statistics.geometryByteLength).toBe(20);
       replacement.destroy();
+    });
+
+    it("keeps the old texture until sorted data uploads after the frame", async function () {
+      const { primitive, frame } = createSortFixture();
+      const errors = spyOn(console, "error");
+      const destroyed = jasmine.createSpy("destroy");
+      primitive._snapshot.gaussianSplatTexture = { destroy: destroyed };
+      const active = primitive._snapshot;
+      const pending = {
+        positions: primitive._positions,
+        numSplats: 2,
+        indexes: undefined,
+      };
+      prepareTextureData(pending);
+      primitive._pendingSnapshot = pending;
+      spyOn(GaussianSplatSorter, "radixSortIndexes").and.returnValue(
+        Promise.resolve(new Uint32Array([0, 1])),
+      );
+      spyOn(GaussianSplatPrimitive, "buildGSplatDrawCommand");
+      primitive.update(frame);
+      await Promise.resolve();
+      expect(primitive._snapshot).toBe(active);
+      expect(pending.gaussianSplatTexture).toBeUndefined();
+      expect(destroyed).not.toHaveBeenCalled();
+      expect(pending.state).toBe("READY");
+      expect(finishFrame(frame)).toContain(true);
+      expect(errors.calls.allArgs()).toEqual([]);
+      expect(destroyed).toHaveBeenCalledTimes(1);
+      expect(primitive._snapshot).toBe(pending);
+      expect(pending.gaussianSplatTexture).toBeDefined();
+      expect(pending.attributeTextureData).toBeUndefined();
+      expect(primitive._retiredTextures.length).toBe(0);
+      primitive.destroy();
+    });
+
+    it("ignores a queued upload after destruction", async function () {
+      const { primitive, frame } = createSortFixture();
+      const pending = { positions: primitive._positions, numSplats: 2 };
+      prepareTextureData(pending);
+      primitive._pendingSnapshot = pending;
+      spyOn(GaussianSplatSorter, "radixSortIndexes").and.returnValue(
+        Promise.resolve(new Uint32Array([0, 1])),
+      );
+      const build = spyOn(GaussianSplatPrimitive, "buildGSplatDrawCommand");
+      primitive.update(frame);
+      await Promise.resolve();
+      expect(frame.afterRender.length).toBe(1);
+      primitive.destroy();
+      expect(finishFrame(frame)).toEqual([false]);
+      expect(build).not.toHaveBeenCalled();
+      expect(pending.attributeTextureData).toBeUndefined();
+      expect(pending.gaussianSplatTexture).toBeUndefined();
+    });
+
+    it("clears uploaded resources when replacement command creation fails", async function () {
+      const { primitive, frame } = createSortFixture();
+      const pending = { positions: primitive._positions, numSplats: 2 };
+      prepareTextureData(pending);
+      primitive._pendingSnapshot = pending;
+      spyOn(GaussianSplatSorter, "radixSortIndexes").and.returnValue(
+        Promise.resolve(new Uint32Array([0, 1])),
+      );
+      let uploaded;
+      spyOn(GaussianSplatPrimitive, "buildGSplatDrawCommand").and.callFake(
+        (owner) => {
+          uploaded = owner.gaussianSplatTexture;
+          throw new Error("Injected replacement failure");
+        },
+      );
+      spyOn(console, "error");
+      primitive.update(frame);
+      await Promise.resolve();
+      expect(finishFrame(frame)).toContain(true);
+      expect(uploaded.isDestroyed()).toBe(true);
+      expect(primitive._drawCommand).toBeUndefined();
+      expect(primitive._pendingSnapshot).toBeUndefined();
+      expect(primitive._snapshot).toBeUndefined();
+      expect(primitive._numSplats).toBe(0);
+      expect(primitive._dirty).toBe(true);
+      expect(pending.attributeTextureData).toBeUndefined();
+      primitive.destroy();
     });
 
     it("releases an unloaded snapshot and renders after reloading", async function () {
@@ -442,9 +539,9 @@ describe(
             rotations: snapshot.rotations,
             colors: snapshot.colors,
           });
-          snapshot.gaussianSplatTexture = { destroy: function () {} };
+          prepareTextureData(snapshot);
           snapshot.state =
-            inputs.length === 1 ? "TEXTURE_READY" : "TEXTURE_PENDING";
+            inputs.length === 1 ? "DATA_READY" : "TEXTURE_PENDING";
         },
       );
       spyOn(GaussianSplatSorter, "radixSortIndexes").and.returnValue(
@@ -455,6 +552,7 @@ describe(
         frame.frameNumber++;
         primitive.update(frame);
         await Promise.resolve();
+        finishFrame(frame);
       }
       try {
         for (let i = 0; i < 90 && !primitive._snapshot; i++) {
@@ -478,7 +576,7 @@ describe(
         for (const key of ["scales", "rotations", "colors"]) {
           expect(inputs[1][key].buffer).toBe(inputs[0][key].buffer);
         }
-        primitive._pendingSnapshot.state = "TEXTURE_READY";
+        primitive._pendingSnapshot.state = "DATA_READY";
         await nextFrame();
         expect(primitive._snapshot).not.toBe(committed);
         expect(primitive._positions).toBe(inputs[1].positions);
@@ -514,8 +612,7 @@ describe(
         tileset._selectedTiles = [selectionChanged ? b : a];
         spyOn(GaussianSplatPrimitive, "generateSplatTexture").and.callFake(
           (owner, state, snapshot) => {
-            snapshot.state = "TEXTURE_READY";
-            snapshot.gaussianSplatTexture = { destroy: function () {} };
+            prepareTextureData(snapshot);
           },
         );
         spyOn(GaussianSplatSorter, "radixSortIndexes").and.returnValue(
@@ -533,6 +630,7 @@ describe(
         frame.frameNumber++;
         primitive.update(frame);
         await Promise.resolve();
+        finishFrame(frame);
         expect(primitive._snapshot).toBe(replacement);
         expect(primitive._selectedTileSet.has(selectionChanged ? b : a)).toBe(
           true,
@@ -566,14 +664,14 @@ describe(
       }
       expect(generate.calls.count()).toBe(1);
       const pending = primitive._pendingSnapshot;
-      pending.state = "TEXTURE_READY";
-      pending.gaussianSplatTexture = { destroy: function () {} };
+      prepareTextureData(pending);
       spyOn(GaussianSplatSorter, "radixSortIndexes").and.returnValue(
         Promise.resolve(new Uint32Array([0])),
       );
       spyOn(GaussianSplatPrimitive, "buildGSplatDrawCommand");
       primitive.update(frame);
       await Promise.resolve();
+      finishFrame(frame);
       expect(primitive._snapshot).toBe(pending);
       expect(primitive._pendingSnapshot).toBeUndefined();
       frame.frameNumber++;
@@ -810,8 +908,8 @@ describe(
       const gsPrim = new GaussianSplatPrimitive({ tileset: tileset });
       gsPrim._rootTransform = Matrix4.IDENTITY;
 
-      // Force the pending-snapshot TEXTURE_READY path deterministically.
-      // This validates "unavailable sorter -> keep TEXTURE_READY -> retry next frame"
+      // Force the pending-snapshot DATA_READY path deterministically.
+      // This validates "unavailable sorter -> keep DATA_READY -> retry next frame"
       // without depending on async texture generation timing.
       const fakeTexture = {
         destroy: function () {},
@@ -858,7 +956,7 @@ describe(
       gsPrim.update(frameState);
 
       expect(gsPrim._pendingSnapshot).toBeDefined();
-      expect(gsPrim._pendingSnapshot.state).toBe("TEXTURE_READY");
+      expect(gsPrim._pendingSnapshot.state).toBe("DATA_READY");
       expect(gsPrim._pendingSortPromise).toBeUndefined();
       gsPrim.destroy();
     });

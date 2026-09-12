@@ -78,24 +78,24 @@ const GaussianSplatSortingState = {
  * Snapshot lifecycle for rebuilding aggregated splat data.
  *
  * Transition order:
- * BUILDING -> TEXTURE_PENDING -> TEXTURE_READY -> SORTING -> READY
+ * BUILDING -> TEXTURE_PENDING -> DATA_READY -> SORTING -> READY
  *
  * The transition points are split across two functions:
  * - {@link GaussianSplatPrimitive#update} drives BUILDING/SORTING/READY
- * - {@link GaussianSplatPrimitive.generateSplatTexture} drives TEXTURE_PENDING/TEXTURE_READY
+ * - {@link GaussianSplatPrimitive.generateSplatTexture} drives TEXTURE_PENDING/DATA_READY
  *
- * A snapshot is committed only when it reaches READY, so all GPU resources
- * and sorted indexes swap atomically as one unit.
+ * A READY snapshot uploads after the old frame finishes. The old GPU textures
+ * are released before the replacement upload.
  *
  * @private
  */
 const SnapshotState = {
   // CPU aggregation is complete and this snapshot is ready to start async texture generation.
   BUILDING: "BUILDING",
-  // Async texture generation/upload is in flight for this snapshot.
+  // Async texture data generation is in flight for this snapshot.
   TEXTURE_PENDING: "TEXTURE_PENDING",
-  // Attribute textures are ready; snapshot can now request index sorting.
-  TEXTURE_READY: "TEXTURE_READY",
+  // CPU texture data is ready; snapshot can now request index sorting.
+  DATA_READY: "DATA_READY",
   // Sort request is in flight for this snapshot generation.
   SORTING: "SORTING",
   // Sorted indexes were validated for this generation and may be committed.
@@ -117,6 +117,8 @@ const SnapshotState = {
  * @property {number} shCoefficientCount Coefficients per splat.
  * @property {number} numSplats Total splat count in this snapshot.
  * @property {Uint32Array|undefined} indexes Sorted index buffer when READY.
+ * @property {GaussianSplatPrimitive.AttributeTextureData|undefined} attributeTextureData Prepared attribute upload.
+ * @property {GaussianSplatPrimitive.SphericalHarmonicsTextureData|undefined} sphericalHarmonicsTextureData Prepared harmonics upload.
  * @property {Texture|undefined} gaussianSplatTexture Packed splat attribute texture.
  * @property {Texture|undefined} sphericalHarmonicsTexture Packed SH texture.
  * @property {number} lastTextureWidth Last splat texture width.
@@ -370,6 +372,8 @@ function destroySnapshotTextures(snapshot) {
   if (!defined(snapshot)) {
     return;
   }
+  snapshot.attributeTextureData = undefined;
+  snapshot.sphericalHarmonicsTextureData = undefined;
   if (defined(snapshot.gaussianSplatTexture)) {
     snapshot.gaussianSplatTexture.destroy();
     snapshot.gaussianSplatTexture = undefined;
@@ -584,7 +588,7 @@ function commitSnapshot(primitive, snapshot, frameState) {
 /**
  * Finalizes async splat texture generation for a snapshot. The resolved data
  * updates or recreates GPU textures, and the snapshot transitions to
- * {@link SnapshotState.TEXTURE_READY} when complete.
+ * {@link SnapshotState.DATA_READY} when complete.
  *
  * @param {GaussianSplatPrimitive} primitive The owning primitive.
  * @param {FrameState} frameState The current frame state.
@@ -675,36 +679,12 @@ async function processGeneratedSplatTextureData(
       snapshot.state = SnapshotState.BUILDING;
       return;
     }
-    if (!defined(snapshot.gaussianSplatTexture)) {
-      snapshot.gaussianSplatTexture = createGaussianSplatTexture(
-        frameState.context,
-        effectiveTextureData,
-      );
-    } else if (
-      snapshot.lastTextureHeight !== effectiveTextureData.height ||
-      snapshot.lastTextureWidth !== effectiveTextureData.width
-    ) {
-      const oldTex = snapshot.gaussianSplatTexture;
-      snapshot.gaussianSplatTexture = createGaussianSplatTexture(
-        frameState.context,
-        effectiveTextureData,
-      );
-      oldTex.destroy();
-    } else {
-      snapshot.gaussianSplatTexture.copyFrom({
-        source: {
-          width: effectiveTextureData.width,
-          height: effectiveTextureData.height,
-          arrayBufferView: effectiveTextureData.data,
-        },
-      });
-    }
+    snapshot.attributeTextureData = effectiveTextureData;
     snapshot.lastTextureHeight = effectiveTextureData.height;
     snapshot.lastTextureWidth = effectiveTextureData.width;
 
     if (defined(snapshot.shData) && snapshot.sphericalHarmonicsDegree > 0) {
       const shRepackStart = profiling.begin();
-      const oldTex = snapshot.sphericalHarmonicsTexture;
       const maximumWidth = ContextLimits.maximumTextureSize;
       const dims = Math.ceil(snapshot.shCoefficientCount / 4);
       const splatsPerRow = Math.floor(maximumWidth / dims);
@@ -726,10 +706,7 @@ async function processGeneratedSplatTextureData(
             `Disabling spherical harmonics for this snapshot (color-only fallback).`,
         );
         snapshot.sphericalHarmonicsDegree = 0;
-        if (defined(oldTex)) {
-          oldTex.destroy();
-        }
-        snapshot.sphericalHarmonicsTexture = undefined;
+        snapshot.sphericalHarmonicsTextureData = undefined;
       } else {
         const shData = snapshot.shData;
         const texelCount = width * shHeight * 2;
@@ -748,24 +725,19 @@ async function processGeneratedSplatTextureData(
           texBuf = new Uint32Array(texelCount);
           texBuf.set(shData);
         }
-        snapshot.sphericalHarmonicsTexture = createSphericalHarmonicsTexture(
-          frameState.context,
-          {
-            data: texBuf,
-            width: width,
-            height: shHeight,
-          },
-        );
-        if (defined(oldTex)) {
-          oldTex.destroy();
-        }
+        snapshot.sphericalHarmonicsTextureData = {
+          data: texBuf,
+          width: width,
+          height: shHeight,
+        };
       }
       profiling.add("shTextureBuild", shRepackStart);
     }
 
     profiling.add("textureProcess", textureProcessStart);
     snapshot.buildFailed = false;
-    snapshot.state = SnapshotState.TEXTURE_READY;
+    snapshot.state = SnapshotState.DATA_READY;
+    frameState.afterRender.push(() => !primitive.isDestroyed());
   } catch (error) {
     console.error("Error generating Gaussian splat texture:", error);
     snapshot.buildFailed = true;
@@ -775,6 +747,76 @@ async function processGeneratedSplatTextureData(
       primitive._updateMemoryStatistics();
     }
   }
+}
+
+/**
+ * Uploads a sorted replacement after the old frame has finished.
+ * @private
+ */
+function uploadPendingSnapshot(primitive, snapshot, frameState) {
+  if (primitive.isDestroyed() || primitive._pendingSnapshot !== snapshot) {
+    return false;
+  }
+
+  // CPU preparation and sorting finish before the old textures are released.
+  // WebGL preserves submitted work that uses deleted resources.
+  destroySnapshotTextures(primitive._snapshot);
+  primitive.gaussianSplatTexture = undefined;
+  primitive.sphericalHarmonicsTexture = undefined;
+  releaseRetiredTextures(primitive, Number.POSITIVE_INFINITY);
+  releaseRetiredDrawResources(primitive, Number.POSITIVE_INFINITY);
+  try {
+    snapshot.gaussianSplatTexture = createGaussianSplatTexture(
+      frameState.context,
+      snapshot.attributeTextureData,
+    );
+    if (defined(snapshot.sphericalHarmonicsTextureData)) {
+      snapshot.sphericalHarmonicsTexture = createSphericalHarmonicsTexture(
+        frameState.context,
+        snapshot.sphericalHarmonicsTextureData,
+      );
+    }
+    commitSnapshot(primitive, snapshot, frameState);
+    GaussianSplatPrimitive.buildGSplatDrawCommand(primitive, frameState);
+    primitive._pendingSnapshot = undefined;
+    releaseRetiredDrawResources(primitive, Number.POSITIVE_INFINITY);
+  } catch (error) {
+    // The old textures are gone. Do not draw with their former command if an
+    // upload fails. Release partial resources and retry from current tile data.
+    destroySnapshotTextures(snapshot);
+    const command = primitive._drawCommand;
+    if (defined(command)) {
+      command.shaderProgram?.destroy();
+    }
+    primitive._drawCommand = undefined;
+    primitive._vertexArray?.destroy();
+    primitive._vertexArray = undefined;
+    primitive._vertexArrayLen = 0;
+    releaseRetiredDrawResources(primitive, Number.POSITIVE_INFINITY);
+    primitive._snapshot = undefined;
+    primitive._pendingSnapshot = undefined;
+    primitive._dirty = true;
+    primitive.gaussianSplatTexture = undefined;
+    primitive.sphericalHarmonicsTexture = undefined;
+    primitive._positions = undefined;
+    primitive._rotations = undefined;
+    primitive._scales = undefined;
+    primitive._colors = undefined;
+    primitive._shData = undefined;
+    primitive._indexes = undefined;
+    primitive._numSplats = 0;
+    primitive._hasGaussianSplatTexture = false;
+    primitive._needsSnapshotRebuild = true;
+    primitive._sorterState = GaussianSplatSortingState.IDLE;
+    snapshot.buildFailed = true;
+    snapshot.state = SnapshotState.BUILDING;
+    console.error("Error uploading Gaussian splat snapshot:", error);
+  } finally {
+    snapshot.attributeTextureData = undefined;
+    snapshot.sphericalHarmonicsTextureData = undefined;
+    primitive._updateMemoryStatistics();
+  }
+  return true;
 }
 
 /**
@@ -814,7 +856,7 @@ async function resolvePendingSnapshotSort(
       primitive._pendingSortPromise = undefined;
       primitive._pendingSort = undefined;
       if (pendingSort.snapshot.state === SnapshotState.SORTING) {
-        pendingSort.snapshot.state = SnapshotState.TEXTURE_READY;
+        pendingSort.snapshot.state = SnapshotState.DATA_READY;
       }
       return;
     }
@@ -824,9 +866,11 @@ async function resolvePendingSnapshotSort(
     pending.state = SnapshotState.READY;
     primitive._pendingSortPromise = undefined;
     primitive._pendingSort = undefined;
-    commitSnapshot(primitive, pending, frameState);
-    primitive._pendingSnapshot = undefined;
-    GaussianSplatPrimitive.buildGSplatDrawCommand(primitive, frameState);
+    // The current frame may already contain commands for the old snapshot.
+    // Upload only after every pass finishes, then request the replacement frame.
+    frameState.afterRender.push(() =>
+      uploadPendingSnapshot(primitive, pending, frameState),
+    );
   } catch (err) {
     if (primitive.isDestroyed()) {
       return;
@@ -841,7 +885,7 @@ async function resolvePendingSnapshotSort(
     primitive._pendingSortPromise = undefined;
     primitive._pendingSort = undefined;
     if (pendingSort.snapshot.state === SnapshotState.SORTING) {
-      pendingSort.snapshot.state = SnapshotState.TEXTURE_READY;
+      pendingSort.snapshot.state = SnapshotState.DATA_READY;
     }
     primitive._sorterState = GaussianSplatSortingState.ERROR;
     primitive._sorterError = err;
@@ -2417,8 +2461,8 @@ function update(frameState) {
         return;
       }
       if (
-        pending.state === SnapshotState.TEXTURE_READY &&
-        !defined(pending.gaussianSplatTexture)
+        pending.state === SnapshotState.DATA_READY &&
+        !defined(pending.attributeTextureData)
       ) {
         return;
       }
@@ -2431,7 +2475,7 @@ function update(frameState) {
       Matrix4.multiply(camera.viewMatrix, this._rootTransform, scratchMatrix4A);
 
       if (
-        pending.state === SnapshotState.TEXTURE_READY &&
+        pending.state === SnapshotState.DATA_READY &&
         !defined(this._pendingSortPromise)
       ) {
         const requestId = ++this._sortRequestId;
@@ -2463,7 +2507,7 @@ function update(frameState) {
           this._invalidateSorterPositions();
           this._pendingSortPromise = undefined;
           this._pendingSort = undefined;
-          pending.state = SnapshotState.TEXTURE_READY;
+          pending.state = SnapshotState.DATA_READY;
           return;
         }
         markSortDepth(this, scratchMatrix4A);
@@ -2481,7 +2525,7 @@ function update(frameState) {
 
       if (!defined(this._pendingSortPromise)) {
         if (pending.state === SnapshotState.SORTING) {
-          pending.state = SnapshotState.TEXTURE_READY;
+          pending.state = SnapshotState.DATA_READY;
         }
         return;
       }
