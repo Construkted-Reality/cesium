@@ -35,8 +35,11 @@ const tileUrl = (tile) => tile._contentResource?.url;
 
 window.harness = {
   async enableCache(config) {
-    const { registerTileCache } =
-      await import("../../Build/TileCache/client.js");
+    const clientUrl = new URL(
+      "../../Build/TileCache/client.js",
+      import.meta.url,
+    );
+    const { registerTileCache } = await import(clientUrl.href);
     window.tileCache = await registerTileCache(config);
   },
   async setup(config) {
@@ -44,8 +47,11 @@ window.harness = {
       viewer.scene.primitives.remove(tileset);
     }
     if (config.decodedBytes && !decoded) {
-      const { retainDecodedImages } =
-        await import("../../Build/TileCache/decoded-images.js");
+      const moduleUrl = new URL(
+        "../../Build/TileCache/decoded-images.js",
+        import.meta.url,
+      );
+      const { retainDecodedImages } = await import(moduleUrl.href);
       decoded = retainDecodedImages(Cesium, config.decodedBytes);
     }
     tileset = await Cesium.Cesium3DTileset.fromUrl(

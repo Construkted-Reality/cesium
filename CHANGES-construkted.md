@@ -22,6 +22,18 @@ Upstream base: commit `488b114e16`, between release 1.145 and release 1.146.
 This section gets the tag name `construkted-1.146.0-1` at the next rebase. See
 [FORK.md](FORK.md) for the reason.
 
+### Local tile caching
+
+- The optional `@construkted/tile-cache` workspace retains encoded responses in
+  bounded RAM and browser Cache Storage. It uses Workbox, `idb`, and `lru-cache`.
+- Cache keys separate accounts, dataset versions, URLs, and request headers.
+  The package requires an immutable dataset directory and explicit registration.
+- The harness checks tile eviction, transfer counts, return pixels, offline browser
+  restart, byte budgets, storage failures, and cancellation. It also provides
+  experimental retention policies and decoded-image measurements.
+- See [the cache guide](packages/tile-cache/GUIDE.md) for deployment requirements
+  and [the harness guide](tools/tile-cache/GUIDE.md) for verification commands.
+
 ### Fixes
 
 - Gaussian splat tiles render without SPZ compression. Mixed tilesets load compressed and
