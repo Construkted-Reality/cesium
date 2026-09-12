@@ -193,6 +193,70 @@ describe(
       };
     }
 
+    it("reuses uploaded scratch arrays while preserving sort positions", async function () {
+      const { primitive, frame, tileset } = createSortFixture();
+      tileset.boundingSphere = {
+        center: Cartesian3.fromDegrees(0, 0),
+        radius: 10,
+      };
+      tileset._selectedTiles = [makeTile()];
+      primitive._snapshot = undefined;
+      primitive._drawCommand = undefined;
+      spyOn(GaussianSplatPrimitive, "transformTile");
+      const inputs = [];
+      spyOn(GaussianSplatPrimitive, "generateSplatTexture").and.callFake(
+        (owner, state, snapshot) => {
+          inputs.push({
+            positions: snapshot.positions,
+            scales: snapshot.scales,
+            rotations: snapshot.rotations,
+            colors: snapshot.colors,
+          });
+          snapshot.gaussianSplatTexture = { destroy: function () {} };
+          snapshot.state =
+            inputs.length === 1 ? "TEXTURE_READY" : "TEXTURE_PENDING";
+        },
+      );
+      spyOn(GaussianSplatSorter, "radixSortIndexes").and.returnValue(
+        Promise.resolve(new Uint32Array([0])),
+      );
+      spyOn(GaussianSplatPrimitive, "buildGSplatDrawCommand");
+      async function nextFrame() {
+        frame.frameNumber++;
+        primitive.update(frame);
+        await Promise.resolve();
+      }
+      try {
+        for (let i = 0; i < 90 && !primitive._snapshot; i++) {
+          await nextFrame();
+        }
+        expect(primitive._snapshot).toBeDefined();
+        const committed = primitive._snapshot;
+        expect(primitive._positions).toBe(inputs[0].positions);
+        for (const key of ["scales", "rotations", "colors", "shData"]) {
+          expect(committed[key]).toBeUndefined();
+          expect(primitive[`_${key}`]).toBeUndefined();
+        }
+        primitive._dirty = true;
+        for (let i = 0; i < 90 && inputs.length < 2; i++) {
+          await nextFrame();
+        }
+        expect(inputs.length).toBe(2);
+        expect(primitive._snapshot).toBe(committed);
+        expect(primitive._positions).toBe(inputs[0].positions);
+        expect(inputs[1].positions.buffer).not.toBe(inputs[0].positions.buffer);
+        for (const key of ["scales", "rotations", "colors"]) {
+          expect(inputs[1][key].buffer).toBe(inputs[0][key].buffer);
+        }
+        primitive._pendingSnapshot.state = "TEXTURE_READY";
+        await nextFrame();
+        expect(primitive._snapshot).not.toBe(committed);
+        expect(primitive._positions).toBe(inputs[1].positions);
+      } finally {
+        primitive.destroy();
+      }
+    });
+
     [false, true].forEach(function (selectionChanged) {
       it(`recovers a failed snapshot, selectionChanged=${selectionChanged}`, async function () {
         const { primitive, frame, tileset } = createSortFixture();
