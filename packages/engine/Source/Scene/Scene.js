@@ -3396,6 +3396,7 @@ function executeWebVRCommands(scene, passState) {
 
   updateAndRenderPrimitives(scene);
 
+  updateOITForTranslucentCommands(scene, passState);
   view.createPotentiallyVisibleSet(scene);
 
   executeComputeCommands(scene);
@@ -3625,6 +3626,36 @@ function execute2DViewportCommands(scene, passState) {
   passState.viewport = originalViewport;
 }
 
+function updateOITForTranslucentCommands(scene, passState) {
+  const { frameState, context } = scene;
+  const { oit, globeDepth } = scene._view;
+  if (
+    scene._environmentState.useOIT ||
+    frameState.passes.pick ||
+    frameState.passes.pickVoxel ||
+    !defined(oit) ||
+    !oit.isSupported() ||
+    !frameState.commandList.some((command) => command.pass === Pass.TRANSLUCENT)
+  ) {
+    return;
+  }
+
+  // Commands are available before derived shaders are created. Initialize OIT
+  // now so its framebuffer fallback also selects the correct derived shaders.
+  oit.update(
+    context,
+    passState,
+    globeDepth.colorFramebufferManager,
+    scene._hdr,
+    scene.msaaSamples,
+  );
+  scene._environmentState.useOIT = oit.isSupported();
+  if (scene._environmentState.useOIT) {
+    // A previous viewport can already contain opaque geometry.
+    oit.clear(context, passState, scene._clearColorCommand.color, false);
+  }
+}
+
 /**
  * Execute the draw commands to render the scene into the viewport.
  * If this is the first viewport rendered, the framebuffers will be cleared to the background color.
@@ -3645,6 +3676,7 @@ function executeCommandsInViewport(firstViewport, scene, passState) {
 
   updateAndRenderPrimitives(scene);
 
+  updateOITForTranslucentCommands(scene, passState);
   view.createPotentiallyVisibleSet(scene);
 
   if (firstViewport) {
@@ -3953,7 +3985,12 @@ function updateAndClearFramebuffers(scene, passState, clearColor) {
   // If supported, configure OIT to use the globe depth framebuffer and clear the OIT framebuffer.
   const oit = view.oit;
   const useOIT = (environmentState.useOIT =
-    !picking && defined(oit) && oit.isSupported());
+    !picking &&
+    defined(oit) &&
+    oit.isSupported() &&
+    (defined(oit._accumulationTexture) ||
+      (scene.invertClassification &&
+        frameState.invertClassificationColor.alpha < 1.0)));
   if (useOIT) {
     oit.update(
       context,

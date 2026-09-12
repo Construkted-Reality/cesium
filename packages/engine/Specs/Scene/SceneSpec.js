@@ -1073,6 +1073,55 @@ describe(
       });
     });
 
+    it("allocates OIT targets on the first translucent frame", function () {
+      const oit = scene._view.oit;
+      if (!defined(oit) || !oit.isSupported()) {
+        return;
+      }
+
+      const rectangle = Rectangle.fromDegrees(-100.0, 30.0, -90.0, 40.0);
+      const primitive = scene.primitives.add(createRectangle(rectangle));
+      primitive.appearance.material.uniforms.color = Color.RED.clone();
+      scene.camera.setView({ destination: rectangle });
+      scene.renderForSpecs();
+      expect(oit._accumulationTexture).toBeUndefined();
+      expect(scene._environmentState.useOIT).toBe(false);
+
+      primitive.appearance.material.uniforms.color.alpha = 0.5;
+      expect(scene).toRenderAndCall(function (rgba) {
+        expect(rgba[0]).toBeGreaterThan(0);
+        expect(rgba[1]).toEqual(0);
+        expect(rgba[2]).toEqual(0);
+      });
+      expect(oit._accumulationTexture).toBeDefined();
+      expect(scene._environmentState.useOIT).toBe(true);
+
+      const accumulationTexture = oit._accumulationTexture;
+      primitive.show = false;
+      scene.renderForSpecs();
+      primitive.show = true;
+      scene.renderForSpecs();
+      expect(oit._accumulationTexture).toBe(accumulationTexture);
+    });
+
+    it("does not allocate OIT targets when picking translucent geometry", function () {
+      const oit = scene._view.oit;
+      if (!defined(oit) || !oit.isSupported()) {
+        return;
+      }
+
+      const rectangle = Rectangle.fromDegrees(-100.0, 30.0, -90.0, 40.0);
+      const primitive = scene.primitives.add(createRectangle(rectangle));
+      primitive.appearance.material.uniforms.color = Color.RED.withAlpha(0.5);
+      scene.camera.setView({ destination: rectangle });
+      scene.pickForSpecs();
+      expect(oit._accumulationTexture).toBeUndefined();
+      expect(scene._environmentState.useOIT).toBe(false);
+
+      scene.renderForSpecs();
+      expect(oit._accumulationTexture).toBeDefined();
+    });
+
     it("renders with OIT and without FXAA", function () {
       const rectangle = Rectangle.fromDegrees(-100.0, 30.0, -90.0, 40.0);
 
