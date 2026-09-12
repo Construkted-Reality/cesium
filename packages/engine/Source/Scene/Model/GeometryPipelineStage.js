@@ -203,6 +203,53 @@ GeometryPipelineStage.process = function (
   shaderBuilder.addFragmentLines(GeometryStageFS);
 };
 
+function isDeferredAttributeUsed(model, attribute) {
+  if (
+    !defined(attribute._deferredBufferOwner) ||
+    !defined(attribute.typedArray)
+  ) {
+    return true;
+  }
+  const { variableName } = ModelUtility.getAttributeInfo(attribute);
+  const customShader = model.customShader;
+  const stages = defined(customShader)
+    ? [customShader.usedVariablesVertex, customShader.usedVariablesFragment]
+    : [];
+  if (stages.some((stage) => stage.attributeSet[variableName])) {
+    return true;
+  }
+  const style = model.style;
+  if (defined(style) && typeof style.getVariables !== "function") {
+    return true;
+  }
+  // A custom style expression need not expose its dependencies.
+  if (
+    defined(style) &&
+    [style.color, style.show, style.pointSize].some(
+      (expression) =>
+        defined(expression) && typeof expression.getVariables !== "function",
+    )
+  ) {
+    return true;
+  }
+  const variables = new Set(style?.getVariables() ?? []);
+  for (const propertyAttribute of model.structuralMetadata.propertyAttributes) {
+    for (const [id, property] of Object.entries(propertyAttribute.properties)) {
+      if (
+        property.attribute === attribute.name &&
+        (variables.has(id) ||
+          stages.some(
+            (stage) =>
+              stage.metadataSet[ModelUtility.sanitizeGlslIdentifier(id)],
+          ))
+      ) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 function processAttribute(
   renderResources,
   attribute,
@@ -214,6 +261,10 @@ function processAttribute(
 ) {
   const shaderBuilder = renderResources.shaderBuilder;
   const attributeInfo = ModelUtility.getAttributeInfo(attribute);
+  attributeInfo.deferredUnused = !isDeferredAttributeUsed(
+    renderResources.model,
+    attribute,
+  );
 
   // This indicates to only modify the resources for 2D if the model is
   // not instanced.
@@ -479,7 +530,9 @@ function updateInitializeAttributesFunction(
   }
 
   const lines = [];
-  if (variableName === "tangentMC") {
+  if (attributeInfo.deferredUnused) {
+    lines.push(`attributes.${variableName} = ${attributeInfo.glslType}(0.0);`);
+  } else if (variableName === "tangentMC") {
     lines.push("attributes.tangentMC = a_tangentMC.xyz;");
     lines.push("attributes.tangentSignMC = a_tangentMC.w;");
   } else {
