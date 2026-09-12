@@ -3189,6 +3189,7 @@ Model.fromB3dm = async function (options) {
 Model.fromPnts = async function (options) {
   const loaderOptions = {
     arrayBuffer: options.arrayBuffer,
+    deferPropertyAttributes: true,
     byteOffset: options.byteOffset,
     loadAttributesFor2D: options.projectTo2D,
   };

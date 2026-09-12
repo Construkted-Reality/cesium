@@ -42,6 +42,7 @@ const MetallicRoughness = ModelComponents.MetallicRoughness;
 class PntsLoader extends ResourceLoader {
   /**
    * @param {object} options An object containing the following properties
+   * @param {boolean} [options.deferPropertyAttributes=false] Upload custom attributes when a shader uses them.
    * @param {ArrayBuffer} options.arrayBuffer The array buffer of the pnts contents
    * @param {number} [options.byteOffset] The byte offset to the beginning of the pnts contents in the array buffer
    * @param {boolean} [options.loadAttributesFor2D=false] If true, load the positions buffer as a typed array for accurately projecting models to 2D.
@@ -70,6 +71,7 @@ class PntsLoader extends ResourceLoader {
     this._error = undefined;
     this._state = ResourceLoaderState.UNLOADED;
     this._buffers = [];
+    this._deferPropertyAttributes = options.deferPropertyAttributes ?? false;
 
     // The batch table object contains a json and a binary component access using keys of the same name.
     this._components = undefined;
@@ -683,6 +685,18 @@ function addPropertyAttributesToPrimitive(
   const length = customAttributes.length;
   for (let i = 0; i < length; i++) {
     const customAttribute = customAttributes[i];
+
+    if (loader._deferPropertyAttributes) {
+      const data = customAttribute.typedArray;
+      customAttribute.typedArray =
+        data.byteLength === data.buffer.byteLength ? data : data.slice();
+      customAttribute.constant = new Array(
+        AttributeType.getNumberOfComponents(customAttribute.type),
+      ).fill(0);
+      customAttribute._deferredBufferOwner = loader._buffers;
+      attributes.push(customAttribute);
+      continue;
+    }
 
     // Upload the typed array to the GPU and free the CPU copy.
     const buffer = Buffer.createVertexBuffer({
