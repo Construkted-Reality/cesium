@@ -104,9 +104,9 @@ describe(
       const sh = new Uint32Array(16);
       primitive._snapshot.positions = active;
       primitive._pendingSnapshot = {
-        positions: pending,
-        colors: pendingColors,
-        shData: sh,
+        positions: pending.subarray(0, 6),
+        colors: pendingColors.subarray(0, 8),
+        shData: sh.subarray(0, 8),
       };
       primitive._aggregateScratchBuffers = {
         positions: [active, pending, free],
