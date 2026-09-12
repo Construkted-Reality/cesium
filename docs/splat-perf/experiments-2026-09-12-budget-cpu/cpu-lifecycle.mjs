@@ -1,3 +1,4 @@
+import {workerHeaps} from './worker-heap.mjs';
 import {chromium} from '/mnt/data2/cesium-splat-perf/cesiumjs/node_modules/@playwright/test/index.mjs';
 import {readFileSync,writeFileSync} from 'node:fs';
 const dir='/mnt/data2/cesium-splat-perf/experiments-2026-09-12-budget-cpu';
@@ -21,7 +22,7 @@ try{
    return {tileBytes,totalBytes:[...buffers.values()].reduce((n,x)=>n+x.bytes,0),buffers:[...buffers.values()],gpuBytes:t.totalMemoryUsageInBytes,tiles:__retainedContents.length};};
  });
  const cdp=await page.context().newCDPSession(page);const sample=async name=>{await cdp.send('HeapProfiler.collectGarbage');result.stages.push({name,heap:await cdp.send('Runtime.getHeapUsage'),ledger:await page.evaluate(()=>__cpuLedger())});};
- await sample('loaded');console.log('sampled loaded');
+ await sample('loaded');result.workers=await workerHeaps(browser);console.log('sampled loaded');
  // Capture synchronously after rendering, before the next browser frame.
  const pixels=await page.evaluate(()=>{__scene.render();const gl=__scene.context._gl,w=gl.drawingBufferWidth,h=gl.drawingBufferHeight,a=new Uint8Array(w*h*4);gl.readPixels(0,0,w,h,gl.RGBA,gl.UNSIGNED_BYTE,a);return Array.from(a);});writeFileSync(dir+'/'+label+'.rgba',Buffer.from(pixels));
  await page.evaluate(()=>{const t=__round2Tilesets[0];__scene.primitives.remove(t);});await page.waitForTimeout(500);await sample('destroyed-with-content-references');
