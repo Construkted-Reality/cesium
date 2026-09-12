@@ -1,5 +1,12 @@
 import { build } from "esbuild";
 await build({
+  entryPoints: ["tools/tile-cache/decoded-images.js"],
+  outfile: "Build/TileCache/decoded-images.js",
+  bundle: true,
+  format: "esm",
+  platform: "browser",
+});
+await build({
   entryPoints: ["packages/tile-cache/src/worker.js"],
   outfile: "Build/TileCache/worker.js",
   bundle: true,

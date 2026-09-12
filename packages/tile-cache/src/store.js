@@ -271,6 +271,12 @@ export class ResponseStore {
     };
   }
 
+  async clearMemory() {
+    await this.ready;
+    await Promise.allSettled([...this.pending]);
+    this.memory.clear();
+  }
+
   async clear() {
     await this.ready;
     await Promise.allSettled([...this.pending]);

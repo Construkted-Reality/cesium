@@ -41,5 +41,41 @@ generated fixture. No internet dataset or account token is required.
 5. Compare retention policies and decoded-resource retention.
 6. Evaluate alternate disk storage only if the measurements show a limitation.
 
+## Extended verification
+
+Build the optional cache and experiment modules with
+`node tools/tile-cache/build.mjs`.
+
+```sh
+node tools/tile-cache/contracts.mjs /tmp/tile-cache/contracts.json
+node tools/tile-cache/integration.mjs /tmp/tile-cache/integration.json
+node tools/tile-cache/run.mjs --phase=cache --output=/tmp/tile-cache/cache.json
+node tools/tile-cache/run.mjs --phase=retention --output=/tmp/tile-cache/retention.json
+node tools/tile-cache/run.mjs --phase=decoded --output=/tmp/tile-cache/decoded.json
+node tools/tile-cache/run.mjs --phase=cache --idleMs=60000 --repetitions=1 --output=/tmp/tile-cache/idle.json
+```
+
+The storage contracts test byte limits, concurrent writes, transferred buffers,
+admission, interrupted writes, injected quota failure, and resource identity.
+The integration test uses the actual Service Worker to check cross-tab account
+and version isolation, request-header identity, range/no-store bypass, cancellation,
+RAM eviction, disk reuse, and explicit purge.
+
+The retention phase gives the disk cache 2 MiB and visits A, B, A, C through H,
+then A again. It checks whether a repeat visit protects A through the journey.
+This phase does not promise offline restart: budget eviction can remove hierarchy
+resources even when some tile content survives.
+
+The decoded phase is a harness-only experiment. It holds references to ordinary
+decoded image loaders within a 16 MiB RGBA pixel estimate. It does not retain GPU
+textures, compressed images, or decoded geometry. The runner checks image reuse,
+identical pixels, and zero loader references after teardown. Browser allocation
+overhead is not included in this estimate. It is not a supported production hook.
+
+The idle test allows a Service Worker to lose its RAM state. Disk hits are valid
+after the wait. Each cache phase also restarts the entire browser and verifies A
+with the tile endpoint unavailable and the HTTP cache disabled. Source hashes in
+the output identify the exact engine bundle, worker, fixture, and harness code.
+
 Keep raw measurements and investigation notes on `research/tile-cache-results`.
 Keep implementation on `feature/tile-cache-harness`. Do not push without approval.

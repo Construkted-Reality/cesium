@@ -40,18 +40,34 @@ export async function startServer({
         record.aborted = !res.writableFinished;
       });
       await new Promise((done) => setTimeout(done, state.latencyMs));
-      const bytes = fixture.get(url.pathname.split("/").at(-1));
+      let bytes = fixture.get(url.pathname.split("/").at(-1));
+      if (url.pathname.endsWith("/identity.bin")) {
+        bytes = Buffer.from(req.headers["x-account"] || "public");
+      }
       record.status = state.offline ? 503 : bytes ? 200 : 404;
       res.statusCode = record.status;
       res.setHeader(
         "Cache-Control",
-        state.offline ? "no-store" : "public, max-age=31536000, immutable",
+        state.offline || url.searchParams.get("cache") === "no-store"
+          ? "no-store"
+          : "public, max-age=31536000, immutable",
       );
+      if (req.headers.range && record.status === 200) {
+        record.status = 206;
+        res.statusCode = 206;
+        res.setHeader(
+          "Content-Range",
+          `bytes 0-${bytes.length - 1}/${bytes.length}`,
+        );
+      }
       res.setHeader(
         "Content-Type",
         mime[extname(url.pathname)] || "application/octet-stream",
       );
-      const body = record.status === 200 ? bytes : Buffer.from("Unavailable");
+      const body =
+        record.status === 200 || record.status === 206
+          ? bytes
+          : Buffer.from("Unavailable");
       res.setHeader("Content-Length", body.length);
       res.on("finish", () => {
         record.bytes = body.length;

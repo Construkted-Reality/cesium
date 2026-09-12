@@ -1,5 +1,5 @@
 import { chromium } from "@playwright/test";
-import { mkdtemp, mkdir, writeFile, rm } from "node:fs/promises";
+import { mkdtemp, mkdir, writeFile, rm, readFile } from "node:fs/promises";
 import { tmpdir, hostname, networkInterfaces } from "node:os";
 import { join, resolve } from "node:path";
 import { execFileSync } from "node:child_process";
@@ -33,9 +33,28 @@ const report = {
     textureSize: Number(options.textureSize || 512),
     viewport: { width: 800, height: 600 },
     synthetic: true,
+    idleMs: Number(options.idleMs || 0),
   },
   runs: [],
 };
+report.sourceHashes = {};
+for (const path of [
+  "Build/CesiumUnminified/Cesium.js",
+  "Build/TileCache/worker.js",
+  "Build/TileCache/decoded-images.js",
+  "tools/tile-cache/harness.js",
+  "tools/tile-cache/run.mjs",
+  "tools/tile-cache/fixture.mjs",
+  "tools/tile-cache/server.mjs",
+]) {
+  try {
+    report.sourceHashes[path] = createHash("sha256")
+      .update(await readFile(path))
+      .digest("hex");
+  } catch {
+    report.sourceHashes[path] = null;
+  }
+}
 let configurations = [
   { name: "http-disabled-small", httpCache: false, cacheBytes: 1 },
   { name: "http-enabled-small", httpCache: true, cacheBytes: 1 },
@@ -68,9 +87,38 @@ async function enableCache(page, configuration) {
       scope: "fixture",
       version: "v1",
       memoryBytes: config.memoryBytes,
-      diskBytes: 32 * 1024 * 1024,
+      diskBytes: config.diskBytes ?? 32 * 1024 * 1024,
+      policy: config.policy ?? "lru",
     });
   }, configuration);
+}
+
+if (options.phase === "decoded") {
+  configurations = [
+    {
+      name: "ram-disk",
+      httpCache: false,
+      cacheBytes: 1,
+      memoryBytes: 16 * 1024 * 1024,
+    },
+    {
+      name: "ram-disk-decoded",
+      httpCache: false,
+      cacheBytes: 1,
+      memoryBytes: 16 * 1024 * 1024,
+      decodedBytes: 16 * 1024 * 1024,
+    },
+  ];
+}
+if (options.phase === "retention") {
+  configurations = ["lru", "revisited"].map((policy) => ({
+    name: `retention-${policy}`,
+    policy,
+    httpCache: false,
+    cacheBytes: 1,
+    memoryBytes: 0,
+    diskBytes: 2 * 1024 * 1024,
+  }));
 }
 
 async function save() {
@@ -126,6 +174,11 @@ try {
         };
         report.runs.push(run);
         for (const index of [0, 1, 0]) {
+          if (run.visits.length === 2 && report.configuration.idleMs) {
+            await new Promise((done) =>
+              setTimeout(done, report.configuration.idleMs),
+            );
+          }
           const requestStart = server.state.requests.length;
           const visit = await page.evaluate(
             (index) => window.harness.visit(index),
@@ -173,12 +226,50 @@ try {
           configuration.name === "http-disabled-small" ? 3 : 0,
         );
         assert.deepEqual(errors, []);
-        if (configuration.memoryBytes !== undefined) {
+        if (options.phase === "retention") {
+          run.journey = [];
+          for (const index of [2, 3, 4, 5, 6, 7, 0]) {
+            const requestStart = server.state.requests.length;
+            const visit = await page.evaluate(
+              (index) => window.harness.visit(index),
+              index,
+            );
+            visit.cache = await page.evaluate(() => window.tileCache.stats());
+            visit.serverRequests = server.state.requests.slice(requestStart);
+            run.journey.push(visit);
+          }
+          const final = run.journey.at(-1);
+          assert.equal(
+            final.serverRequests.length,
+            configuration.policy === "revisited" ? 0 : 3,
+          );
+          assert.ok(final.cache.diskBytes <= configuration.diskBytes);
+          run.journeyImageHash = createHash("sha256")
+            .update(await page.locator("canvas").first().screenshot())
+            .digest("hex");
+          assert.equal(run.journeyImageHash, run.visits[0].imageHash);
+        }
+        if (configuration.decodedBytes) {
+          assert.ok(returned.decoded.hits > 0, "Decoded image must be reused");
+          assert.ok(returned.decoded.bytes <= configuration.decodedBytes);
+        }
+        run.cleanup = await page.evaluate(() => window.harness.dispose());
+        assert.equal(
+          run.cleanup.loaders,
+          0,
+          "Loader references leaked after teardown",
+        );
+        if (
+          configuration.memoryBytes !== undefined &&
+          options.phase !== "retention"
+        ) {
           assert.equal(returned.cache.errors, 0);
           assert.ok(
             configuration.memoryBytes === 0
               ? returned.cache.diskHits >= 3
-              : returned.cache.memoryHits >= 3,
+              : returned.cache.memoryHits +
+                  (report.configuration.idleMs ? returned.cache.diskHits : 0) >=
+                  (configuration.decodedBytes ? 2 : 3),
           );
           // Same profile and origin, entirely new browser process. No HTTP cache.
           await context.close();

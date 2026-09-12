@@ -20,6 +20,7 @@ viewer.resolutionScale = 1;
 viewer.scene.backgroundColor = Cesium.Color.BLACK;
 let tileset;
 let active;
+let decoded;
 const events = [];
 const frameTimes = [];
 let lastFrame = performance.now();
@@ -39,6 +40,11 @@ window.harness = {
   async setup(config) {
     if (tileset) {
       viewer.scene.primitives.remove(tileset);
+    }
+    if (config.decodedBytes && !decoded) {
+      const { retainDecodedImages } =
+        await import("../../Build/TileCache/decoded-images.js");
+      decoded = retainDecodedImages(Cesium, config.decodedBytes);
     }
     tileset = await Cesium.Cesium3DTileset.fromUrl(
       config.url || "/tile-data/v1/tileset.json",
@@ -124,6 +130,7 @@ window.harness = {
       index,
       settleMs: performance.now() - started,
       residentBytes: tileset.totalMemoryUsageInBytes,
+      decoded: decoded?.stats(),
       visible: [...active.visible].sort(),
       events: events.slice(eventStart),
       frameMs: frameTimes.slice(frameStart),
@@ -136,5 +143,14 @@ window.harness = {
     };
     active = undefined;
     return result;
+  },
+  dispose() {
+    viewer.scene.primitives.remove(tileset);
+    tileset = undefined;
+    decoded?.destroy();
+    return {
+      loaders: Object.keys(Cesium.ResourceCache.cacheEntries).length,
+      decoded: decoded?.stats(),
+    };
   },
 };
