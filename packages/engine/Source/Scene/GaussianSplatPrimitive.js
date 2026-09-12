@@ -586,8 +586,7 @@ function commitSnapshot(primitive, snapshot, frameState) {
 }
 
 /**
- * Finalizes async splat texture generation for a snapshot. The resolved data
- * updates or recreates GPU textures, and the snapshot transitions to
+ * Prepares CPU texture payloads for a snapshot. The snapshot transitions to
  * {@link SnapshotState.DATA_READY} when complete.
  *
  * @param {GaussianSplatPrimitive} primitive The owning primitive.
@@ -794,6 +793,7 @@ function uploadPendingSnapshot(primitive, snapshot, frameState) {
     return false;
   }
 
+  const uploadStart = profiling.begin();
   // CPU preparation and sorting finish before the old textures are released.
   // WebGL preserves submitted work that uses deleted resources.
   destroySnapshotTextures(primitive._snapshot);
@@ -851,6 +851,7 @@ function uploadPendingSnapshot(primitive, snapshot, frameState) {
     snapshot.attributeTextureData = undefined;
     snapshot.sphericalHarmonicsTextureData = undefined;
     primitive._updateMemoryStatistics();
+    profiling.add("textureUpload", uploadStart);
   }
   return true;
 }
