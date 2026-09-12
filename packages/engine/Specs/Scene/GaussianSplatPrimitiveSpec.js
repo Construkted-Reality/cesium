@@ -1,4 +1,5 @@
 import {
+  Cesium3DTileset,
   Event,
   PerspectiveFrustum,
   Math as CesiumMath,
@@ -93,6 +94,48 @@ describe(
       };
       return { primitive, frame, tileset };
     }
+
+    it("trims unused staging arrays while preserving both snapshots", function () {
+      const { primitive, tileset } = createSortFixture();
+      const active = new Float32Array(6);
+      const pending = new Float32Array(9);
+      const free = new Float32Array(12);
+      const pendingColors = new Uint8Array(12);
+      const sh = new Uint32Array(16);
+      primitive._snapshot.positions = active;
+      primitive._pendingSnapshot = {
+        positions: pending.subarray(0, 6),
+        colors: pendingColors.subarray(0, 8),
+        shData: sh.subarray(0, 8),
+      };
+      primitive._aggregateScratchBuffers = {
+        positions: [active, pending, free],
+        colors: [pendingColors, new Uint8Array(16)],
+      };
+      primitive._scratchAggregateShBuffer = sh;
+      const trim = jasmine.createSpy("trim");
+      tileset._cache = { trim };
+      Cesium3DTileset.prototype.trimLoadedTiles.call(tileset);
+      expect(trim).toHaveBeenCalled();
+      expect(primitive._aggregateScratchBuffers.positions).toEqual([
+        active,
+        pending,
+      ]);
+      expect(primitive._aggregateScratchBuffers.colors).toEqual([
+        pendingColors,
+      ]);
+      expect(primitive._scratchAggregateShBuffer).toBe(sh);
+      expect(primitive._snapshot.positions).toBe(active);
+
+      primitive._pendingSnapshot = undefined;
+      primitive.trimScratchBuffers();
+      expect(primitive._aggregateScratchBuffers.positions).toEqual([active]);
+      expect(primitive._aggregateScratchBuffers.colors).toEqual([]);
+      expect(primitive._scratchAggregateShBuffer).toBeUndefined();
+      primitive.trimScratchBuffers();
+      expect(primitive._aggregateScratchBuffers.positions).toEqual([active]);
+      primitive.destroy();
+    });
 
     it("retries a cache miss after the camera stops", async function () {
       const { primitive, frame } = createSortFixture();

@@ -3303,12 +3303,16 @@ function destroyTile(tileset, tile) {
  * explicitly manage the tile cache and reduce the total number of tiles loaded below
  * {@link Cesium3DTileset#cacheBytes}.
  * <p>
+ * Gaussian splats also release unused CPU staging arrays. A later rebuild may allocate them again.
+ * </p>
+ * <p>
  * Tile unloads occur at the next frame to keep all the WebGL delete calls
  * within the render loop.
  * </p>
  */
 Cesium3DTileset.prototype.trimLoadedTiles = function () {
   this._cache.trim();
+  this.gaussianSplatPrimitive?.trimScratchBuffers();
 };
 
 /**
