@@ -1,22 +1,28 @@
-# Second memory and rendering experiment round
+# Memory experiments, 2026-09-12
 
-Date: 2026-09-12
-Baseline: aee7afc9b6, the 1.144 performance branch with reviewed texture sharing restored. Its tracked tree matches the previously validated 9ad8758499 integration. The separate 1.145 main branch contains PR14 and is not the baseline for this round.
+The [report](REPORT.md) records all six research areas. The [validation record](VALIDATION.md) distinguishes accepted checks from invalid setup runs. Raw evidence is outside the source PR at `/mnt/data2/cesium-splat-perf/experiments-2026-09-12`.
 
-## Experiment ledger
+## Decisions from the measurements
 
-1. Whole-scene allocation accounting: track unique WebGL buffers, texture levels and renderbuffers, plus CPU backing storage, through load/remove cycles. Include textured mesh, modern point cloud and splats. Counts exclude driver overhead and browser backbuffers.
-2. Modern point-cloud properties: inspect linked shaders and test a shader intervention before assuming deferred uploads cannot work. Check later style use and output hashes.
-3. Decoder memory: measure WASM lifecycle and test module reuse or retirement with real SPZ data, output hashes and subsequent-load cost.
-4. Snapshots: measure retained aggregate arrays after successful upload. Test whether releasing staging arrays reduces CPU retention without breaking sorting, rebuilding or images.
-5. Overdraw: measure screen-space overlap and compare MSAA/sample/coverage interventions with explicit image-quality checks. Diagnostic image-changing experiments are not production defaults.
-6. Compatibility: reproduce baseline test failures on hardware OpenGL and Vulkan, preserve additional lifetime probes as tests where useful, and report unavailable platforms explicitly.
+- Retain scratch pools and release snapshot ownership after upload. Controlled rebuilds save 63.7 MiB for Geo and 21.5 MiB for Bike. Rebuild CPU time at the 99th percentile increases by about 2.5–2.7%.
+- Reject releasing every scratch array as the default. Geo frame time at the 99th percentile increases from 102.85 to 151.25 ms.
+- Continue modern point-cloud dependency handling. The combined fixture prototype saves 8 MiB of GPU storage before any property is used. Shader reflection alone saves zero bytes.
+- Continue decoder module reuse with an idle-release policy. Browser decode time falls by 28.5%. A warm module retains 29.6 MiB of linear memory. The idle probe recovers 28.3 MiB of renderer resident memory.
+- Continue lazy transparency-target allocation. Disabling those targets saves 63.3 MiB at 1920 by 1080 pixels in opaque scenes. Global disabling changes the mixed-transparency fixture and is rejected.
+- Keep multisample anti-aliasing as a quality choice. Two samples save 31.6 MiB and reduce GPU time by 11.3–14.9%, with measurable image changes.
 
-All heavy work runs on 192.168.8.212. Raw evidence is outside source PRs in /mnt/data2/cesium-splat-perf/experiments-2026-09-12. Timed GPU comparisons run sequentially. Each idea gets an observed result before acceptance or rejection.
+## Findings that changed the investigation
 
-## Initial measurements
+The initial staging probe finds 255 MiB of referenced arrays in Geo. Releasing those references does not free 255 MiB because the scratch pools also own the arrays. The accepted reduction comes from reusing one set of arrays across committed snapshots.
 
-- PR #15 carries the missed PR #10 merge into the performance branch. All 169 cache tests pass. Its tree matches the previous validated integration.
-- Snapshot retention probe finds 267,415,552 bytes (Geo) and 90,615,168 bytes (Bike) in aggregate rotation, scale, color, and spherical harmonic arrays after upload. Releasing these references allows navigation and rebuild without exceptions. Pixel validation remains open: the initial capture also differs between two unchanged control frames. These are retained-reference measurements, not proven process memory savings.
-- A decoder microbenchmark alternates real Geo and Bike root tiles for 24 jobs per run, in base/reuse/reuse/base order. Mean decode times are 30.26/21.14/20.78/28.84 ms. The prototype reuses the dependency module. Node also requires a module-import shim because the packaged Node path is broken. This is a microbenchmark, not browser scene validation or a production change.
-- Raw inputs, scripts, and outputs reside in `/mnt/data2/cesium-splat-perf/experiments-2026-09-12`.
+Chrome's backing-storage counter does not include the decoder's WebAssembly linear memory. The idle-release experiment therefore also checks weak references and renderer resident memory. The module and its buffer are collected.
+
+A high screen-space error limit produces an empty selection in the Geo fixture. It does not produce the intended coarse level of detail. The previous snapshot remains active. This is a follow-up retention question, not a validated cache policy.
+
+## Branch and publication scope
+
+The experiments use the optimized 1.144.0 performance line. The separate 1.145.0 work on `main` is outside the comparison.
+
+Pull request #15 carries the previously reviewed texture-sharing merge to the performance branch. The scratch-ownership change is commit `21410f2c14` on `feature/reuse-committed-splat-scratch`. It targets the performance branch directly. The point-cloud prototype remains on `feature/pnts-unused-attribute-probe` and is not ready for production.
+
+The source PR contains no research JSON, copied bundles, or raw images. The report and research notes remain on this research branch.
