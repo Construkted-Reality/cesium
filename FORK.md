@@ -28,18 +28,26 @@ git fetch upstream --tags
 
 ## Branches
 
-| Branch             | Base                    | Content                                                  | Rebased each month |
-| ------------------ | ----------------------- | -------------------------------------------------------- | ------------------ |
-| `main`             | An upstream release tag | The upstream release and the fork commits. Nothing else. | Yes                |
-| `feature/<topic>`  | `main`                  | Work in progress on one topic.                           | Yes                |
-| `research/<topic>` | Any commit              | Measurements, harness code, notes, result data.          | No                 |
+| Branch             | Base                    | Content                                                | Rebased each month                       |
+| ------------------ | ----------------------- | ------------------------------------------------------ | ---------------------------------------- |
+| `construkted`      | An upstream release tag | The trunk. All fork work goes here.                    | Yes                                      |
+| `main`             | `construkted`           | The last released state. Consumers pin a tag cut here. | No. It moves forward from `construkted`. |
+| `feature/<topic>`  | `construkted`           | Work in progress on one topic.                         | Yes                                      |
+| `research/<topic>` | Any commit              | Measurements, harness code, notes, result data.        | No                                       |
+
+`construkted` is the trunk. `main` is not. `main` holds the last package that passed the
+tests, and it moves forward only at release time.
+
+Both branches hold a complete copy of CesiumJS with the fork changes applied. They are not
+a base and a patch. `main` simply lags behind `construkted`.
 
 Rules for branches:
 
-- Commit fork work to a `feature/<topic>` branch. Do not commit to `main` directly.
-- Base a new `feature` branch on `main`, not on `upstream/main`.
-- Merge a `feature` branch into `main` only after the tests pass.
-- Keep research data out of `main`. Put it on a `research/<topic>` branch.
+- Commit fork work to a `feature/<topic>` branch. Do not commit to `construkted` directly.
+- Base a new `feature` branch on `construkted`, not on `main` and not on `upstream/main`.
+- Merge a `feature` branch into `construkted` with a pull request, after the tests pass.
+- Never commit to `main`. `main` only fast-forwards from `construkted` at release time.
+- Keep research data out of `construkted`. Put it on a `research/<topic>` branch.
 
 ## Version and tags
 
@@ -120,26 +128,43 @@ releases.
 
 The procedure below moves the fork from release `<old>` to release `<new>`.
 
+You rebase `construkted` only. `main` then fast-forwards to it. This gives one rebase each
+month, not two.
+
 1. Run `git fetch upstream --tags`.
-2. Run `git checkout main`.
-3. Run `git tag archive/$(date +%F)/main main`. This makes the current state permanent.
-4. Run `git rebase --onto <new> <old> main`.
+2. Run `git checkout construkted`.
+3. Run `git tag archive/$(date +%F)/construkted construkted`. This makes the current state
+   permanent.
+4. Run `git rebase --onto <new> <old> construkted`.
 5. Resolve each conflict. Work through one commit at a time.
 6. Run `npm install`. This repository does not commit a lockfile.
 7. Run `npm run eslint`.
 8. Run `npm run test-non-webgl`.
 9. Run `npm run test-webgl`. This step needs a graphics processor.
 10. Add a section to `CHANGES-construkted.md` for the new tag.
-11. Run `git tag -a construkted-<new>-1`. Give the upstream base and the test result.
-12. Run `git push --force-with-lease origin main`.
-13. Run `git push origin --tags`.
+11. Run `git push --force-with-lease origin construkted`.
 
-**CAUTION:** Step 12 rewrites the history of `main`. Tell each consumer before you push.
+Do the steps below when the package passes review and you want to release it.
+
+1. Run `git checkout main`.
+2. Run `git merge --ff-only construkted`. If this command fails, `main` holds a commit that
+   `construkted` does not. Find that commit before you continue.
+3. Run `git tag -a construkted-<new>-1`. Give the upstream base and the test result.
+4. Run `git push origin main`.
+5. Run `git push origin construkted-<new>-1`.
+
+After the release, `main` and `construkted` point at the same commit. Later work moves
+`construkted` ahead again.
+
+**CAUTION:** Step 11 of the first list rewrites the history of `construkted`. Tell each
+person who works on a `feature` branch before you push. Each open `feature` branch needs a
+rebase onto the new `construkted`.
+
 A consumer that pinned a `construkted-<upstream>-<n>` tag is safe, because the tag does
 not move.
 
 If a rebase goes wrong, run `git rebase --abort`. If you already finished a bad rebase,
-run `git reset --hard archive/<date>/main`.
+run `git reset --hard archive/<date>/construkted`.
 
 ## What keeps the monthly cost low
 
@@ -155,7 +180,7 @@ run `git reset --hard archive/<date>/main`.
 The fork delta is the output of this command:
 
 ```sh
-git log --oneline <upstream tag>..main
+git log --oneline <upstream tag>..construkted
 ```
 
 Read that list before and after a rebase. The two lists must show the same topics.
@@ -163,13 +188,13 @@ Read that list before and after a rebase. The two lists must show the same topic
 To see the changed files, run this command:
 
 ```sh
-git diff --stat <upstream tag> main
+git diff --stat <upstream tag> construkted
 ```
 
 ## Current state
 
-`main` is not on an upstream release tag yet. It sits on upstream commit `488b114e16`,
-which is 16 commits after release `1.145` and before release `1.146`.
+`construkted` is not on an upstream release tag yet. Neither is `main`. Both sit on an
+upstream commit between release `1.145` and release `1.146`.
 
 Therefore no `construkted-` tag exists yet. The first one is `construkted-1.146.0-1`. Cut
 it at the next rebase, when `main` first sits on a release tag. The rules in
