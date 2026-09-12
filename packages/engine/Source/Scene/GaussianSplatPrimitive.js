@@ -737,7 +737,6 @@ async function processGeneratedSplatTextureData(
     profiling.add("textureProcess", textureProcessStart);
     snapshot.buildFailed = false;
     snapshot.state = SnapshotState.DATA_READY;
-    frameState.afterRender.push(() => !primitive.isDestroyed());
   } catch (error) {
     console.error("Error generating Gaussian splat texture:", error);
     snapshot.buildFailed = true;
@@ -745,8 +744,45 @@ async function processGeneratedSplatTextureData(
   } finally {
     if (!primitive.isDestroyed()) {
       primitive._updateMemoryStatistics();
+      requestSnapshotFrame(primitive, frameState);
     }
   }
+}
+
+/**
+ * Requests frames for work that cannot advance through a worker event alone.
+ * @private
+ */
+function requestSnapshotFrame(primitive, frameState) {
+  const pending = primitive._pendingSnapshot;
+  const needsFrame = defined(pending)
+    ? pending.state === SnapshotState.BUILDING ||
+      pending.state === SnapshotState.DATA_READY
+    : primitive._needsSnapshotRebuild;
+  if (needsFrame) {
+    frameState.afterRender.push(() => !primitive.isDestroyed());
+  }
+}
+
+/**
+ * Queues an upload without retaining a discarded snapshot through the callback.
+ * @private
+ */
+function scheduleSnapshotUpload(primitive, frameState, generation) {
+  frameState.afterRender.push(() => {
+    if (primitive.isDestroyed()) {
+      return false;
+    }
+    const snapshot = primitive._pendingSnapshot;
+    if (
+      !defined(snapshot) ||
+      snapshot.generation !== generation ||
+      snapshot.state !== SnapshotState.READY
+    ) {
+      return false;
+    }
+    return uploadPendingSnapshot(primitive, snapshot, frameState);
+  });
 }
 
 /**
@@ -868,9 +904,7 @@ async function resolvePendingSnapshotSort(
     primitive._pendingSort = undefined;
     // The current frame may already contain commands for the old snapshot.
     // Upload only after every pass finishes, then request the replacement frame.
-    frameState.afterRender.push(() =>
-      uploadPendingSnapshot(primitive, pending, frameState),
-    );
+    scheduleSnapshotUpload(primitive, frameState, pending.generation);
   } catch (err) {
     if (primitive.isDestroyed()) {
       return;
@@ -892,6 +926,7 @@ async function resolvePendingSnapshotSort(
   } finally {
     if (!primitive.isDestroyed()) {
       primitive._updateMemoryStatistics();
+      requestSnapshotFrame(primitive, frameState);
     }
   }
 }
@@ -2113,6 +2148,7 @@ GaussianSplatPrimitive.prototype.update = function (frameState) {
     update.call(this, frameState);
   } finally {
     this._updateMemoryStatistics();
+    requestSnapshotFrame(this, frameState);
   }
 };
 

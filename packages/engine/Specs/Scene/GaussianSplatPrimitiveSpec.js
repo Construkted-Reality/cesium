@@ -85,9 +85,9 @@ describe(
       const frame = {
         frameNumber: 100,
         context: scene.context,
-        afterRender: [],
         passes: {},
         commandList: [],
+        afterRender: [],
         camera: {
           viewMatrix: Matrix4.clone(Matrix4.IDENTITY),
           positionWC: new Cartesian3(),
@@ -182,6 +182,22 @@ describe(
       replacement.destroy();
     });
 
+    it("requests frames for selection stability but stops when settled", function () {
+      const { primitive, frame, tileset } = createSortFixture();
+      const tile = makeTile();
+      spyOn(GaussianSplatSorter, "radixSortIndexes").and.returnValue(undefined);
+      tileset._selectedTiles = [tile];
+      primitive.update(frame);
+      expect(primitive._needsSnapshotRebuild).toBe(true);
+      expect(finishFrame(frame)).toContain(true);
+      primitive._selectedTileSet = new Set([tile]);
+      primitive._needsSnapshotRebuild = false;
+      primitive._dirty = false;
+      primitive.update(frame);
+      expect(finishFrame(frame)).toEqual([]);
+      primitive.destroy();
+    });
+
     it("keeps the old texture until sorted data uploads after the frame", async function () {
       const { primitive, frame } = createSortFixture();
       const errors = spyOn(console, "error");
@@ -232,6 +248,30 @@ describe(
       expect(build).not.toHaveBeenCalled();
       expect(pending.attributeTextureData).toBeUndefined();
       expect(pending.gaussianSplatTexture).toBeUndefined();
+    });
+
+    it("ignores a queued upload after its generation is replaced", async function () {
+      const { primitive, frame } = createSortFixture();
+      const pending = {
+        generation: 1,
+        positions: primitive._positions,
+        numSplats: 2,
+      };
+      prepareTextureData(pending);
+      primitive._pendingSnapshot = pending;
+      spyOn(GaussianSplatSorter, "radixSortIndexes").and.returnValue(
+        Promise.resolve(new Uint32Array([0, 1])),
+      );
+      const build = spyOn(GaussianSplatPrimitive, "buildGSplatDrawCommand");
+      primitive.update(frame);
+      await Promise.resolve();
+      const active = primitive._snapshot;
+      primitive._pendingSnapshot = { generation: 2, state: "READY" };
+      expect(finishFrame(frame)).toEqual([false]);
+      expect(build).not.toHaveBeenCalled();
+      expect(primitive._snapshot).toBe(active);
+      expect(pending.gaussianSplatTexture).toBeUndefined();
+      primitive.destroy();
     });
 
     it("clears uploaded resources when replacement command creation fails", async function () {
@@ -948,6 +988,7 @@ describe(
           directionWC: Cartesian3.clone(Cartesian3.UNIT_Z, new Cartesian3()),
         },
         commandList: [],
+        afterRender: [],
         passes: {
           pick: false,
         },
@@ -988,6 +1029,7 @@ describe(
           directionWC: Cartesian3.clone(Cartesian3.UNIT_Z, new Cartesian3()),
         },
         commandList: [],
+        afterRender: [],
         passes: { pick: false },
       };
 
@@ -1027,6 +1069,7 @@ describe(
           directionWC: Cartesian3.clone(Cartesian3.UNIT_Z, new Cartesian3()),
         },
         commandList: [],
+        afterRender: [],
         passes: { pick: false },
       };
 
