@@ -1,0 +1,74 @@
+--- baseline-Cesium.js
++++ admit-Cesium.js
+@@ -155049,6 +155049,24 @@
+     if (!defined_default(snapshot) || snapshot.state !== SnapshotState.BUILDING) {
+       return;
+     }
++    const tileset = primitive._tileset;
++    const width = ContextLimits_default.maximumTextureSize;
++    const count = snapshot.numSplats;
++    const splatBytes = width * Math.ceil(count / (width / 2)) * 16;
++    const dims = Math.ceil(snapshot.shCoefficientCount / 4);
++    const shRow = dims > 0 ? Math.floor(width / dims) : 0;
++    const shBytes = dims > 0 ? shRow * dims * Math.ceil(count / shRow) * 8 : 0;
++    const drawBytes = !primitive._vertexArray || count > primitive._vertexArrayLen ? count * 4 + 32 : 0;
++    const required = splatBytes + shBytes + drawBytes;
++    const available = Math.max(tileset.cacheBytes + tileset.maximumCacheOverflowBytes - tileset.totalMemoryUsageInBytes, 0);
++    const cap = Math.max(tileset.maximumScreenSpaceError, tileset.root._screenSpaceError);
++    if (required > available && tileset.memoryAdjustedScreenSpaceError < cap) {
++      snapshot.buildFailed = true;
++      primitive._needsSnapshotRebuild = true;
++      tileset._memoryAdjustedScreenSpaceError = Math.min(cap, tileset.memoryAdjustedScreenSpaceError * Math.max(1.02, Math.sqrt(required / Math.max(available, 1))));
++      frameState.afterRender.push(() => true);
++      return;
++    }
+     snapshot.state = SnapshotState.TEXTURE_PENDING;
+     const promise = GaussianSplatTextureGenerator_default.generateFromAttributes({
+       attributes: {
+@@ -165205,13 +165223,23 @@
+     const tiles = tileset._processingQueue;
+     const { cacheBytes, maximumCacheOverflowBytes, statistics: statistics2 } = tileset;
+     const cacheByteLimit = cacheBytes + maximumCacheOverflowBytes;
+-    let memoryExceeded = false;
++    const splatPrimitive = tileset.gaussianSplatPrimitive;
++    if (splatPrimitive) {
++      const cap = Math.max(tileset.maximumScreenSpaceError, tileset.root._screenSpaceError);
++      tileset._memoryAdjustedScreenSpaceError = Math.min(tileset._memoryAdjustedScreenSpaceError, cap);
++    }
++    let memoryExceeded = tileset.totalMemoryUsageInBytes > cacheByteLimit;
+     for (let i = 0; i < tiles.length; ++i) {
++      const tile = tiles[i];
+       if (tileset.totalMemoryUsageInBytes > cacheByteLimit) {
+         memoryExceeded = true;
+-        break;
+-      }
+-      const tile = tiles[i];
++        if (!(tile.content instanceof GaussianSplat3DTileContent_default)) break;
++        if (tile._touchedFrame < frameState.frameNumber - 1) {
++          tile.unloadContent();
++          --statistics2.numberOfTilesProcessing;
++          continue;
++        }
++      }
+       try {
+         tile.process(tileset, frameState);
+         if (tile.contentReady) {
+@@ -165228,7 +165256,7 @@
+     const refinementLimit = defined_default(splat) ? cacheBytes * 0.75 : cacheBytes;
+     if (snapshotSettled && tileset.totalMemoryUsageInBytes < refinementLimit && (!defined_default(splat) || statistics2.numberOfTilesProcessing === 0)) {
+       decreaseScreenSpaceError(tileset);
+-    } else if (snapshotSettled && memoryExceeded && tiles.length > 0) {
++    } else if (snapshotSettled && memoryExceeded && (tiles.length > 0 || splat)) {
+       increaseScreenSpaceError(tileset);
+     }
+   }
+@@ -165240,6 +165268,9 @@
+     Consider using larger values for cacheBytes and maximumCacheOverflowBytes.`
+     );
+     tileset._memoryAdjustedScreenSpaceError *= 1.02;
++    if (tileset.gaussianSplatPrimitive) {
++      tileset._memoryAdjustedScreenSpaceError = Math.min(tileset._memoryAdjustedScreenSpaceError, Math.max(tileset.maximumScreenSpaceError, tileset.root._screenSpaceError));
++    }
+     const tiles = tileset._processingQueue;
+     for (let i = 0; i < tiles.length; ++i) {
+       tiles[i].updatePriority();

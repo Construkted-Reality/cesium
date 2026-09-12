@@ -1,0 +1,534 @@
+[
+  {
+    "label": "admit0",
+    "budgetMiB": 0,
+    "seconds": 25,
+    "failure": null,
+    "errors": [],
+    "peakBytes": 28458768,
+    "final": {
+      "time": 26290.599999904633,
+      "frame": 1500,
+      "rootThreshold": 3021.946458719337,
+      "rootSse": 56.849350074906305,
+      "queue": [],
+      "bytes": 6442640,
+      "sse": 56.849350074906305,
+      "ready": 1,
+      "processing": 0,
+      "requests": 0,
+      "attempted": 0,
+      "selected": 1,
+      "splats": 42279,
+      "active": {
+        "state": "READY",
+        "count": 42279,
+        "tex": 5766144
+      },
+      "pending": null,
+      "needsRebuild": false,
+      "retired": 0,
+      "draw": true
+    },
+    "recovered": true
+  },
+  {
+    "label": "admit64",
+    "budgetMiB": 64,
+    "seconds": 25,
+    "failure": null,
+    "errors": [],
+    "peakBytes": 52277516,
+    "final": {
+      "time": 26330.200000047684,
+      "frame": 1493,
+      "rootThreshold": 3021.946458719337,
+      "rootSse": 56.849350074906305,
+      "queue": [],
+      "bytes": 30261388,
+      "sse": 24.793589022593252,
+      "ready": 139,
+      "processing": 0,
+      "requests": 0,
+      "attempted": 0,
+      "selected": 14,
+      "splats": 226651,
+      "active": {
+        "state": "READY",
+        "count": 226651,
+        "tex": 29354752
+      },
+      "pending": null,
+      "needsRebuild": true,
+      "retired": 0,
+      "draw": true
+    },
+    "recovered": true
+  },
+  {
+    "label": "baseline0",
+    "budgetMiB": 0,
+    "seconds": 25,
+    "failure": null,
+    "errors": [],
+    "peakBytes": 28458768,
+    "final": {
+      "time": 26688,
+      "frame": 1505,
+      "rootThreshold": 3021.946458719337,
+      "rootSse": 56.849350074906305,
+      "queue": [
+        {
+          "depth": 2,
+          "sse": 0,
+          "touched": 146,
+          "state": 2
+        },
+        {
+          "depth": 2,
+          "sse": 0,
+          "touched": 146,
+          "state": 2
+        },
+        {
+          "depth": 2,
+          "sse": 0,
+          "touched": 113,
+          "state": 2
+        },
+        {
+          "depth": 2,
+          "sse": 7.03888467099928,
+          "touched": 113,
+          "state": 2
+        },
+        {
+          "depth": 2,
+          "sse": 7.499999912998547,
+          "touched": 113,
+          "state": 2
+        },
+        {
+          "depth": 3,
+          "sse": 0,
+          "touched": 71,
+          "state": 2
+        }
+      ],
+      "bytes": 6442640,
+      "sse": 13301789677978.309,
+      "ready": 0,
+      "processing": 127,
+      "requests": 0,
+      "attempted": 0,
+      "selected": 0,
+      "splats": 42279,
+      "active": {
+        "state": "READY",
+        "count": 42279,
+        "tex": 5766144
+      },
+      "pending": null,
+      "needsRebuild": false,
+      "retired": 0,
+      "draw": true
+    },
+    "recovered": true
+  },
+  {
+    "label": "baseline64",
+    "budgetMiB": 64,
+    "seconds": 25,
+    "failure": null,
+    "errors": [],
+    "peakBytes": 152130196,
+    "final": {
+      "time": 26374.200000047684,
+      "frame": 1488,
+      "rootThreshold": 3021.946458719337,
+      "rootSse": 56.849350074906305,
+      "queue": [],
+      "bytes": 66686868,
+      "sse": 16.31819754922163,
+      "ready": 29,
+      "processing": 0,
+      "requests": 0,
+      "attempted": 0,
+      "selected": 23,
+      "splats": 499376,
+      "active": {
+        "state": "READY",
+        "count": 499376,
+        "tex": 64213568
+      },
+      "pending": null,
+      "needsRebuild": false,
+      "retired": 0,
+      "draw": true
+    },
+    "recovered": true
+  },
+  {
+    "label": "bike-source0",
+    "budgetMiB": 0,
+    "seconds": 30,
+    "failure": null,
+    "errors": [],
+    "peakBytes": 4250344,
+    "final": {
+      "time": 31289.199999928474,
+      "frame": 1803,
+      "rootThreshold": 2896.0307078034634,
+      "rootSse": 53.422781684755066,
+      "queue": [],
+      "bytes": 2153576,
+      "sse": 53.422781684755066,
+      "ready": 1,
+      "processing": 0,
+      "requests": 0,
+      "attempted": 0,
+      "selected": 1,
+      "splats": 14194,
+      "active": {
+        "state": "READY",
+        "count": 14194,
+        "tex": 2096768
+      },
+      "pending": null,
+      "needsRebuild": false,
+      "retired": 0,
+      "draw": true
+    },
+    "recovered": true
+  },
+  {
+    "label": "bike-source16",
+    "budgetMiB": 16,
+    "seconds": 30,
+    "failure": null,
+    "errors": [],
+    "peakBytes": 96344444,
+    "final": {
+      "time": 31321.799999952316,
+      "frame": 1800,
+      "rootThreshold": 2896.0307078034634,
+      "rootSse": 53.422781684755066,
+      "queue": [],
+      "bytes": 15618812,
+      "sse": 16.31819754922163,
+      "ready": 14,
+      "processing": 0,
+      "requests": 0,
+      "attempted": 0,
+      "selected": 11,
+      "splats": 109200,
+      "active": {
+        "state": "READY",
+        "count": 109200,
+        "tex": 14153216
+      },
+      "pending": null,
+      "needsRebuild": false,
+      "retired": 0,
+      "draw": true
+    },
+    "recovered": true
+  },
+  {
+    "label": "equal-root0",
+    "budgetMiB": 0,
+    "seconds": 25,
+    "failure": null,
+    "errors": [],
+    "peakBytes": 11701436,
+    "final": {
+      "time": 26446.100000023842,
+      "frame": 1510,
+      "rootThreshold": 56.849350074906305,
+      "rootSse": 56.849350074906305,
+      "queue": [],
+      "bytes": 5935292,
+      "sse": 56.849350074906305,
+      "ready": 1,
+      "processing": 0,
+      "requests": 0,
+      "attempted": 0,
+      "selected": 1,
+      "splats": 42279,
+      "active": {
+        "state": "READY",
+        "count": 42279,
+        "tex": 5766144
+      },
+      "pending": null,
+      "needsRebuild": false,
+      "retired": 0,
+      "draw": true
+    },
+    "recovered": true
+  },
+  {
+    "label": "fallback0",
+    "budgetMiB": 0,
+    "seconds": 25,
+    "failure": null,
+    "errors": [],
+    "peakBytes": 44708752,
+    "final": {
+      "time": 26262.600000023842,
+      "frame": 1495,
+      "rootThreshold": 3021.946458719337,
+      "rootSse": 56.849350074906305,
+      "queue": [],
+      "bytes": 6442640,
+      "sse": 56.849350074906305,
+      "ready": 1,
+      "processing": 0,
+      "requests": 0,
+      "attempted": 0,
+      "selected": 1,
+      "splats": 42279,
+      "active": {
+        "state": "READY",
+        "count": 42279,
+        "tex": 5766144
+      },
+      "pending": null,
+      "needsRebuild": false,
+      "retired": 0,
+      "draw": true
+    },
+    "recovered": true
+  },
+  {
+    "label": "fallback64",
+    "budgetMiB": 64,
+    "seconds": 25,
+    "failure": null,
+    "errors": [],
+    "peakBytes": 168904340,
+    "final": {
+      "time": 26325.5,
+      "frame": 1486,
+      "rootThreshold": 3021.946458719337,
+      "rootSse": 56.849350074906305,
+      "queue": [],
+      "bytes": 66919464,
+      "sse": 16.31819754922163,
+      "ready": 29,
+      "processing": 0,
+      "requests": 0,
+      "attempted": 0,
+      "selected": 23,
+      "splats": 499376,
+      "active": {
+        "state": "READY",
+        "count": 499376,
+        "tex": 64213568
+      },
+      "pending": null,
+      "needsRebuild": false,
+      "retired": 0,
+      "draw": true
+    },
+    "recovered": true
+  },
+  {
+    "label": "move-source0",
+    "budgetMiB": 0,
+    "seconds": 25,
+    "failure": null,
+    "errors": [],
+    "peakBytes": 44708752,
+    "final": {
+      "time": 26370.300000071526,
+      "frame": 1499,
+      "rootThreshold": 3021.946458719337,
+      "rootSse": 56.849350074906305,
+      "queue": [],
+      "bytes": 6442640,
+      "sse": 56.849350074906305,
+      "ready": 1,
+      "processing": 0,
+      "requests": 0,
+      "attempted": 0,
+      "selected": 1,
+      "splats": 42279,
+      "active": {
+        "state": "READY",
+        "count": 42279,
+        "tex": 5766144
+      },
+      "pending": null,
+      "needsRebuild": false,
+      "retired": 0,
+      "draw": true
+    },
+    "recovered": true
+  },
+  {
+    "label": "progress0",
+    "budgetMiB": 0,
+    "seconds": 25,
+    "failure": null,
+    "errors": [],
+    "peakBytes": 533064864,
+    "final": {
+      "time": 26322.100000023842,
+      "frame": 1341,
+      "rootThreshold": 3021.946458719337,
+      "rootSse": 56.849350074906305,
+      "queue": [],
+      "bytes": 66533920,
+      "sse": 21.531515117662554,
+      "ready": 21,
+      "processing": 0,
+      "requests": 0,
+      "attempted": 0,
+      "selected": 17,
+      "splats": 450876,
+      "active": {
+        "state": "READY",
+        "count": 450876,
+        "tex": 58185344
+      },
+      "pending": null,
+      "needsRebuild": true,
+      "retired": 0,
+      "draw": true
+    },
+    "recovered": true
+  },
+  {
+    "label": "progress64",
+    "budgetMiB": 64,
+    "seconds": 25,
+    "failure": null,
+    "errors": [],
+    "peakBytes": 533064864,
+    "final": {
+      "time": 26259,
+      "frame": 1331,
+      "rootThreshold": 3021.946458719337,
+      "rootSse": 56.849350074906305,
+      "queue": [],
+      "bytes": 72562144,
+      "sse": 16.977452730210185,
+      "ready": 25,
+      "processing": 0,
+      "requests": 0,
+      "attempted": 0,
+      "selected": 20,
+      "splats": 499376,
+      "active": {
+        "state": "READY",
+        "count": 499376,
+        "tex": 64213568
+      },
+      "pending": null,
+      "needsRebuild": true,
+      "retired": 0,
+      "draw": true
+    },
+    "recovered": true
+  },
+  {
+    "label": "reserve64",
+    "budgetMiB": 64,
+    "seconds": 25,
+    "failure": null,
+    "errors": [],
+    "peakBytes": 52047376,
+    "final": {
+      "time": 26340.399999976158,
+      "frame": 1493,
+      "rootThreshold": 3021.946458719337,
+      "rootSse": 56.849350074906305,
+      "queue": [],
+      "bytes": 30261388,
+      "sse": 28.398449313213263,
+      "ready": 139,
+      "processing": 0,
+      "requests": 0,
+      "attempted": 0,
+      "selected": 11,
+      "splats": 226651,
+      "active": {
+        "state": "READY",
+        "count": 226651,
+        "tex": 29354752
+      },
+      "pending": null,
+      "needsRebuild": false,
+      "retired": 0,
+      "draw": true
+    },
+    "recovered": true
+  },
+  {
+    "label": "source0",
+    "budgetMiB": 0,
+    "seconds": 25,
+    "failure": null,
+    "errors": [],
+    "peakBytes": 44708752,
+    "final": {
+      "time": 26353.5,
+      "frame": 1497,
+      "rootThreshold": 3021.946458719337,
+      "rootSse": 56.849350074906305,
+      "queue": [],
+      "bytes": 6442640,
+      "sse": 56.849350074906305,
+      "ready": 1,
+      "processing": 0,
+      "requests": 0,
+      "attempted": 0,
+      "selected": 1,
+      "splats": 42279,
+      "active": {
+        "state": "READY",
+        "count": 42279,
+        "tex": 5766144
+      },
+      "pending": null,
+      "needsRebuild": false,
+      "retired": 0,
+      "draw": true
+    },
+    "recovered": true
+  },
+  {
+    "label": "source64",
+    "budgetMiB": 64,
+    "seconds": 25,
+    "failure": null,
+    "errors": [],
+    "peakBytes": 167302248,
+    "final": {
+      "time": 26346.100000023842,
+      "frame": 1485,
+      "rootThreshold": 3021.946458719337,
+      "rootSse": 56.849350074906305,
+      "queue": [],
+      "bytes": 66919464,
+      "sse": 16.31819754922163,
+      "ready": 29,
+      "processing": 0,
+      "requests": 0,
+      "attempted": 0,
+      "selected": 23,
+      "splats": 499376,
+      "active": {
+        "state": "READY",
+        "count": 499376,
+        "tex": 64213568
+      },
+      "pending": null,
+      "needsRebuild": false,
+      "retired": 0,
+      "draw": true
+    },
+    "recovered": true
+  }
+]

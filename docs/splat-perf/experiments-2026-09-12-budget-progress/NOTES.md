@@ -9,3 +9,12 @@ The first experiment caps the adjusted error at the root level, drops obsolete p
 The next experiment estimates texture dimensions, spherical-harmonic storage, and draw-buffer growth before creating a snapshot texture. It coarsens traversal before admission when the replacement cannot fit beside retained resources. The coarsest visible representation remains a best-effort fallback when no representation can fit the configured budget. This prototype is under test.
 
 Raw files remain in /mnt/data2/cesium-splat-perf/experiments-2026-09-12-budget-progress. No implementation is accepted yet.
+
+
+## Source implementation accepted for review
+
+Commit c5e50f8eb0 narrows the fallback decoding exception to the coarsest detail level. It keeps zero-budget loading live and preserves the 499,376-splat Geo result at 64 MiB. Six source browser scenarios complete without errors, including camera return and equal root and tileset error. This is a correctness change. It does not establish a GPU memory peak reduction.
+
+The admission prototype produces a useful negative result: a lower GPU peak can conceal lower rendered detail and more retained CPU tiles. Record all three measures before accepting a memory optimization.
+
+The proposed deferred upload lifecycle remains a design pending Adrian's approval. See REPORT.md and LIFECYCLE-DESIGN.md.

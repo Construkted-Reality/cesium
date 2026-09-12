@@ -1,0 +1,50 @@
+--- baseline-Cesium.js
++++ fallback-Cesium.js
+@@ -165205,13 +165205,24 @@
+     const tiles = tileset._processingQueue;
+     const { cacheBytes, maximumCacheOverflowBytes, statistics: statistics2 } = tileset;
+     const cacheByteLimit = cacheBytes + maximumCacheOverflowBytes;
+-    let memoryExceeded = false;
++    const splatPrimitive = tileset.gaussianSplatPrimitive;
++    if (splatPrimitive) {
++      const cap = Math.max(tileset.maximumScreenSpaceError, tileset.root._screenSpaceError);
++      tileset._memoryAdjustedScreenSpaceError = Math.min(tileset._memoryAdjustedScreenSpaceError, cap);
++    }
++    let memoryExceeded = tileset.totalMemoryUsageInBytes > cacheByteLimit;
+     for (let i = 0; i < tiles.length; ++i) {
++      const tile = tiles[i];
+       if (tileset.totalMemoryUsageInBytes > cacheByteLimit) {
+         memoryExceeded = true;
+-        break;
+-      }
+-      const tile = tiles[i];
++        if (!(tile.content instanceof GaussianSplat3DTileContent_default)) break;
++        if (tile._touchedFrame < frameState.frameNumber - 1) {
++          tile.unloadContent();
++          --statistics2.numberOfTilesProcessing;
++          continue;
++        }
++        if (tileset.memoryAdjustedScreenSpaceError < Math.max(tileset.maximumScreenSpaceError, tileset.root._screenSpaceError)) continue;
++      }
+       try {
+         tile.process(tileset, frameState);
+         if (tile.contentReady) {
+@@ -165228,7 +165239,7 @@
+     const refinementLimit = defined_default(splat) ? cacheBytes * 0.75 : cacheBytes;
+     if (snapshotSettled && tileset.totalMemoryUsageInBytes < refinementLimit && (!defined_default(splat) || statistics2.numberOfTilesProcessing === 0)) {
+       decreaseScreenSpaceError(tileset);
+-    } else if (snapshotSettled && memoryExceeded && tiles.length > 0) {
++    } else if (snapshotSettled && memoryExceeded && (tiles.length > 0 || splat)) {
+       increaseScreenSpaceError(tileset);
+     }
+   }
+@@ -165240,6 +165251,9 @@
+     Consider using larger values for cacheBytes and maximumCacheOverflowBytes.`
+     );
+     tileset._memoryAdjustedScreenSpaceError *= 1.02;
++    if (tileset.gaussianSplatPrimitive) {
++      tileset._memoryAdjustedScreenSpaceError = Math.min(tileset._memoryAdjustedScreenSpaceError, Math.max(tileset.maximumScreenSpaceError, tileset.root._screenSpaceError));
++    }
+     const tiles = tileset._processingQueue;
+     for (let i = 0; i < tiles.length; ++i) {
+       tiles[i].updatePriority();
