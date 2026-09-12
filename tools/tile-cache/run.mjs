@@ -15,6 +15,26 @@ const output = resolve(
 );
 const repetitions = Number(options.repetitions || 5);
 const software = options.software === "true";
+assert.ok(
+  Number.isSafeInteger(repetitions) && repetitions > 0,
+  "repetitions must be a positive integer",
+);
+assert.ok(
+  [undefined, "baseline", "cache", "retention", "decoded"].includes(
+    options.phase,
+  ),
+  "Unknown test phase",
+);
+assert.ok(
+  Number.isFinite(Number(options.latency || 100)) &&
+    Number(options.latency || 100) >= 0,
+  "latency must be nonnegative",
+);
+assert.ok(
+  Number.isFinite(Number(options.idleMs || 0)) &&
+    Number(options.idleMs || 0) >= 0,
+  "idleMs must be nonnegative",
+);
 const server = await startServer({
   latencyMs: Number(options.latency || 100),
   textureSize: Number(options.textureSize || 512),

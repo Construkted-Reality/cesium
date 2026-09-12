@@ -1,6 +1,7 @@
 import { chromium } from "@playwright/test";
 import assert from "node:assert/strict";
-import { writeFile } from "node:fs/promises";
+import { writeFile, mkdir } from "node:fs/promises";
+import { dirname } from "node:path";
 import { startServer } from "./server.mjs";
 
 const server = await startServer({ latencyMs: 20 });
@@ -188,10 +189,10 @@ try {
   process.exitCode = 1;
 } finally {
   report.requests = server.state.requests;
-  await writeFile(
-    process.argv[2] || "/tmp/cesium-tile-cache-2026-09-12/integration.json",
-    JSON.stringify(report, null, 2),
-  );
+  const output =
+    process.argv[2] || "/tmp/cesium-tile-cache-2026-09-12/integration.json";
+  await mkdir(dirname(output), { recursive: true });
+  await writeFile(output, JSON.stringify(report, null, 2));
   await browser.close();
   await server.close();
 }

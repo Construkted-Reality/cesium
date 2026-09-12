@@ -1,6 +1,7 @@
 import { chromium } from "@playwright/test";
 import { build } from "esbuild";
-import { writeFile } from "node:fs/promises";
+import { writeFile, mkdir } from "node:fs/promises";
+import { dirname } from "node:path";
 import { startServer } from "./server.mjs";
 
 await build({
@@ -28,10 +29,10 @@ try {
   report.error = String(error.stack);
   process.exitCode = 1;
 } finally {
-  await writeFile(
-    process.argv[2] || "/tmp/cesium-tile-cache-2026-09-12/contracts.json",
-    JSON.stringify(report, null, 2),
-  );
+  const output =
+    process.argv[2] || "/tmp/cesium-tile-cache-2026-09-12/contracts.json";
+  await mkdir(dirname(output), { recursive: true });
+  await writeFile(output, JSON.stringify(report, null, 2));
   await browser.close();
   await server.close();
 }
