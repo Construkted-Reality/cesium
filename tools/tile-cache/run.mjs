@@ -36,7 +36,7 @@ const report = {
   },
   runs: [],
 };
-const configurations = [
+let configurations = [
   { name: "http-disabled-small", httpCache: false, cacheBytes: 1 },
   { name: "http-enabled-small", httpCache: true, cacheBytes: 1 },
   {
@@ -45,6 +45,33 @@ const configurations = [
     cacheBytes: 256 * 1024 * 1024,
   },
 ];
+if (options.phase === "cache") {
+  configurations = [
+    { name: "disk", httpCache: false, cacheBytes: 1, memoryBytes: 0 },
+    {
+      name: "ram-disk",
+      httpCache: false,
+      cacheBytes: 1,
+      memoryBytes: 16 * 1024 * 1024,
+    },
+  ];
+}
+
+async function enableCache(page, configuration) {
+  if (configuration.memoryBytes === undefined) {
+    return;
+  }
+  await page.evaluate(async (config) => {
+    await window.harness.enableCache({
+      workerUrl: "/Build/TileCache/worker.js",
+      urlPrefix: "/tile-data/v1/",
+      scope: "fixture",
+      version: "v1",
+      memoryBytes: config.memoryBytes,
+      diskBytes: 32 * 1024 * 1024,
+    });
+  }, configuration);
+}
 
 async function save() {
   await mkdir(resolve(output, ".."), { recursive: true });
@@ -55,7 +82,7 @@ try {
   for (const configuration of configurations) {
     for (let repetition = 0; repetition < repetitions; repetition++) {
       const profile = await mkdtemp(join(tmpdir(), "cesium-cache-"));
-      const context = await chromium.launchPersistentContext(profile, {
+      const launchOptions = {
         channel: "chromium",
         headless: true,
         viewport: report.configuration.viewport,
@@ -63,7 +90,11 @@ try {
         args: software
           ? ["--use-angle=swiftshader", "--enable-unsafe-swiftshader"]
           : ["--use-angle=gl", "--ignore-gpu-blocklist"],
-      });
+      };
+      let context = await chromium.launchPersistentContext(
+        profile,
+        launchOptions,
+      );
       try {
         const page = context.pages()[0];
         const errors = [];
@@ -75,6 +106,7 @@ try {
         });
         await page.goto(`${server.url}/tools/tile-cache/harness.html`);
         await page.waitForFunction(() => !!window.harness);
+        await enableCache(page, configuration);
         const environment = await page.evaluate(
           (config) => window.harness.setup(config),
           configuration,
@@ -100,6 +132,9 @@ try {
             index,
           );
           visit.serverRequests = server.state.requests.slice(requestStart);
+          if (configuration.memoryBytes !== undefined) {
+            visit.cache = await page.evaluate(() => window.tileCache.stats());
+          }
           visit.imageHash = createHash("sha256")
             .update(await page.locator("canvas").first().screenshot())
             .digest("hex");
@@ -138,6 +173,55 @@ try {
           configuration.name === "http-disabled-small" ? 3 : 0,
         );
         assert.deepEqual(errors, []);
+        if (configuration.memoryBytes !== undefined) {
+          assert.equal(returned.cache.errors, 0);
+          assert.ok(
+            configuration.memoryBytes === 0
+              ? returned.cache.diskHits >= 3
+              : returned.cache.memoryHits >= 3,
+          );
+          // Same profile and origin, entirely new browser process. No HTTP cache.
+          await context.close();
+          server.state.offline = true;
+          context = await chromium.launchPersistentContext(
+            profile,
+            launchOptions,
+          );
+          const restarted = context.pages()[0];
+          const restartedCdp = await context.newCDPSession(restarted);
+          await restartedCdp.send("Network.enable");
+          await restartedCdp.send("Network.setCacheDisabled", {
+            cacheDisabled: true,
+          });
+          await restarted.goto(`${server.url}/tools/tile-cache/harness.html`);
+          await restarted.waitForFunction(() => !!window.harness);
+          await enableCache(restarted, configuration);
+          const requestStart = server.state.requests.length;
+          await restarted.evaluate(
+            (config) => window.harness.setup(config),
+            configuration,
+          );
+          run.restart = await restarted.evaluate(() => window.harness.visit(0));
+          run.restart.cache = await restarted.evaluate(() =>
+            window.tileCache.stats(),
+          );
+          run.restart.serverRequests =
+            server.state.requests.slice(requestStart);
+          run.restart.imageHash = createHash("sha256")
+            .update(await restarted.locator("canvas").first().screenshot())
+            .digest("hex");
+          assert.equal(run.restart.imageHash, run.visits[0].imageHash);
+          assert.equal(
+            run.restart.serverRequests.length,
+            0,
+            "Restart must use persisted content without a server request",
+          );
+          assert.ok(
+            run.restart.cache.diskHits >= 4,
+            "Manifest, tile, geometry and image must persist",
+          );
+          server.state.offline = false;
+        }
         console.log(
           JSON.stringify({
             configuration: configuration.name,

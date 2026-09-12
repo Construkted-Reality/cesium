@@ -31,6 +31,11 @@ viewer.scene.postRender.addEventListener(() => {
 const tileUrl = (tile) => tile._contentResource?.url;
 
 window.harness = {
+  async enableCache(config) {
+    const { registerTileCache } =
+      await import("../../Build/TileCache/client.js");
+    window.tileCache = await registerTileCache(config);
+  },
   async setup(config) {
     if (tileset) {
       viewer.scene.primitives.remove(tileset);

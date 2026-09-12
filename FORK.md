@@ -225,5 +225,12 @@ npx gulp test --browsers ChromeHeadless --includeName GaussianSplat
 
 ## Consumer policy
 
+### Optional local tile caching
+
+The opt-in `@construkted/tile-cache` workspace adds RAM and persistent browser
+response storage without changing the engine request implementation. See
+[the cache guide](packages/tile-cache/GUIDE.md) for integration and limitations,
+and [the harness guide](tools/tile-cache/GUIDE.md) for reproducible tests.
+
 A consumer project must pin a reviewed commit or a `construkted-<version>` tag from this
 repository. The public `cesium` package on npm does not contain these corrections.

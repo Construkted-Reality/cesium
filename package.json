@@ -160,7 +160,8 @@
   "workspaces": [
     "packages/engine",
     "packages/widgets",
-    "packages/sandcastle"
+    "packages/sandcastle",
+    "packages/tile-cache"
   ],
   "overrides": {
     "protobufjs": "^8.6.5",

@@ -1,0 +1,18 @@
+import { build } from "esbuild";
+await build({
+  entryPoints: ["packages/tile-cache/src/worker.js"],
+  outfile: "Build/TileCache/worker.js",
+  bundle: true,
+  format: "iife",
+  platform: "browser",
+  sourcemap: true,
+  define: { "process.env.NODE_ENV": '"production"' },
+});
+await build({
+  entryPoints: ["packages/tile-cache/src/client.js"],
+  outfile: "Build/TileCache/client.js",
+  bundle: true,
+  format: "esm",
+  platform: "browser",
+  sourcemap: true,
+});
