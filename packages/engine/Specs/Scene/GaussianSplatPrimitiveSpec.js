@@ -130,6 +130,42 @@ describe(
       tileset.destroy();
     });
 
+    it("ignores texture completion after an empty primitive is destroyed", async function () {
+      const { primitive, tileset, frame } = createSortFixture();
+      tileset._statistics = { texturesByteLength: 100, geometryByteLength: 20 };
+      let complete;
+      spyOn(
+        GaussianSplatTextureGenerator,
+        "generateFromAttributes",
+      ).and.returnValue(
+        new Promise((resolve) => {
+          complete = resolve;
+        }),
+      );
+      const pending = {
+        state: "BUILDING",
+        positions: new Float32Array(6),
+        rotations: new Float32Array(8),
+        scales: new Float32Array(6),
+        colors: new Uint8Array(8),
+        numSplats: 2,
+      };
+      primitive._pendingSnapshot = pending;
+      GaussianSplatPrimitive.generateSplatTexture(primitive, frame, pending);
+      expect(pending.state).toBe("TEXTURE_PENDING");
+      primitive.destroy();
+      const replacement = new GaussianSplatPrimitive({ tileset });
+      tileset.gaussianSplatPrimitive = replacement;
+      complete({ width: 1, height: 1, data: new Uint32Array(4) });
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(pending.gaussianSplatTexture).toBeUndefined();
+      expect(tileset.gaussianSplatPrimitive).toBe(replacement);
+      expect(tileset._statistics.texturesByteLength).toBe(100);
+      expect(tileset._statistics.geometryByteLength).toBe(20);
+      replacement.destroy();
+    });
+
     it("releases an unloaded snapshot and renders after reloading", async function () {
       const tileset = await Cesium3DTilesTester.loadTileset(
         scene,
