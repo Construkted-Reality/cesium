@@ -2081,7 +2081,7 @@ describe(
       }).contextToRender();
     });
 
-    for (const [pass, constant] of [
+    [
       [Pass.CESIUM_3D_TILE, "czm_passCesium3DTile"],
       [Pass.CESIUM_3D_TILE_EDGES, "czm_passCesium3DTileEdges"],
       [Pass.CESIUM_3D_TILE_PLANAR_FILL_ID, "czm_passCesium3DTilePlanarFillId"],
@@ -2092,7 +2092,7 @@ describe(
       [Pass.VOXELS, "czm_passVoxels"],
       [Pass.GAUSSIAN_SPLATS, "czm_passGaussianSplats"],
       [Pass.CESIUM_3D_TILE_EDGES_DIRECT, "czm_passCesium3DTileEdgesDirect"],
-    ]) {
+    ].forEach(([pass, constant]) => {
       it(`has czm_pass and ${constant}`, function () {
         context.uniformState.updatePass(pass);
         expect({
@@ -2100,7 +2100,7 @@ describe(
           fragmentShader: `void main() { out_FragColor = vec4(czm_pass == ${constant}); }`,
         }).contextToRender();
       });
-    }
+    });
 
     it("has czm_pass and czm_passOverlay", function () {
       const us = context.uniformState;
