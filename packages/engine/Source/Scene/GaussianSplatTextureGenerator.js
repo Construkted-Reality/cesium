@@ -13,12 +13,58 @@ GaussianSplatTextureGenerator._maxSortingConcurrency = Math.max(
 GaussianSplatTextureGenerator._textureTaskProcessor = undefined;
 GaussianSplatTextureGenerator._taskProcessorReady = false;
 GaussianSplatTextureGenerator._error = undefined;
+GaussianSplatTextureGenerator._referenceCount = 0;
+GaussianSplatTextureGenerator._initializing = false;
+GaussianSplatTextureGenerator._releaseRequested = false;
+
+function releaseUnusedTaskProcessor() {
+  const generator = GaussianSplatTextureGenerator;
+  const processor = generator._textureTaskProcessor;
+  if (
+    !generator._releaseRequested ||
+    generator._referenceCount !== 0 ||
+    generator._initializing ||
+    (defined(processor) && processor._activeTasks !== 0)
+  ) {
+    return;
+  }
+  if (defined(processor)) {
+    processor.destroy();
+  }
+  generator._textureTaskProcessor = undefined;
+  generator._taskProcessorReady = false;
+  generator._error = undefined;
+  generator._releaseRequested = false;
+}
+
+/**
+ * Retains the shared worker for a live splat primitive.
+ * @private
+ */
+GaussianSplatTextureGenerator.retain = function () {
+  ++GaussianSplatTextureGenerator._referenceCount;
+  GaussianSplatTextureGenerator._releaseRequested = false;
+};
+
+/**
+ * Releases the worker after its last primitive and pending task finish.
+ * @private
+ */
+GaussianSplatTextureGenerator.release = function () {
+  --GaussianSplatTextureGenerator._referenceCount;
+  if (GaussianSplatTextureGenerator._referenceCount === 0) {
+    GaussianSplatTextureGenerator._releaseRequested = true;
+    releaseUnusedTaskProcessor();
+  }
+};
+
 GaussianSplatTextureGenerator._getTextureTaskProcessor = function () {
   if (!defined(GaussianSplatTextureGenerator._textureTaskProcessor)) {
     const processor = new TaskProcessor(
       "gaussianSplatTextureGenerator",
       GaussianSplatTextureGenerator._maxSortingConcurrency,
     );
+    GaussianSplatTextureGenerator._initializing = true;
     processor
       .initWebAssemblyModule({
         wasmBinaryFile: "ThirdParty/wasm_splats_bg.wasm",
@@ -34,6 +80,10 @@ GaussianSplatTextureGenerator._getTextureTaskProcessor = function () {
       })
       .catch((error) => {
         GaussianSplatTextureGenerator._error = error;
+      })
+      .finally(function () {
+        GaussianSplatTextureGenerator._initializing = false;
+        releaseUnusedTaskProcessor();
       });
     GaussianSplatTextureGenerator._textureTaskProcessor = processor;
   }
@@ -53,12 +103,13 @@ GaussianSplatTextureGenerator.generateFromAttributes = function (parameters) {
   }
 
   const { attributes } = parameters;
-  return textureTaskProcessor.scheduleTask(parameters, [
+  const promise = textureTaskProcessor.scheduleTask(parameters, [
     attributes.positions.buffer,
     attributes.scales.buffer,
     attributes.rotations.buffer,
     attributes.colors.buffer,
   ]);
+  return promise?.finally(releaseUnusedTaskProcessor);
 };
 
 export default GaussianSplatTextureGenerator;

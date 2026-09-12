@@ -24,6 +24,9 @@ This section gets the tag name `construkted-1.146.0-1` at the next rebase. See
 
 ### Fixes
 
+- Gaussian splats release the texture worker after the last primitive and pending task finish.
+  The worker retains its WebAssembly memory while another splat primitive remains alive.
+
 - Gaussian splat replacements prepare texture data and sort before the old frame finishes.
   They release old textures before the replacement upload to reduce overlapping GPU allocations.
 

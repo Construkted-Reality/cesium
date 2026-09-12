@@ -1345,6 +1345,7 @@ function GaussianSplatPrimitive(options) {
    * @private
    */
   this._splatBudgetSSEScale = 1.0;
+  GaussianSplatTextureGenerator.retain();
 }
 
 Object.defineProperties(GaussianSplatPrimitive, {
@@ -1614,6 +1615,7 @@ GaussianSplatPrimitive.prototype.destroy = function () {
     this._tileset.gaussianSplatPrimitive = undefined;
   }
 
+  GaussianSplatTextureGenerator.release();
   return destroyObject(this);
 };
 
