@@ -878,13 +878,21 @@ OIT.prototype.execute = function (context, passState) {
  * @param {Context} context
  * @param {PassState} passState
  * @param {Color} clearColor
+ * @param {boolean} [clearOpaque=true] Whether to clear the opaque framebuffer.
  */
-OIT.prototype.clear = function (context, passState, clearColor) {
+OIT.prototype.clear = function (
+  context,
+  passState,
+  clearColor,
+  clearOpaque = true,
+) {
   const framebuffer = passState.framebuffer;
 
-  passState.framebuffer = this._opaqueFBO.framebuffer;
-  Color.clone(clearColor, this._opaqueClearCommand.color);
-  this._opaqueClearCommand.execute(context, passState);
+  if (clearOpaque) {
+    passState.framebuffer = this._opaqueFBO.framebuffer;
+    Color.clone(clearColor, this._opaqueClearCommand.color);
+    this._opaqueClearCommand.execute(context, passState);
+  }
 
   passState.framebuffer = this._translucentFBO.framebuffer;
   const translucentClearCommand = this._translucentMRTSupport

@@ -1073,6 +1073,81 @@ describe(
       });
     });
 
+    it("allocates OIT targets on the first translucent frame", function () {
+      const oit = scene._view.oit;
+      if (!defined(oit) || !oit._translucentMRTSupport) {
+        return;
+      }
+
+      const rectangle = Rectangle.fromDegrees(-100.0, 30.0, -90.0, 40.0);
+      const primitive = scene.primitives.add(createRectangle(rectangle));
+      primitive.appearance.material.uniforms.color = Color.RED.clone();
+      scene.camera.setView({ destination: rectangle });
+      scene.renderForSpecs();
+      expect(oit._accumulationTexture).toBeUndefined();
+      expect(scene._environmentState.useOIT).toBe(false);
+
+      primitive.appearance.material.uniforms.color.alpha = 0.5;
+      expect(scene).toRenderAndCall(function (rgba) {
+        expect(rgba[0]).toBeGreaterThan(0);
+        expect(rgba[1]).toEqual(0);
+        expect(rgba[2]).toEqual(0);
+      });
+      expect(oit._accumulationTexture).toBeDefined();
+      expect(scene._environmentState.useOIT).toBe(true);
+
+      const accumulationTexture = oit._accumulationTexture;
+      primitive.show = false;
+      scene.renderForSpecs();
+      primitive.show = true;
+      scene.renderForSpecs();
+      expect(oit._accumulationTexture).toBe(accumulationTexture);
+    });
+
+    it("composites both wrapped viewports on the first translucent frame", function () {
+      if (webglStub) {
+        return;
+      }
+      scene.canvas.width = 256;
+      scene.canvas.height = 256;
+      scene.morphTo2D(0.0);
+      const rectangle = Rectangle.fromDegrees(-180.0, -90.0, 180.0, 90.0);
+      const primitive = scene.primitives.add(createRectangle(rectangle));
+      primitive.appearance.material.uniforms.color = Color.RED.clone();
+      scene.camera.setView({
+        destination: new Cartesian3(
+          Ellipsoid.WGS84.maximumRadius * Math.PI,
+          0.0,
+          10000.0,
+        ),
+        convert: false,
+      });
+      scene.renderForSpecs();
+      primitive.appearance.material.uniforms.color.alpha = 0.5;
+      scene.renderForSpecs();
+      const pixels = scene.context.readPixels({ width: 256, height: 256 });
+      expect(pixels[(128 * 256 + 64) * 4]).toBeGreaterThan(0);
+      expect(pixels[(128 * 256 + 192) * 4]).toBeGreaterThan(0);
+    });
+
+    it("does not allocate OIT targets when picking translucent geometry", function () {
+      const oit = scene._view.oit;
+      if (!defined(oit) || !oit._translucentMRTSupport) {
+        return;
+      }
+
+      const rectangle = Rectangle.fromDegrees(-100.0, 30.0, -90.0, 40.0);
+      const primitive = scene.primitives.add(createRectangle(rectangle));
+      primitive.appearance.material.uniforms.color = Color.RED.withAlpha(0.5);
+      scene.camera.setView({ destination: rectangle });
+      scene.pickForSpecs();
+      expect(oit._accumulationTexture).toBeUndefined();
+      expect(scene._environmentState.useOIT).toBe(false);
+
+      scene.renderForSpecs();
+      expect(oit._accumulationTexture).toBeDefined();
+    });
+
     it("renders with OIT and without FXAA", function () {
       const rectangle = Rectangle.fromDegrees(-100.0, 30.0, -90.0, 40.0);
 
