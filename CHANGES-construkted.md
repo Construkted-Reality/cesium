@@ -1,5 +1,14 @@
 # Construkted Reality fork changes
 
+## Decoded tile resource cache
+
+- Add an optional RAM cache for completed Draco geometry and decoded or transcoded
+  textures in `@construkted/tile-cache/decoded`.
+- Bound retained payload bytes with LRU eviction. Preserve live caller references
+  during clearing and release cache references during teardown or context loss.
+- Add ownership contracts and GPU measurements for separate geometry and texture
+  retention, constrained budgets, clearing, and offline browser restarts.
+
 This file lists the changes that the Construkted Reality fork adds to CesiumJS. Upstream
 CesiumJS does not contain these changes. See [FORK.md](FORK.md) for the branch layout, the
 tag format, and the upgrade procedure.

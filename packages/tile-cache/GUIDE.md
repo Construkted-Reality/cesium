@@ -98,3 +98,70 @@ node tools/tile-cache/run.mjs --phase=cache --output=/tmp/tile-cache/cache.json
 Add `--software=true` for functional tests without hardware WebGL. The runner
 checks return pixels and verifies complete reloads after browser restart while
 the tile endpoint is unavailable and the HTTP cache is disabled.
+
+## Decoded geometry and texture RAM cache
+
+The optional `@construkted/tile-cache/decoded` entry point retains completed
+Draco geometry and decoded/transcoded image loaders after their rendering
+consumers release them. It uses private Cesium APIs. Pin the tested fork commit
+and run the cache tests when upgrading Cesium.
+
+```js
+import { retainDecodedResources } from "@construkted/tile-cache/decoded";
+
+const decodedCache = retainDecodedResources(Cesium, {
+  canvas: viewer.canvas,
+  urlPrefix: "https://assets.example.com/immutable-version/tileset/",
+  maximumBytes: 512 * 1024 * 1024,
+  geometry: true,
+  textures: true,
+});
+```
+
+Install it before loading the tileset. Use one controller and one viewer context
+per Cesium ResourceCache. Do not combine it with the older harness-only decoded
+image adapter. The prefix must identify an immutable asset directory. Changing
+content must use new URLs. This adapter reuses Cesium's existing resource keys;
+it does not add an independent asset-version or texture-format namespace.
+Destroy the controller before replacing the viewer or changing GPU capabilities.
+
+Geometry entries keep triangle indices, vertex attribute arrays, and quantization
+metadata. Texture entries keep KTX2/Basis transcoder output, its GPU-compatible
+compressed format, and mip levels. They remain ready for upload. Ordinary decoded
+image objects are also supported. GPU buffers, textures, models, and draw commands
+are not retained by this adapter.
+
+On a cache hit, Cesium can reuse the CPU-side result and rebuild GPU resources.
+It can still read and parse the compressed GLB through the response cache. On a
+miss, ordinary loading and decoding continue. The RAM cache does not replace the
+Service Worker response cache and does not survive a page reload. The response
+cache can provide compressed bytes for offline reconstruction after a restart.
+
+`maximumBytes` bounds retained payload charges. The cache counts full backing
+ArrayBuffers and counts a shared buffer once within an entry. It conservatively
+charges buffers shared by different entries more than once. `stats()` also reports
+`uniquePayloadBytes`, deduplicated across entries. Ordinary image objects use a
+width-times-height-times-four pixel estimate. Loader metadata, browser overhead,
+WebAssembly heaps, and GPU allocations are excluded. Released resources remain
+subject to ordinary garbage collection, so this is not a browser-process RAM cap.
+
+`stats()` exposes entries, charged bytes, unique payload bytes, oversized bypasses,
+and per-type admissions, hits, and evictions. Hits count ResourceCache lookups;
+multiple geometry attributes can look up the same retained loader. Clearing and
+destruction count as evictions. A payload larger than the budget is not retained.
+
+```js
+console.log(decodedCache.stats());
+decodedCache.clear(); // Release cache references; keep live caller references.
+decodedCache.destroy(); // Clear and remove this adapter. Safe to call twice.
+```
+
+A context-loss notification clears retained entries and suspends admission until
+restoration. The viewer remains responsible for restoring rendering. Clearing the
+cache cannot destroy data still referenced by an active consumer. Such data can
+be admitted again when that consumer subsequently releases its reference.
+
+For the Palace A/B workload, the first combined-cache preview retained about
+282 MiB of payload: 80 MiB of geometry and 202 MiB of texture blocks. This is
+additional system RAM and can overlap data already uploaded to the GPU. The
+benefit and appropriate budget depend on the revisited working set.

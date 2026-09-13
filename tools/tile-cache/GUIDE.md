@@ -199,3 +199,29 @@ flag, and exclude verification runs from performance comparisons. Run the same
 matrix without pipeline probes to measure camera performance. Omit `--draco` for
 a stock-engine control. All variants retain the normal pose, pixel, tile-selection,
 network, offline restart, and loader-cleanup checks.
+
+## Decoded resource cache measurements
+
+`build.mjs` also builds `Build/TileCache/decoded-resources.js`. Add
+`--decoded=geometry`, `--decoded=textures`, or `--decoded=both` to the real runner.
+The default payload budget is 512 MiB; `--decodedBytes=67108864` selects 64 MiB.
+Omit `--decoded` for the ordinary decoder baseline. The decoded cache is independent
+of `--draco` and the compressed response-cache condition.
+
+```sh
+node tools/tile-cache/decoded-contracts.mjs /tmp/decoded-contracts.json
+node tools/tile-cache/real-run.mjs --conditions=disk --repetitions=3 --decoded=both --pipeline=true --output=/tmp/decoded/results.json
+node tools/tile-cache/real-run.mjs --conditions=disk --repetitions=3 --decoded=both --clearDecoded=true --pipeline=true --output=/tmp/decoded-clear/results.json
+```
+
+The lifetime contracts use actual Cesium loader classes with controlled payloads.
+They verify reference ownership, LRU eviction, scope and type filtering, backing
+buffer accounting, texture mip retention, context-loss notifications, and adapter
+teardown. The real-model runs separately verify rendering and avoided worker jobs.
+
+Each visit records decoded-cache statistics and checks the payload budget. Cleanup
+must leave zero ResourceCache loaders and zero retained payload bytes. The optional
+clear test adds B, clears the decoded cache, and revisits A to verify reconstruction
+from ordinary cache misses. Browser restarts retain compressed disk responses but
+start with an empty decoded RAM cache. Use `--idleMs=60000` to test a minute-away
+return. Measure control runs without pipeline probes as well as traced runs.

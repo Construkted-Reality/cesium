@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Opt-in local response caching for Cesium applications",
+  "description": "Opt-in response and decoded resource caching for Cesium applications",
   "license": "Apache-2.0",
   "exports": {
     ".": "./src/client.js",

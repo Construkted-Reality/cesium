@@ -228,7 +228,9 @@ npx gulp test --browsers ChromeHeadless --includeName GaussianSplat
 ### Optional local tile caching
 
 The opt-in `@construkted/tile-cache` workspace adds RAM and persistent browser
-response storage without changing the engine request implementation. See
+response storage without changing the engine request implementation. Its optional
+`/decoded` entry point retains decoded geometry and upload-ready texture data in
+system RAM under a payload budget. See
 [the cache guide](packages/tile-cache/GUIDE.md) for integration and limitations,
 and [the harness guide](tools/tile-cache/GUIDE.md) for reproducible tests.
 

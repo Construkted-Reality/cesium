@@ -194,6 +194,24 @@ export async function runDecodedContracts() {
     cache.unload(c);
     assert(!c.isDestroyed(), "Resume admission after restoration");
   });
+  canvas.width = canvas.height = 2;
+  const bitmap = await createImageBitmap(canvas);
+  test("ordinary decoded bitmap retention", (controller) => {
+    const loader = texture();
+    loader._image = bitmap;
+    loader._mipLevels = undefined;
+    cache.unload(loader);
+    assert(
+      controller.stats().textures.chargedBytes === 16,
+      "Estimate ordinary image pixels as RGBA",
+    );
+    assert(
+      cache.get(loader.cacheKey).image === bitmap,
+      "Reuse the decoded bitmap object",
+    );
+    cache.unload(loader);
+  });
+  bitmap.close();
   test("duplicate installation fails and destroy is idempotent", (controller) => {
     let rejected = false;
     try {
