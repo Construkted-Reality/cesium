@@ -147,3 +147,24 @@ Open the resulting `gallery.html`. It includes each camera screenshot, the exact
 pose, selected tile URLs and transferred bytes. `summary.json` contains the
 per-condition timing distributions. The runner saves JSON through an atomic
 rename so readers can copy completed snapshots while measurements continue.
+
+## Pipeline attribution
+
+Add `--pipeline=true` to `real-run.mjs` for diagnostic probes. Run the same
+conditions without that flag to measure probe overhead. Each fresh profile gives
+a cold first A view, followed by B and a return to A. `setupMs` records page,
+viewer and manifest setup before the first pose; `settleMs` starts at the pose.
+
+The probes leave engine source unchanged. They wrap loader processing, resource
+body promises, resource jobs, WebGL calls and the original decoder workers.
+Worker records distinguish queue time, receive-to-post execution and main-thread
+result delivery. They support this fork's embedded worker build. GPU elapsed
+queries cover rendered frames; they are separate from CPU submission timings.
+The diagnostic Service Worker adds a cache-lookup duration header to hits. The
+normal Service Worker remains unchanged. Build both with `build.mjs`.
+
+Intervals overlap. Do not sum body, worker, main-frame and GPU durations into a
+single elapsed-time total. Resource promises can be cancelled by Cesium before
+any network request; use CDP records for actual transfers. Early `tilesLoaded`
+signals can describe provisional selection immediately after a camera change.
+The stable final selection and screenshot equality checks determine completion.
