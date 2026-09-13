@@ -1,0 +1,380 @@
+/* global Cesium */
+import { installDracoExperiment } from "./draco-experiment.js";
+import { tracePipeline } from "./pipeline.js";
+import { instrument } from "./instrument.js";
+const viewer = new Cesium.Viewer("view", {
+  baseLayer: false,
+  globe: false,
+  skyBox: false,
+  skyAtmosphere: false,
+  animation: false,
+  timeline: false,
+  geocoder: false,
+  homeButton: false,
+  sceneModePicker: false,
+  baseLayerPicker: false,
+  navigationHelpButton: false,
+  fullscreenButton: false,
+  infoBox: false,
+  selectionIndicator: false,
+  useBrowserRecommendedResolution: false,
+});
+viewer.resolutionScale = 1;
+viewer.scene.backgroundColor = Cesium.Color.BLACK;
+let tileset;
+let active;
+let decoded;
+let probes;
+let pipeline;
+let dracoExperiment;
+let decodedResources;
+let localFrame;
+const events = [];
+const renderErrors = [];
+viewer.scene.renderError.addEventListener((...args) =>
+  renderErrors.push(String(args[1])),
+);
+const frameTimes = [];
+let lastFrame = performance.now();
+viewer.scene.postRender.addEventListener(() => {
+  const now = performance.now();
+  frameTimes.push(now - lastFrame);
+  lastFrame = now;
+});
+const tileUrl = (tile) => tile._contentResource?.url;
+
+window.harness = {
+  snapshot() {
+    return {
+      events,
+      renderErrors,
+      residentBytes: tileset?.totalMemoryUsageInBytes,
+      tilesLoaded: tileset?.tilesLoaded,
+      statistics: tileset?._statistics,
+      visible: [...(active?.visible || [])],
+    };
+  },
+  async enableCache(config) {
+    const clientUrl = new URL(
+      "../../Build/TileCache/client.js",
+      import.meta.url,
+    );
+    const { registerTileCache } = await import(clientUrl.href);
+    window.tileCache = await registerTileCache(config);
+  },
+  async setup(config) {
+    if (config.pipeline && !pipeline) {
+      pipeline = tracePipeline(Cesium, viewer);
+    }
+    if (config.draco && !dracoExperiment) {
+      dracoExperiment = installDracoExperiment(Cesium, config.draco);
+    }
+    if (config.decodedResources && !decodedResources) {
+      const moduleUrl = new URL(
+        "../../Build/TileCache/decoded-resources.js",
+        import.meta.url,
+      );
+      const { retainDecodedResources } = await import(moduleUrl.href);
+      decodedResources = retainDecodedResources(Cesium, {
+        ...config.decodedResources,
+        canvas: viewer.canvas,
+      });
+    }
+    if (tileset) {
+      viewer.scene.primitives.remove(tileset);
+    }
+    if (config.decodedBytes && !decoded) {
+      const moduleUrl = new URL(
+        "../../Build/TileCache/decoded-images.js",
+        import.meta.url,
+      );
+      const { retainDecodedImages } = await import(moduleUrl.href);
+      decoded = retainDecodedImages(Cesium, config.decodedBytes);
+    }
+    tileset = await Cesium.Cesium3DTileset.fromUrl(
+      config.url || "/tile-data/v1/tileset.json",
+      {
+        cacheBytes: config.cacheBytes,
+        maximumCacheOverflowBytes: config.overflowBytes ?? 64 * 1024 * 1024,
+        maximumScreenSpaceError: config.sse ?? 16,
+        dynamicScreenSpaceError: false,
+        foveatedScreenSpaceError: false,
+        skipLevelOfDetail: false,
+        preloadWhenHidden: false,
+        preloadFlightDestinations: false,
+      },
+    );
+    if (config.localOrigin) {
+      viewer.clock.shouldAnimate = false;
+      viewer.clock.currentTime = Cesium.JulianDate.fromIso8601(
+        "2026-09-13T12:00:00Z",
+      );
+      tileset.modelMatrix = Cesium.Transforms.eastNorthUpToFixedFrame(
+        Cesium.Cartesian3.fromDegrees(...config.localOrigin),
+      );
+    }
+    localFrame = tileset.modelMatrix;
+    viewer.scene.primitives.add(tileset);
+    for (const [name, event] of [
+      ["load", tileset.tileLoad],
+      ["unload", tileset.tileUnload],
+      ["failed", tileset.tileFailed],
+    ]) {
+      event.addEventListener((tile) =>
+        events.push({
+          name,
+          url: tileUrl(tile) || tile.url,
+          message: tile.message,
+          time: performance.now(),
+        }),
+      );
+    }
+    tileset.tileVisible.addEventListener((tile) =>
+      active?.visible.add(tileUrl(tile)),
+    );
+    const gl = viewer.scene.context._gl;
+    if (config.instrument && !probes) {
+      probes = instrument(Cesium, gl);
+    }
+    const extension = gl.getExtension("WEBGL_debug_renderer_info");
+    return {
+      renderer: gl.getParameter(
+        extension ? extension.UNMASKED_RENDERER_WEBGL : gl.RENDERER,
+      ),
+      cesium: Cesium.VERSION,
+      width: viewer.canvas.width,
+      height: viewer.canvas.height,
+      devicePixelRatio,
+      resolutionScale: viewer.resolutionScale,
+    };
+  },
+  async visit(index, { timeoutMs = 30000, camera, pose } = {}) {
+    const started = performance.now();
+    probes?.reset();
+    pipeline?.begin();
+    dracoExperiment?.begin();
+    const eventStart = events.length;
+    const frameStart = frameTimes.length;
+    performance.clearResourceTimings();
+    active = { visible: new Set() };
+    if (pose) {
+      viewer.camera.frustum.fov = Cesium.Math.toRadians(pose.fov || 60);
+    }
+    if (pose && !pose.position) {
+      camera = {
+        destination: Cesium.Cartesian3.fromDegrees(
+          pose.longitude,
+          pose.latitude,
+          pose.height,
+        ),
+        orientation: {
+          heading: Cesium.Math.toRadians(pose.heading),
+          pitch: Cesium.Math.toRadians(pose.pitch),
+          roll: Cesium.Math.toRadians(pose.roll || 0),
+        },
+      };
+    }
+    if (pose?.position && pose?.target) {
+      const destination = Cesium.Matrix4.multiplyByPoint(
+        localFrame,
+        Cesium.Cartesian3.fromArray(pose.position),
+        new Cesium.Cartesian3(),
+      );
+      const target = Cesium.Matrix4.multiplyByPoint(
+        localFrame,
+        Cesium.Cartesian3.fromArray(pose.target),
+        new Cesium.Cartesian3(),
+      );
+      const direction = Cesium.Cartesian3.normalize(
+        Cesium.Cartesian3.subtract(
+          target,
+          destination,
+          new Cesium.Cartesian3(),
+        ),
+        new Cesium.Cartesian3(),
+      );
+      const vertical = Cesium.Matrix4.multiplyByPointAsVector(
+        localFrame,
+        Cesium.Cartesian3.UNIT_Z,
+        new Cesium.Cartesian3(),
+      );
+      const right = Cesium.Cartesian3.normalize(
+        Cesium.Cartesian3.cross(direction, vertical, new Cesium.Cartesian3()),
+        new Cesium.Cartesian3(),
+      );
+      camera = {
+        destination,
+        orientation: {
+          direction,
+          up: Cesium.Cartesian3.cross(
+            right,
+            direction,
+            new Cesium.Cartesian3(),
+          ),
+        },
+      };
+    }
+    viewer.camera.setView(
+      camera || {
+        destination: new Cesium.Cartesian3(6378437, index * 1000, 0),
+        orientation: {
+          direction: new Cesium.Cartesian3(-1, 0, 0),
+          up: new Cesium.Cartesian3(0, 0, 1),
+        },
+      },
+    );
+    const milestones = {
+      firstVisibleMs: null,
+      firstLoadedMs: null,
+      lastUnstableMs: 0,
+    };
+    let stableFrames = 0;
+    let previousVisible = "";
+    let frameVisible = new Set();
+    let frameDetails = new Map();
+    let finalDetails = [];
+    const removeVisible = tileset.tileVisible.addEventListener((tile) => {
+      frameVisible.add(tileUrl(tile));
+      frameDetails.set(tileUrl(tile), {
+        url: tileUrl(tile),
+        level: tile.implicitCoordinates?.level,
+        geometricError: tile.geometricError,
+        children: tile.children.length,
+        terminal:
+          tile.hasRenderableContent &&
+          !tile.hasImplicitContent &&
+          tile.children.length === 0,
+        triangles: tile.content?.trianglesLength,
+      });
+    });
+    await new Promise((resolve, reject) => {
+      const subscription = {};
+      const timer = setTimeout(() => {
+        subscription.remove();
+        removeVisible();
+        reject(
+          new Error(
+            `View ${index} did not settle: ${JSON.stringify({ events: events.slice(eventStart), renderErrors })}`,
+          ),
+        );
+      }, timeoutMs);
+      subscription.remove = viewer.scene.postRender.addEventListener(() => {
+        const visible = [...frameVisible].sort();
+        const elapsed = performance.now() - started;
+        if (visible.length && milestones.firstVisibleMs === null) {
+          milestones.firstVisibleMs = elapsed;
+        }
+        if (
+          tileset.tilesLoaded &&
+          visible.length &&
+          milestones.firstLoadedMs === null
+        ) {
+          milestones.firstLoadedMs = elapsed;
+        }
+        const key = JSON.stringify(visible);
+        stableFrames =
+          tileset.tilesLoaded && visible.length > 0 && key === previousVisible
+            ? stableFrames + 1
+            : 0;
+        if (stableFrames === 0) {
+          milestones.lastUnstableMs = elapsed;
+        }
+        previousVisible = key;
+        active.visible = frameVisible;
+        frameVisible = new Set();
+        finalDetails = [...frameDetails.values()].sort((a, b) =>
+          a.url.localeCompare(b.url),
+        );
+        frameDetails = new Map();
+        if (stableFrames >= 4) {
+          clearTimeout(timer);
+          subscription.remove();
+          removeVisible();
+          resolve();
+        }
+      });
+    });
+    const result = {
+      index,
+      pose,
+      renderErrors: [...renderErrors],
+      settleMs: performance.now() - started,
+      residentBytes: tileset.totalMemoryUsageInBytes,
+      screenSpaceError: tileset.maximumScreenSpaceError,
+      memoryAdjustedScreenSpaceError: tileset.memoryAdjustedScreenSpaceError,
+      decoded: decoded?.stats(),
+      decodedResources: decodedResources?.stats(),
+      probes: probes?.snapshot(),
+      pipeline: await pipeline?.snapshot(),
+      draco: dracoExperiment?.snapshot(),
+      milestones,
+      visible: [...active.visible].sort(),
+      tileDetails: finalDetails,
+      events: events.slice(eventStart),
+      frameMs: frameTimes.slice(frameStart),
+      resources: performance
+        .getEntriesByType("resource")
+        .map((entry) => entry.toJSON()),
+      // This interval includes scheduling, decode and upload. It is not GPU time.
+      attribution:
+        "Fetch timings plus end-to-end settle; decode/upload are not independently attributed.",
+    };
+    active = undefined;
+    return result;
+  },
+  inspectPose() {
+    const inverse = Cesium.Matrix4.inverseTransformation(
+      localFrame,
+      new Cesium.Matrix4(),
+    );
+    const local = (point) => {
+      const p = Cesium.Matrix4.multiplyByPoint(
+        inverse,
+        point,
+        new Cesium.Cartesian3(),
+      );
+      return [p.x, p.y, p.z];
+    };
+    const samples = [];
+    for (const y of [0.25, 0.5, 0.75]) {
+      for (const x of [0.25, 0.5, 0.75]) {
+        const point = viewer.scene.pickPosition(
+          new Cesium.Cartesian2(
+            viewer.canvas.clientWidth * x,
+            viewer.canvas.clientHeight * y,
+          ),
+        );
+        if (point) {
+          samples.push({
+            x,
+            y,
+            position: local(point),
+            distance: Cesium.Cartesian3.distance(
+              viewer.camera.positionWC,
+              point,
+            ),
+          });
+        }
+      }
+    }
+    return { camera: local(viewer.camera.positionWC), samples };
+  },
+  clearDecodedResources() {
+    decodedResources?.clear();
+    return decodedResources?.stats();
+  },
+  dispose() {
+    viewer.scene.primitives.remove(tileset);
+    tileset = undefined;
+    decoded?.destroy();
+    probes?.destroy();
+    decodedResources?.destroy();
+    dracoExperiment?.destroy();
+    pipeline?.destroy();
+    return {
+      loaders: Object.keys(Cesium.ResourceCache.cacheEntries).length,
+      decoded: decoded?.stats(),
+      decodedResources: decodedResources?.stats(),
+    };
+  },
+};

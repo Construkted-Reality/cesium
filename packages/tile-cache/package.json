@@ -1,0 +1,17 @@
+{
+  "name": "@construkted/tile-cache",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Opt-in disk response and decoded geometry caching for Cesium applications",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./src/client.js",
+    "./decoded": "./src/decoded.js"
+  },
+  "dependencies": {
+    "idb": "8.0.3",
+    "lru-cache": "11.5.2",
+    "workbox-strategies": "7.4.1"
+  }
+}

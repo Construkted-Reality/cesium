@@ -22,6 +22,21 @@ Upstream base: commit `488b114e16`, between release 1.145 and release 1.146.
 This section gets the tag name `construkted-1.146.0-1` at the next rebase. See
 [FORK.md](FORK.md) for the reason.
 
+### Local tile caching
+
+- The optional `@construkted/tile-cache` workspace retains encoded responses in
+  byte-bounded browser Cache Storage with LRU eviction. It uses Workbox and `idb`.
+- The separate `/decoded` entry point retains Draco geometry in RAM by default.
+  Texture retention is optional. `lru-cache` bounds retained payloads and preserves
+  live caller ownership during eviction, clearing, teardown, and context loss.
+- Cache keys separate accounts, dataset versions, URLs, and request headers.
+  The package requires an immutable dataset directory and explicit registration.
+- The harness checks tile eviction, transfer counts, return pixels, offline browser
+  restart, byte budgets, storage failures, and cancellation. It also provides
+  decoded-resource measurements. No encoded-response RAM tier is maintained.
+- See [the cache guide](packages/tile-cache/GUIDE.md) for deployment requirements
+  and [the harness guide](tools/tile-cache/GUIDE.md) for verification commands.
+
 ### Fixes
 
 - Gaussian splat workers pad attribute textures before transfer to avoid a main-thread copy.
