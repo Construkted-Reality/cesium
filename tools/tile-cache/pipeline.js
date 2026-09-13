@@ -112,6 +112,7 @@ export function tracePipeline(Cesium, viewer) {
     });
   }
   ["scheduleTask", "initWebAssemblyModule"].forEach(wrapWorkerCreation);
+  let workerSerial = 0;
   const OriginalWorker = window.Worker;
   window.Worker = class extends OriginalWorker {
     constructor(url, options) {
@@ -152,6 +153,7 @@ ${options?.type === "module" ? `await import(${JSON.stringify(absolute)});` : `i
         workerUrls.push(workerUrl);
       }
       super(workerUrl, options);
+      const workerId = ++workerSerial;
       if (match) {
         const sent = new Map();
         const post = this.postMessage;
@@ -171,6 +173,7 @@ ${options?.type === "module" ? `await import(${JSON.stringify(absolute)});` : `i
           const clockOffset = performance.timeOrigin + epoch;
           push({
             phase: `worker.${match[1]}`,
+            workerId,
             ...entry,
             workerStart: data.__pipeline.start - clockOffset,
             workerEnd: data.__pipeline.end - clockOffset,
