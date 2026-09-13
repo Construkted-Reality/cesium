@@ -30,14 +30,14 @@ const conditions = [
 const selected = args.conditions ? args.conditions.split(",") : conditions.map(c => c.name);
 assert.ok(selected.every(name => conditions.some(c => c.name === name)));
 await mkdir(dirname(output), { recursive: true });
-const server = await startServer({ latencyMs: 0 });
 const report = { startedAt: new Date().toISOString(), host: hostname(),
   commit: execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim(),
   asset, launch, repetitions, sourceHashes: {}, runs: [],
   measurement: "Direct Wasabi HTTPS. No artificial latency. CDP observes page and Service Worker network sessions. Encoded bytes include response transport overhead. Camera movement is an immediate pose change." };
-for (const path of [configPath, "tools/tile-cache/real-run.mjs", "tools/tile-cache/network.mjs", "tools/tile-cache/harness.js", "Build/CesiumUnminified/Cesium.js", "Build/TileCache/worker.js"]) {
+for (const path of [configPath, "tools/tile-cache/real-run.mjs", "tools/tile-cache/network.mjs", "tools/tile-cache/harness.js", "Build/CesiumUnminified/Cesium.js", "Build/TileCache/worker.js", "Build/CesiumUnminified/ThirdParty/draco_decoder.wasm", "Build/CesiumUnminified/ThirdParty/basis_transcoder.wasm"]) {
   report.sourceHashes[path] = createHash("sha256").update(await readFile(path)).digest("hex");
 }
+const server = await startServer({ latencyMs: 0 });
 const save = () => writeFile(output, `${JSON.stringify(report, null, 2)  }\n`);
 async function configure(page, condition) {
   await page.goto(`${server.url}/tools/tile-cache/harness.html`);

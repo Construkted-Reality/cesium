@@ -103,3 +103,35 @@ and the host's `__EGL_VENDOR_LIBRARY_FILENAMES` before running the command.
 This launches headed Chromium inside the compositor. On the A4000 test host,
 headless Weston with its GL renderer provides hardware OpenGL rendering.
 A missing renderer also fails the GPU check.
+
+## Real Wasabi dataset
+
+Run `npx gulp prepare` before `npx gulp build` to install the decoder assets.
+Then run `node tools/tile-cache/build.mjs`. The real runner checks and hashes
+the Draco and Basis WebAssembly files before opening the test server.
+
+With the GPU Wayland environment configured, run:
+
+```sh
+node tools/tile-cache/real-run.mjs --repetitions=5 --output=/tmp/palace/results.json
+```
+
+`tools/tile-cache/palace.json` contains the public Wasabi URL, budgets and two
+explicit camera poses. Pose A uses the asset page's saved camera. Pose B views
+the opposite side. Each scenario follows A, B, A. The asset uses local coordinates,
+so the runner places its local origin at longitude 0, latitude 0 with an east,
+north, up transform. It freezes the clock and uses a 1280 by 720 viewport.
+
+The real runner fetches Wasabi directly without injected latency. It compares
+uncached, HTTP cache, larger Cesium residency, disk, and RAM/disk conditions.
+Use `--conditions=uncached,disk` for a short diagnostic run. Every settled visit
+saves a PNG and the exact pose, selected tiles, load/unload events, cache counters
+and CDP network records. Cached conditions also restart the browser with actual
+Wasabi requests blocked. Failed runs retain diagnostics and failure screenshots.
+
+Network instrumentation observes both page and Service Worker sessions, excluding
+worker-supplied page responses and browser-cache responses from upstream totals.
+Run `node tools/tile-cache/network-check.mjs` to verify the counters against the
+controlled server. Encoded transfer bytes include HTTP overhead and exclude
+unknown bytes from cancelled transfers. All timings include tile selection,
+decoding, upload and four stable frames. They are not isolated decoder timings.
