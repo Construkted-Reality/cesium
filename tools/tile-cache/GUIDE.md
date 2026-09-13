@@ -168,3 +168,34 @@ single elapsed-time total. Resource promises can be cancelled by Cesium before
 any network request; use CDP records for actual transfers. Early `tilesLoaded`
 signals can describe provisional selection immediately after a camera change.
 The stable final selection and screenshot equality checks determine completion.
+
+## Draco stage and worker experiments
+
+Build optional diagnostic workers with `node tools/tile-cache/draco-build.mjs`.
+This generates copies of the current engine worker and fails if the expected
+source patterns change. It does not edit production engine sources.
+
+```sh
+node tools/tile-cache/real-run.mjs --conditions=disk --repetitions=3 --draco=legacy --workers=1 --pipeline=true --output=/tmp/draco-legacy/results.json
+node tools/tile-cache/real-run.mjs --conditions=disk --repetitions=1 --draco=bulk --workers=4 --verify=true --pipeline=true --output=/tmp/draco-verify/results.json
+```
+
+`--draco=legacy` retains the existing extraction APIs. `--draco=bulk` uses Draco's
+bulk array APIs and copies the result out of WebAssembly memory before freeing
+its temporary allocation. Both variants use the same diagnostic build and
+scheduler. `--workers=1`, `2`, or `4` selects a pool size. The pool preserves the
+original total outstanding-task limit, initializes lazily, and destroys its
+workers during harness cleanup. It applies to mesh buffer views, not point clouds.
+
+`--pipeline=true` adds codec, attribute, index, and total task timings. It also
+records decoded array bytes and each worker's WebAssembly heap size. Heap size
+is allocated WebAssembly linear memory, not total browser memory. Multiple
+worker execution spans overlap. Their summed durations are work, not elapsed
+camera time. Queuing and message delivery remain in the pipeline records.
+
+`--verify=true` compares the bulk output type, length, and every byte against the
+legacy extraction for each decoded mesh. Use it with the bulk variant and pipeline
+flag, and exclude verification runs from performance comparisons. Run the same
+matrix without pipeline probes to measure camera performance. Omit `--draco` for
+a stock-engine control. All variants retain the normal pose, pixel, tile-selection,
+network, offline restart, and loader-cleanup checks.
