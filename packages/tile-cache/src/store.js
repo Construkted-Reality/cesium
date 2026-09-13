@@ -1,5 +1,4 @@
 import { openDB } from "idb";
-import { LRUCache } from "lru-cache";
 
 const database = () =>
   openDB("construkted-tile-cache-v1", 1, {
@@ -46,22 +45,11 @@ async function boundedBody(response, limit) {
   return bytes.buffer;
 }
 
-function makeResponse(entry, tier) {
-  const headers = new Headers(entry.headers);
-  headers.set("X-Construkted-Cache", tier);
-  return new Response(entry.bytes.slice(0), { status: 200, headers });
-}
-
 export class ResponseStore {
   constructor(namespace, config) {
     this.namespace = namespace;
     this.config = config;
-    this.memory = new LRUCache({
-      maxSize: Math.max(1, config.memoryBytes),
-      sizeCalculation: (entry) => Math.max(1, entry.bytes.byteLength),
-    });
     this.stats = {
-      memoryHits: 0,
       diskHits: 0,
       misses: 0,
       network: 0,
@@ -111,23 +99,8 @@ export class ResponseStore {
     return result;
   }
 
-  remember(key, entry) {
-    if (
-      entry.bytes.byteLength > 0 &&
-      entry.bytes.byteLength <= this.config.memoryBytes
-    ) {
-      this.memory.set(key, entry);
-    }
-  }
-
   async get(key) {
     await this.ready;
-    const memory = this.memory.get(key);
-    if (memory) {
-      this.stats.memoryHits++;
-      await this.touch(key);
-      return makeResponse(memory, "memory");
-    }
     return this.lock(async () => {
       const record = await this.db.get("entries", key);
       const response = record && (await this.cache.match(key));
@@ -136,29 +109,11 @@ export class ResponseStore {
         return undefined;
       }
       record.lastAccess = Date.now();
-      record.hits++;
       await this.db.put("entries", record);
       this.stats.diskHits++;
-      if (record.bytes <= this.config.memoryBytes) {
-        const bytes = await response.arrayBuffer();
-        const entry = { bytes, headers: [...response.headers] };
-        this.remember(key, entry);
-        return makeResponse(entry, "disk");
-      }
       const headers = new Headers(response.headers);
       headers.set("X-Construkted-Cache", "disk");
       return new Response(response.body, { headers });
-    });
-  }
-
-  async touch(key) {
-    await this.lock(async () => {
-      const record = await this.db.get("entries", key);
-      if (record) {
-        record.lastAccess = Date.now();
-        record.hits++;
-        await this.db.put("entries", record);
-      }
     });
   }
 
@@ -172,17 +127,9 @@ export class ResponseStore {
       (sum, record) => sum + (record.key === replacing ? 0 : record.bytes),
       0,
     );
-    records.sort((a, b) => {
-      const protectedDifference =
-        this.config.policy === "revisited"
-          ? Number(a.hits > 0) - Number(b.hits > 0)
-          : 0;
-      return (
-        protectedDifference ||
-        a.lastAccess - b.lastAccess ||
-        a.key.localeCompare(b.key)
-      );
-    });
+    records.sort(
+      (a, b) => a.lastAccess - b.lastAccess || a.key.localeCompare(b.key),
+    );
     for (const record of records) {
       if (total + incoming <= this.config.diskBytes) {
         break;
@@ -211,7 +158,7 @@ export class ResponseStore {
     }
     const limit = Math.min(
       this.config.maximumEntryBytes,
-      Math.max(this.config.diskBytes, this.config.memoryBytes),
+      this.config.diskBytes,
     );
     const bytes = await boundedBody(response, limit);
     if (!bytes || bytes.byteLength === 0) {
@@ -221,11 +168,6 @@ export class ResponseStore {
     const headers = new Headers(response.headers);
     headers.delete("Content-Encoding");
     headers.set("Content-Length", String(bytes.byteLength));
-    const entry = { bytes, headers: [...headers] };
-    this.remember(key, entry);
-    if (bytes.byteLength > this.config.diskBytes) {
-      return;
-    }
     await this.lock(async () => {
       await this.evict(bytes.byteLength, key);
       try {
@@ -235,7 +177,6 @@ export class ResponseStore {
           namespace: this.namespace,
           bytes: bytes.byteLength,
           lastAccess: Date.now(),
-          hits: 0,
         });
         this.stats.writes++;
       } catch (error) {
@@ -264,23 +205,15 @@ export class ResponseStore {
     );
     return {
       ...this.stats,
-      memoryBytes: this.memory.calculatedSize,
       diskBytes: records.reduce((sum, record) => sum + record.bytes, 0),
       entries: records.length,
       config: this.config,
     };
   }
 
-  async clearMemory() {
-    await this.ready;
-    await Promise.allSettled([...this.pending]);
-    this.memory.clear();
-  }
-
   async clear() {
     await this.ready;
     await Promise.allSettled([...this.pending]);
-    this.memory.clear();
     await this.lock(async () => {
       const records = await this.db.getAllFromIndex(
         "entries",

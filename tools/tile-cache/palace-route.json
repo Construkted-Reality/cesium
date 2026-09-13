@@ -10,7 +10,6 @@
   "sse": 16,
   "overflowBytes": 1073741824,
   "diskBytes": 1073741824,
-  "memoryBytes": 268435456,
   "maximumEntryBytes": 67108864,
   "residentBytes": 536870912,
   "poses": [

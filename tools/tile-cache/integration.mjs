@@ -24,7 +24,6 @@ async function configure(page, { scope = "A", version = "v1" } = {}) {
         urlPrefix: "/tile-data/v1/",
         scope,
         version,
-        memoryBytes: 1024 * 1024,
         diskBytes: 4 * 1024 * 1024,
       });
     },
@@ -65,7 +64,7 @@ try {
   assert.equal(b.tier, null);
   const red = await fetchResult(page, path, { "X-Account": "red" });
   assert.equal(red.text, "red");
-  assert.equal(red.tier, "memory");
+  assert.equal(red.tier, "disk");
   report.tests.push({ test: "same-url-different-headers", pass: true });
 
   const other = await pageFor();
@@ -81,7 +80,7 @@ try {
   );
   assert.equal(
     (await fetchResult(page, path, { "X-Account": "red" })).tier,
-    "memory",
+    "disk",
   );
   report.tests.push({
     test: "cross-tab-account-and-version-isolation",
@@ -113,7 +112,6 @@ try {
   }
   report.tests.push({ test: "no-store-and-range-bypass", pass: true });
 
-  await page.evaluate(() => window.tileCache.clearMemory());
   server.state.offline = true;
   assert.equal(
     (await fetchResult(page, path, { "X-Account": "red" })).tier,
@@ -128,7 +126,7 @@ try {
   );
   server.state.offline = false;
   report.tests.push({
-    test: "memory-eviction-offline-hit-and-explicit-purge",
+    test: "offline-hit-and-explicit-purge",
     pass: true,
   });
 

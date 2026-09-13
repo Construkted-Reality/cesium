@@ -37,8 +37,7 @@ const conditions = [
   { name: "uncached", cacheBytes: 1, httpCache: false },
   { name: "http-cache", cacheBytes: 1, httpCache: true },
   { name: "resident", cacheBytes: asset.residentBytes, httpCache: false },
-  { name: "disk", cacheBytes: 1, httpCache: false, memoryBytes: 0 },
-  { name: "ram-disk", cacheBytes: 1, httpCache: false, memoryBytes: asset.memoryBytes },
+  { name: "disk", cacheBytes: 1, httpCache: false, diskCache: true },
 ];
 const selected = args.conditions ? args.conditions.split(",") : conditions.map(c => c.name);
 assert.ok(selected.every(name => conditions.some(c => c.name === name)));
@@ -58,20 +57,20 @@ const save = async () => {
 async function configure(page, condition) {
   await page.goto(`${server.url}/tools/tile-cache/harness.html`);
   await page.waitForFunction(() => !!window.harness);
-  if (condition.memoryBytes !== undefined) {
+  if (condition.diskCache) {
     await page.evaluate(config => window.harness.enableCache(config), {
       workerUrl: args.pipeline === "true" ? "/Build/TileCache/profile-worker.js" : "/Build/TileCache/worker.js", urlPrefix: prefix,
       scope: "public-palace-measurement", version: "2026-09-13",
-      diskBytes: asset.diskBytes, memoryBytes: condition.memoryBytes,
+      diskBytes: asset.diskBytes,
       maximumEntryBytes: asset.maximumEntryBytes,
     });
   }
   return page.evaluate(config => window.harness.setup(config), { ...asset, ...condition, draco, decodedResources: decodedResources && { ...decodedResources, urlPrefix: prefix }, pipeline: args.pipeline === "true" });
 }
 async function visit(page, network, condition, label, pose, start = network.records.length) {
-  const before = condition.memoryBytes === undefined ? null : await page.evaluate(() => window.tileCache.stats());
+  const before = !condition.diskCache ? null : await page.evaluate(() => window.tileCache.stats());
   const result = await page.evaluate(pose => window.harness.visit(pose.name, { pose, timeoutMs: 180000 }), pose);
-  const after = condition.memoryBytes === undefined ? null : await page.evaluate(() => window.tileCache.stats());
+  const after = !condition.diskCache ? null : await page.evaluate(() => window.tileCache.stats());
   result.poseInspection = await page.evaluate(() => window.harness.inspectPose());
   result.cache = after;
   result.cacheDelta = after && Object.fromEntries(Object.keys(after).filter(key => typeof after[key] === "number").map(key => [key, after[key] - (before?.[key] || 0)]));
@@ -136,7 +135,7 @@ try {
           const original = run.visits[first];
           assert.equal(current.imageHash, original.imageHash, `Pose ${poseIndex} pixels differ on step ${step}`);
           assert.deepEqual(current.visible, original.visible, `Pose ${poseIndex} tiles differ on step ${step}`);
-          if (condition.memoryBytes !== undefined) {
+          if (condition.diskCache) {
             assert.equal(current.transfer.upstreamRequests, 0, "Revisited pose must use local data");
             assert.equal(current.cache.errors, 0);
           }
@@ -157,7 +156,7 @@ try {
         } else {
           assert.equal(run.reloadedAtA, 0, "Resident condition must retain A");
         }
-        if (condition.memoryBytes !== undefined) {
+        if (condition.diskCache) {
           assert.equal(run.visits[returnStep].transfer.upstreamRequests, 0, "Warm return must use local data");
           assert.equal(run.visits[returnStep].cache.errors, 0);
         }
@@ -174,7 +173,7 @@ try {
         if (decodedResources) {assert.equal(run.cleanup.decodedResources.uniquePayloadBytes, 0);}
         assert.deepEqual(network.errors, []);
         assert.deepEqual(run.errors, []);
-        if (condition.memoryBytes !== undefined) {
+        if (condition.diskCache) {
           await context.close();
           context = await chromium.launchPersistentContext(profile, launch);
           const page = context.pages()[0];

@@ -108,19 +108,11 @@ let configurations = [
   },
 ];
 if (options.phase === "cache") {
-  configurations = [
-    { name: "disk", httpCache: false, cacheBytes: 1, memoryBytes: 0 },
-    {
-      name: "ram-disk",
-      httpCache: false,
-      cacheBytes: 1,
-      memoryBytes: 16 * 1024 * 1024,
-    },
-  ];
+  configurations = [{ name: "disk", httpCache: false, cacheBytes: 1, diskCache: true }];
 }
 
 async function enableCache(page, configuration) {
-  if (configuration.memoryBytes === undefined) {
+  if (!configuration.diskCache) {
     return;
   }
   await page.evaluate(async (config) => {
@@ -129,9 +121,7 @@ async function enableCache(page, configuration) {
       urlPrefix: config.urlPrefix,
       scope: "fixture",
       version: "v1",
-      memoryBytes: config.memoryBytes,
       diskBytes: config.diskBytes ?? 32 * 1024 * 1024,
-      policy: config.policy ?? "lru",
     });
   }, configuration);
 }
@@ -139,29 +129,23 @@ async function enableCache(page, configuration) {
 if (options.phase === "decoded") {
   configurations = [
     {
-      name: "ram-disk",
+      name: "disk",
       httpCache: false,
       cacheBytes: 1,
-      memoryBytes: 16 * 1024 * 1024,
+      diskCache: true,
     },
     {
-      name: "ram-disk-decoded",
+      name: "disk-decoded",
       httpCache: false,
       cacheBytes: 1,
-      memoryBytes: 16 * 1024 * 1024,
+      diskCache: true,
       decodedBytes: 16 * 1024 * 1024,
     },
   ];
 }
 if (options.phase === "retention") {
-  configurations = ["lru", "revisited"].map((policy) => ({
-    name: `retention-${policy}`,
-    policy,
-    httpCache: false,
-    cacheBytes: 1,
-    memoryBytes: 0,
-    diskBytes: 2 * 1024 * 1024,
-  }));
+  configurations = [{ name: "retention-lru", httpCache: false, cacheBytes: 1,
+    diskCache: true, diskBytes: 2 * 1024 * 1024 }];
 }
 for (const configuration of configurations) {
   configuration.instrument = options.instrument === "true";
@@ -233,7 +217,7 @@ try {
             index,
           );
           visit.serverRequests = server.state.requests.slice(requestStart);
-          if (configuration.memoryBytes !== undefined) {
+          if (configuration.diskCache) {
             visit.cache = await page.evaluate(() => window.tileCache.stats());
           }
           visit.imageHash = createHash("sha256")
@@ -289,7 +273,7 @@ try {
           const final = run.journey.at(-1);
           assert.equal(
             final.serverRequests.length,
-            configuration.policy === "revisited" ? 0 : 3,
+            3,
           );
           assert.ok(final.cache.diskBytes <= configuration.diskBytes);
           run.journeyImageHash = createHash("sha256")
@@ -308,16 +292,12 @@ try {
           "Loader references leaked after teardown",
         );
         if (
-          configuration.memoryBytes !== undefined &&
+          configuration.diskCache &&
           options.phase !== "retention"
         ) {
           assert.equal(returned.cache.errors, 0);
           assert.ok(
-            configuration.memoryBytes === 0
-              ? returned.cache.diskHits >= 3
-              : returned.cache.memoryHits +
-                  (report.configuration.idleMs ? returned.cache.diskHits : 0) >=
-                  (configuration.decodedBytes ? 2 : 3),
+            returned.cache.diskHits >= (configuration.decodedBytes ? 2 : 3),
           );
           // Same profile and origin, entirely new browser process. No HTTP cache.
           await context.close();

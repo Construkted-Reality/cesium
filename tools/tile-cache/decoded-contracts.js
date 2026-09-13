@@ -150,19 +150,23 @@ export async function runDecodedContracts() {
     }
     assert(controller.stats().entries === 0, "Cache stays empty");
   });
-  test("texture mip levels retain their shared backing buffer", (controller) => {
-    const loader = texture();
-    cache.unload(loader);
-    assert(
-      controller.stats().textures.chargedBytes === 64,
-      "Count all mip storage without double counting",
-    );
-    assert(
-      cache.get(loader.cacheKey).mipLevels[0].byteLength === 16,
-      "Preserve mip levels",
-    );
-    cache.unload(loader);
-  });
+  test(
+    "texture mip levels retain their shared backing buffer",
+    (controller) => {
+      const loader = texture();
+      cache.unload(loader);
+      assert(
+        controller.stats().textures.chargedBytes === 64,
+        "Count all mip storage without double counting",
+      );
+      assert(
+        cache.get(loader.cacheKey).mipLevels[0].byteLength === 16,
+        "Preserve mip levels",
+      );
+      cache.unload(loader);
+    },
+    { textures: true },
+  );
   test(
     "resource-type switches isolate geometry and textures",
     (controller) => {
@@ -176,41 +180,74 @@ export async function runDecodedContracts() {
       );
       assert(controller.stats().geometry.entries === 0, "No geometry entries");
     },
-    { geometry: false },
+    { geometry: false, textures: true },
   );
+  test("default retains only geometry across repeated clears", (controller) => {
+    for (let i = 0; i < 3; i++) {
+      const a = geometry(),
+        b = texture();
+      cache.unload(a);
+      cache.unload(b);
+      assert(
+        !a.isDestroyed() && b.isDestroyed(),
+        "Default must retain only geometry",
+      );
+      assert(
+        controller.stats().geometry.entries === 1,
+        "Admit geometry after clear",
+      );
+      assert(
+        controller.stats().uniquePayloadBytes === 64,
+        "Recompute unique buffer size",
+      );
+      controller.clear();
+      assert(
+        a.isDestroyed() && controller.stats().chargedBytes === 0,
+        "Clear releases geometry",
+      );
+      assert(
+        controller.stats().uniquePayloadBytes === 0,
+        "Clear releases unique buffers",
+      );
+    }
+  });
   test("context loss clears entries and suspends admissions", (controller) => {
-    const a = texture();
+    const a = geometry();
     cache.unload(a);
     canvas.dispatchEvent(new Event("webglcontextlost"));
     assert(
       a.isDestroyed() && controller.stats().entries === 0,
       "Clear incompatible context data",
     );
-    const b = texture();
+    const b = geometry();
     cache.unload(b);
     assert(b.isDestroyed(), "Do not admit while the context is lost");
     canvas.dispatchEvent(new Event("webglcontextrestored"));
-    const c = texture();
+    const c = geometry();
     cache.unload(c);
     assert(!c.isDestroyed(), "Resume admission after restoration");
   });
   canvas.width = canvas.height = 2;
   const bitmap = await createImageBitmap(canvas);
-  test("ordinary decoded bitmap retention", (controller) => {
-    const loader = texture();
-    loader._image = bitmap;
-    loader._mipLevels = undefined;
-    cache.unload(loader);
-    assert(
-      controller.stats().textures.chargedBytes === 16,
-      "Estimate ordinary image pixels as RGBA",
-    );
-    assert(
-      cache.get(loader.cacheKey).image === bitmap,
-      "Reuse the decoded bitmap object",
-    );
-    cache.unload(loader);
-  });
+  test(
+    "ordinary decoded bitmap retention",
+    (controller) => {
+      const loader = texture();
+      loader._image = bitmap;
+      loader._mipLevels = undefined;
+      cache.unload(loader);
+      assert(
+        controller.stats().textures.chargedBytes === 16,
+        "Estimate ordinary image pixels as RGBA",
+      );
+      assert(
+        cache.get(loader.cacheKey).image === bitmap,
+        "Reuse the decoded bitmap object",
+      );
+      cache.unload(loader);
+    },
+    { textures: true },
+  );
   bitmap.close();
   test("duplicate installation fails and destroy is idempotent", (controller) => {
     let rejected = false;

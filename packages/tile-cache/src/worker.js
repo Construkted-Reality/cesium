@@ -125,9 +125,6 @@ self.addEventListener("message", (event) => {
         if (action === "clear") {
           await store.clear();
         }
-        if (action === "clearMemory") {
-          await store.clearMemory();
-        }
         port.postMessage({ result: await store.snapshot() });
       } catch (error) {
         port.postMessage({ error: String(error) });

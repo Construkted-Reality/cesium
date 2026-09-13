@@ -1,14 +1,5 @@
 # Construkted Reality fork changes
 
-## Decoded tile resource cache
-
-- Add an optional RAM cache for completed Draco geometry and decoded or transcoded
-  textures in `@construkted/tile-cache/decoded`.
-- Bound retained payload bytes with LRU eviction. Preserve live caller references
-  during clearing and release cache references during teardown or context loss.
-- Add ownership contracts and GPU measurements for separate geometry and texture
-  retention, constrained budgets, clearing, and offline browser restarts.
-
 This file lists the changes that the Construkted Reality fork adds to CesiumJS. Upstream
 CesiumJS does not contain these changes. See [FORK.md](FORK.md) for the branch layout, the
 tag format, and the upgrade procedure.
@@ -34,12 +25,15 @@ This section gets the tag name `construkted-1.146.0-1` at the next rebase. See
 ### Local tile caching
 
 - The optional `@construkted/tile-cache` workspace retains encoded responses in
-  bounded RAM and browser Cache Storage. It uses Workbox, `idb`, and `lru-cache`.
+  byte-bounded browser Cache Storage with LRU eviction. It uses Workbox and `idb`.
+- The separate `/decoded` entry point retains Draco geometry in RAM by default.
+  Texture retention is optional. `lru-cache` bounds retained payloads and preserves
+  live caller ownership during eviction, clearing, teardown, and context loss.
 - Cache keys separate accounts, dataset versions, URLs, and request headers.
   The package requires an immutable dataset directory and explicit registration.
 - The harness checks tile eviction, transfer counts, return pixels, offline browser
   restart, byte budgets, storage failures, and cancellation. It also provides
-  experimental retention policies and decoded-image measurements.
+  decoded-resource measurements. No encoded-response RAM tier is maintained.
 - See [the cache guide](packages/tile-cache/GUIDE.md) for deployment requirements
   and [the harness guide](tools/tile-cache/GUIDE.md) for verification commands.
 

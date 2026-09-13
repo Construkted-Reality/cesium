@@ -17,9 +17,7 @@ window.cacheContracts = async () => {
     version: "v1",
     urlPrefix: `${location.origin}/tile-data/v1/`,
     diskBytes: 16,
-    memoryBytes: 0,
     maximumEntryBytes: 16,
-    policy: "lru",
   };
   const make = async (label, options = {}) => {
     const store = new ResponseStore(`construkted-test-${label}`, {
@@ -33,41 +31,39 @@ window.cacheContracts = async () => {
   const response = (text = "12345678", headers) =>
     new Response(text, { headers });
 
-  for (const policy of ["lru", "revisited"]) {
-    const store = await make(policy, { policy });
-    await store.write(key("A"), response());
-    await store.write(key("B"), response());
-    await store.get(key("A"));
-    await store.write(key("C"), response());
-    await store.write(key("D"), response());
-    const a = await store.get(key("A"));
-    check(!!a === (policy === "revisited"), `${policy} retained wrong entries`);
-    check((await store.snapshot()).diskBytes === 16, "Disk budget mismatch");
-    results.push({
-      test: `retention-${policy}`,
-      pass: true,
-      stats: await store.snapshot(),
-    });
-    await store.clear();
-  }
+  const lru = await make("lru");
+  await lru.write(key("A"), response());
+  await lru.write(key("B"), response());
+  await lru.get(key("A"));
+  await lru.write(key("C"), response());
+  check(!(await lru.get(key("B"))), "LRU did not evict B after touching A");
+  await lru.write(key("D"), response());
+  check(!(await lru.get(key("A"))), "LRU retained stale A");
+  check((await lru.snapshot()).diskBytes === 16, "Disk budget mismatch");
+  results.push({
+    test: "retention-lru",
+    pass: true,
+    stats: await lru.snapshot(),
+  });
+  await lru.clear();
 
-  const memory = await make("memory", { memoryBytes: 16 });
-  await memory.write(key("A"), response());
-  const body = await (await memory.get(key("A"))).arrayBuffer();
+  const disk = await make("disk");
+  await disk.write(key("A"), response());
+  const body = await (await disk.get(key("A"))).arrayBuffer();
   structuredClone(body, { transfer: [body] });
   check(body.byteLength === 0, "Transfer did not detach the returned buffer");
   check(
-    (await (await memory.get(key("A"))).text()) === "12345678",
+    (await (await disk.get(key("A"))).text()) === "12345678",
     "Cached bytes detached",
   );
   await Promise.all(
     Array.from({ length: 20 }).map((value, index) =>
-      memory.write(key(`parallel-${value}-${index}`), response()),
+      disk.write(key(`parallel-${value}-${index}`), response()),
     ),
   );
-  const snapshot = await memory.snapshot();
+  const snapshot = await disk.snapshot();
   check(
-    snapshot.memoryBytes <= 16 && snapshot.diskBytes <= 16,
+    snapshot.diskBytes <= 16,
     "Concurrent writes exceeded retained budgets",
   );
   results.push({
@@ -75,7 +71,7 @@ window.cacheContracts = async () => {
     pass: true,
     stats: snapshot,
   });
-  await memory.clear();
+  await disk.clear();
 
   const admission = await make("admission");
   await admission.write(key("large"), response("x".repeat(17)));
@@ -164,9 +160,10 @@ window.cacheContracts = async () => {
   check(a !== b && !a.includes("Bearer"), "Authorization key collision");
   for (const input of [
     { diskBytes: -1 },
-    { memoryBytes: Infinity },
+    { memoryBytes: 0 },
     { urlPrefix: "/not-a-directory" },
-    { policy: "unknown" },
+    { policy: "lru" },
+    { policy: "revisited" },
   ]) {
     let invalid = false;
     try {

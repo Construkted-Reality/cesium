@@ -61,7 +61,7 @@ try {
   report.visits.push(v);
   assert.equal(v.memoryAdjustedScreenSpaceError,8,'Application reduced requested detail');
   assert.deepEqual(v.errors,[]);assert.ok(!v.events.some(e=>e.name==='failed'));
-  if(v.cache){assert.ok(v.cache.uniquePayloadBytes<=config.decodedBytes);}
+  if(v.cache){assert.ok(v.cache.chargedBytes<=config.decodedBytes);assert.ok(v.cache.uniquePayloadBytes<=v.cache.chargedBytes);}
   if(step>=8){assert.deepEqual(v.visible,report.visits[index].visible);assert.equal(v.imageHash,report.visits[index].imageHash);}
   await save();
  }

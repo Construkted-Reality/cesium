@@ -9,7 +9,7 @@ export function retainDecodedResources(Cesium, options) {
     urlPrefix,
     canvas,
     geometry = true,
-    textures = true,
+    textures = false,
   } = options;
   if (!Number.isSafeInteger(maximumBytes) || maximumBytes <= 0) {
     throw new Error("maximumBytes must be a positive safe integer");
@@ -32,8 +32,6 @@ export function retainDecodedResources(Cesium, options) {
   }
   const originalGet = cache.get;
   const originalUnload = cache.unload;
-  const buffers = new Map();
-  let imageBytes = 0;
   let suspended = false;
   let destroyed = false;
   let contextAvailable = true;
@@ -47,15 +45,6 @@ export function retainDecodedResources(Cesium, options) {
     sizeCalculation: (entry) => entry.bytes,
     disposeAfter(entry) {
       counters[entry.kind].evictions++;
-      for (const buffer of entry.buffers) {
-        const count = buffers.get(buffer) - 1;
-        if (count) {
-          buffers.set(buffer, count);
-        } else {
-          buffers.delete(buffer);
-        }
-      }
-      imageBytes -= entry.imageBytes;
       originalUnload(entry.loader);
     },
   });
@@ -138,10 +127,6 @@ export function retainDecodedResources(Cesium, options) {
         counters.oversized++;
       } else if (entry?.bytes > 0) {
         originalGet(loader.cacheKey);
-        for (const buffer of entry.buffers) {
-          buffers.set(buffer, (buffers.get(buffer) || 0) + 1);
-        }
-        imageBytes += entry.imageBytes;
         held.set(loader.cacheKey, entry);
         counters[entry.kind].admissions++;
       }
@@ -170,18 +155,24 @@ export function retainDecodedResources(Cesium, options) {
   const controller = {
     clear,
     stats() {
+      const buffers = new Set();
+      let imageBytes = 0;
       const byKind = {
         geometry: { ...counters.geometry, entries: 0, chargedBytes: 0 },
         textures: { ...counters.textures, entries: 0, chargedBytes: 0 },
       };
       for (const entry of held.values()) {
+        for (const buffer of entry.buffers) {
+          buffers.add(buffer);
+        }
+        imageBytes += entry.imageBytes;
         byKind[entry.kind].entries++;
         byKind[entry.kind].chargedBytes += entry.bytes;
       }
       return {
         maximumBytes,
         chargedBytes: held.calculatedSize,
-        uniquePayloadBytes: [...buffers.keys()].reduce(
+        uniquePayloadBytes: [...buffers].reduce(
           (sum, buffer) => sum + buffer.byteLength,
           imageBytes,
         ),

@@ -59,6 +59,5 @@ export async function registerTileCache({ workerUrl, ...config }) {
     registration,
     stats: () => call("stats"),
     clear: () => call("clear"),
-    clearMemory: () => call("clearMemory"),
   };
 }

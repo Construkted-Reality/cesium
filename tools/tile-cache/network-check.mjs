@@ -24,7 +24,7 @@ try {
           const { registerTileCache } = await import(url);
           window.tileCache = await registerTileCache({
             workerUrl: "/Build/TileCache/worker.js", urlPrefix: prefix,
-            scope: "network-check", version: "1", memoryBytes: 1024, diskBytes: 4096,
+            scope: "network-check", version: "1", diskBytes: 4096,
           });
         }, prefix);
       }

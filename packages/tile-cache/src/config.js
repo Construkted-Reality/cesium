@@ -4,9 +4,7 @@ export function validateConfig(input, origin) {
     version: input.version,
     urlPrefix: new URL(input.urlPrefix, origin).href,
     diskBytes: input.diskBytes ?? 256 * 1024 * 1024,
-    memoryBytes: input.memoryBytes ?? 32 * 1024 * 1024,
     maximumEntryBytes: input.maximumEntryBytes ?? 16 * 1024 * 1024,
-    policy: input.policy ?? "lru",
   };
   for (const field of ["scope", "version"]) {
     if (typeof config[field] !== "string" || !config[field].length) {
@@ -26,13 +24,15 @@ export function validateConfig(input, origin) {
       "urlPrefix must be an HTTP directory URL without credentials, query or fragment",
     );
   }
-  for (const field of ["diskBytes", "memoryBytes", "maximumEntryBytes"]) {
+  for (const field of ["diskBytes", "maximumEntryBytes"]) {
     if (!Number.isSafeInteger(config[field]) || config[field] < 0) {
       throw new Error(`${field} must be a nonnegative safe integer`);
     }
   }
-  if (!["lru", "revisited"].includes(config.policy)) {
-    throw new Error("Unknown retention policy");
+  if (input.memoryBytes !== undefined || input.policy !== undefined) {
+    throw new Error(
+      "Response storage is disk-only with LRU eviction; remove memoryBytes and policy",
+    );
   }
   return config;
 }

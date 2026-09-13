@@ -1,9 +1,14 @@
-# Local tile response cache
+# Optional tile caching
 
-This opt-in package retains encoded HTTP responses in worker RAM and browser
-Cache Storage. It does not modify Cesium's GPU cache or loader lifetimes.
-Workbox owns the fetch lifecycle, `idb` provides the metadata database, and
-`lru-cache` enforces the RAM byte budget. All three dependency versions are pinned.
+Use `@construkted/tile-cache/decoded` for bounded decoded Draco geometry retention
+in RAM. Geometry retention is enabled by default; texture retention requires an
+explicit option. This entry point only needs `lru-cache` and the Cesium runtime.
+It works with ordinary browser HTTP caching and does not register a Service Worker.
+
+The separate response-cache entry point stores encoded tile files on browser disk
+when the application needs controlled local retention. Workbox owns its fetch
+lifecycle and `idb` provides its metadata database. There is no encoded-response
+RAM tier. All three dependency versions are pinned.
 
 ## Build and enable
 
@@ -27,12 +32,10 @@ const cache = await registerTileCache({
   scope: "account-42",
   version: "revision-17",
   diskBytes: 1024 * 1024 * 1024,
-  memoryBytes: 128 * 1024 * 1024,
   maximumEntryBytes: 16 * 1024 * 1024,
 });
 
 console.log(await cache.stats());
-await cache.clearMemory();
 await cache.clear();
 ```
 
@@ -58,22 +61,22 @@ browser overhead are additional. Browser quota failures fall back to networking;
 inspect the `errors` counter. Storage is subject to browser eviction and user
 clearing. A cache hit does not guarantee permanent offline availability.
 
-RAM is owned by the Service Worker. Browsers can terminate an idle worker, so
-RAM retention is opportunistic; committed disk entries survive worker termination.
-Each returned RAM response uses a copy so a decoder cannot detach the cached
-buffer. Copies, response buffering, and concurrent in-flight requests consume
-memory beyond the retained-byte budget. `maximumEntryBytes` bounds admission
-per response. The budget is per account/version/prefix namespace, not a global
-origin quota. Remove obsolete namespaces through application storage management.
+Committed disk entries survive worker termination. Response buffering and
+concurrent in-flight requests still use transient RAM. `maximumEntryBytes` bounds
+admission per response. The default disk cap is 256 MiB per account/version/prefix
+namespace, not a global origin quota. Remove obsolete namespaces through application
+storage management. Site-wide budgeting and a user-facing clear control belong to
+the integrating application.
 
 Metadata is committed after response storage. Startup removes uncommitted cache
 responses and missing-body records. Web Locks serialize disk operations where
 available. Consuming a response does not wait for its cache write; `stats()` waits
 for pending writes and provides a measurement barrier.
 
-The default eviction policy is `lru`. The experimental `revisited` policy protects
-entries that have had a cache hit before evicting entries encountered only once.
-It applies to disk retention. RAM uses the established library's LRU policy.
+The store evicts the least recently accessed entries before each write to fit its
+byte budget. LRU is its only policy. The earlier prototype's `memoryBytes` and
+`policy` options are rejected. Remove those options and calls to `clearMemory`;
+use `clear()` to purge the configured disk namespace.
 
 ## Service Worker ownership
 
@@ -114,7 +117,7 @@ const decodedCache = retainDecodedResources(Cesium, {
   urlPrefix: "https://assets.example.com/immutable-version/tileset/",
   maximumBytes: 512 * 1024 * 1024,
   geometry: true,
-  textures: true,
+  textures: false, // Default. Opt in only after measuring the RAM tradeoff.
 });
 ```
 
@@ -126,7 +129,7 @@ it does not add an independent asset-version or texture-format namespace.
 Destroy the controller before replacing the viewer or changing GPU capabilities.
 
 Geometry entries keep triangle indices, vertex attribute arrays, and quantization
-metadata. Texture entries keep KTX2/Basis transcoder output, its GPU-compatible
+metadata. Only Draco geometry loaders are retained. With `textures: true`, texture entries keep KTX2/Basis transcoder output, its GPU-compatible
 compressed format, and mip levels. They remain ready for upload. Ordinary decoded
 image objects are also supported. GPU buffers, textures, models, and draw commands
 are not retained by this adapter.
@@ -140,7 +143,7 @@ cache can provide compressed bytes for offline reconstruction after a restart.
 `maximumBytes` bounds retained payload charges. The cache counts full backing
 ArrayBuffers and counts a shared buffer once within an entry. It conservatively
 charges buffers shared by different entries more than once. `stats()` also reports
-`uniquePayloadBytes`, deduplicated across entries. Ordinary image objects use a
+`uniquePayloadBytes`, computed on demand and deduplicated across retained entries. Ordinary image objects use a
 width-times-height-times-four pixel estimate. Loader metadata, browser overhead,
 WebAssembly heaps, and GPU allocations are excluded. Released resources remain
 subject to ordinary garbage collection, so this is not a browser-process RAM cap.
@@ -161,7 +164,8 @@ restoration. The viewer remains responsible for restoring rendering. Clearing th
 cache cannot destroy data still referenced by an active consumer. Such data can
 be admitted again when that consumer subsequently releases its reference.
 
-For the Palace A/B workload, the first combined-cache preview retained about
-282 MiB of payload: 80 MiB of geometry and 202 MiB of texture blocks. This is
-additional system RAM and can overlap data already uploaded to the GPU. The
-benefit and appropriate budget depend on the revisited working set.
+Geometry reuse still needs the original encoded tile response for parsing and
+loader setup. If both the ordinary HTTP cache and optional disk cache miss, that
+response must be downloaded again. Texture decoding and GPU uploads can recur
+when only geometry is retained. Select payload budgets for the target device and
+working set; a larger combined cache is not automatically a better choice.

@@ -36,9 +36,9 @@ generated fixture. No internet dataset or account token is required.
 
 1. Verify the harness and baseline.
 2. Prototype Workbox Cache Storage and an explicit byte budget.
-3. Add bounded RAM storage with established LRU components.
+3. Retain decoded geometry in RAM with established LRU components.
 4. Test persistence, offline revisits, identity, cancellation, and storage failure.
-5. Compare retention policies and decoded-resource retention.
+5. Verify LRU eviction and decoded-resource retention.
 6. Evaluate alternate disk storage only if the measurements show a limitation.
 
 ## Extended verification
@@ -59,10 +59,10 @@ The storage contracts test byte limits, concurrent writes, transferred buffers,
 admission, interrupted writes, injected quota failure, and resource identity.
 The integration test uses the actual Service Worker to check cross-tab account
 and version isolation, request-header identity, range/no-store bypass, cancellation,
-RAM eviction, disk reuse, and explicit purge.
+disk reuse, and explicit purge.
 
 The retention phase gives the disk cache 2 MiB and visits A, B, A, C through H,
-then A again. It checks whether a repeat visit protects A through the journey.
+then A again. It checks that LRU eventually evicts A under the constrained budget.
 This phase does not promise offline restart: budget eviction can remove hierarchy
 resources even when some tile content survives.
 
@@ -74,8 +74,7 @@ overhead is not included in this estimate. It is not a supported production hook
 An ImageBitmap's backing storage is browser-managed; this experiment does not
 prove that every retained decoded byte resides exclusively in system RAM.
 
-The idle test allows a Service Worker to lose its RAM state. Disk hits are valid
-after the wait. Each cache phase also restarts the entire browser and verifies A
+The idle test checks disk reuse after a minute away. Each cache phase also restarts the entire browser and verifies A
 with the tile endpoint unavailable and the HTTP cache disabled. Source hashes in
 the output identify the exact engine bundle, worker, fixture, and harness code.
 
@@ -232,7 +231,8 @@ network, offline restart, and loader-cleanup checks.
 ## Decoded resource cache measurements
 
 `build.mjs` also builds `Build/TileCache/decoded-resources.js`. Add
-`--decoded=geometry`, `--decoded=textures`, or `--decoded=both` to the real runner.
+`--decoded=geometry`, `--decoded=textures`, or `--decoded=both` to the real runner. Geometry-only is the recommended application
+configuration; texture retention is an explicit comparison option.
 The default payload budget is 512 MiB; `--decodedBytes=67108864` selects 64 MiB.
 Omit `--decoded` for the ordinary decoder baseline. The decoded cache is independent
 of `--draco` and the compressed response-cache condition.
@@ -273,6 +273,7 @@ node tools/tile-cache/app-run.mjs --probe=true --recovery=native --output=/tmp/a
 The runner requires the RTX A4000 Wayland test environment. It records live script
 hashes, runtime tile budgets, final tile identities, canvas PNGs, HTTP transfers,
 worker job counts, decoded payload bytes, and browser process-tree memory.
+Each decoded-cache visit checks both charged and unique bytes against its cap.
 Proportional set size (PSS) accounts for shared process pages proportionally.
 One-second samples include loading; their maximum is a sampled high-water value,
 not a guarantee that no shorter peak occurred. GPU memory from `nvidia-smi` is
