@@ -19,6 +19,7 @@ const launch = { channel: "chromium", headless: args.software === "true",
   viewport: { width: 1280, height: 720 }, deviceScaleFactor: 1,
   args: args.software === "true" ? ["--use-angle=swiftshader", "--enable-unsafe-swiftshader"]
     : ["--use-angle=gl", "--ignore-gpu-blocklist", "--enable-gpu", "--ozone-platform=wayland"] };
+launch.args.push("--remote-debugging-port=0");
 const conditions = [
   { name: "uncached", cacheBytes: 1, httpCache: false },
   { name: "http-cache", cacheBytes: 1, httpCache: true },
@@ -80,7 +81,7 @@ try {
         context = await chromium.launchPersistentContext(profile, launch);
         const page = context.pages()[0];
         page.on("pageerror", error => run.errors.push(String(error)));
-        const network = await observeNetwork(context, page, { prefix, httpCache: condition.httpCache });
+        const network = await observeNetwork(context, page, { prefix, httpCache: condition.httpCache, profile });
         const started = performance.now();
         run.environment = await configure(page, condition);
         assert.ok(typeof run.environment.renderer === "string" &&
@@ -114,7 +115,7 @@ try {
             run.blockedRestartRequests.push(route.request().url());
             return route.abort("internetdisconnected");
           });
-          const network = await observeNetwork(context, page, { prefix, httpCache: false });
+          const network = await observeNetwork(context, page, { prefix, httpCache: false, profile });
           await configure(page, condition);
           run.restart = await visit(page, network, condition,
             `${condition.name}-r${repetition}-restart-A`, asset.poses[0], 0);
