@@ -45,6 +45,14 @@ This section gets the tag name `construkted-1.146.0-1` at the next rebase. See
 
 ### Fixes
 
+- Gaussian splat workers pad attribute textures before transfer to avoid a main-thread copy.
+
+- Gaussian splat replacements prepare texture data and sort before the old frame finishes.
+  They release old textures before the replacement upload to reduce overlapping GPU allocations.
+
+- Gaussian splat loading keeps a root fallback when the cache budget cannot hold it.
+  Memory pressure no longer increases detail error without a limit or retains stale decoding work.
+
 - Gaussian splat tiles render without SPZ compression. Mixed tilesets load compressed and
   uncompressed splat attributes through the same rendering path.
 - Uncompressed splats retain their higher-order spherical harmonics when a degree-zero
@@ -53,6 +61,9 @@ This section gets the tag name `construkted-1.146.0-1` at the next rebase. See
   that use `requestRenderMode`. Without this fix an idle scene does not show the splats.
 - A camera move that arrives during a sort now starts a second sort. Without this fix the
   splats keep the order of the previous camera position.
+
+- Gaussian splats release the texture worker after the last primitive and pending task finish.
+  The worker retains its WebAssembly memory while another splat primitive remains alive.
 
 ### Changed files
 

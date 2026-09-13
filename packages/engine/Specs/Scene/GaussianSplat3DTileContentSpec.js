@@ -172,6 +172,29 @@ describe(
       expect(tile.content).toBeUndefined();
     });
 
+    it("releases source glTF data after decoding", async function () {
+      const tileset = await Cesium3DTilesTester.loadTileset(
+        scene,
+        tilesetUrl,
+        options,
+      );
+      scene.camera.lookAt(
+        tileset.boundingSphere.center,
+        new HeadingPitchRange(0.0, -1.57, tileset.boundingSphere.radius),
+      );
+      const tile = await Cesium3DTilesTester.waitForTileContentReady(
+        scene,
+        tileset.root,
+      );
+      const content = tile.content;
+      expect(content._loader._gltfJsonLoader).toBeUndefined();
+      expect(content._loader._typedArray).toBeUndefined();
+      expect(content.positions.length).toBe(content.pointsLength * 3);
+      expect(content.rotations.length).toBe(content.pointsLength * 4);
+      expect(content.scales.length).toBe(content.pointsLength * 3);
+      expect(content.gltfPrimitive.attributes.length).toBeGreaterThan(0);
+    });
+
     it("Load multiple instances of Gaussian splat tileset and validate transformed attributes", async function () {
       const tileset = await Cesium3DTilesTester.loadTileset(
         scene,
@@ -233,6 +256,20 @@ describe(
       const scales2 = tile2.content._scales;
 
       expect(scales1.every((s, i) => s === scales2[i])).toBe(true);
+
+      scene.primitives.remove(tileset);
+      scene.renderForSpecs();
+      expect(content._positions).toBeUndefined();
+      expect(content2.positions).toBe(positions2);
+      expect(content2.rotations).toBe(rotations2);
+      expect(content2.scales).toBe(scales2);
+      expect(content2._loader.isDestroyed()).toBe(false);
+      expect(
+        ModelUtility.getAttributeBySemantic(
+          content2.gltfPrimitive,
+          VertexAttributeSemantic.POSITION,
+        ).typedArray.length,
+      ).toBe(content2.pointsLength * 3);
     });
 
     it("keeps transformed attribute buffers separate from the original glTF attributes", async function () {
@@ -355,6 +392,13 @@ describe(
       // tile content is destroyed, because other tiles in the tileset still
       // rely on it.
       expect(gaussianSplatPrimitive.isDestroyed()).toBe(false);
+      expect(content._positions).toBeUndefined();
+      expect(content._rotations).toBeUndefined();
+      expect(content._scales).toBeUndefined();
+      expect(content._packedSphericalHarmonicsData).toBeUndefined();
+      expect(content.gltfPrimitive).toBeUndefined();
+      expect(content.worldTransform).toBeUndefined();
+      expect(content._loader).toBeUndefined();
     });
   },
   "WebGL",

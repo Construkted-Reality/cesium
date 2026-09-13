@@ -59,10 +59,12 @@ Cesium3DTilesetSkipTraversal.selectTiles = function (tileset, frameState) {
     return;
   }
 
-  if (
-    root.getScreenSpaceError(frameState, true) <=
-    tileset.memoryAdjustedScreenSpaceError
-  ) {
+  // Memory pressure may reduce splat detail to the root level, but must not
+  // hide that fallback. Keep the user's explicit visibility threshold.
+  const rootScreenSpaceError = defined(tileset.gaussianSplatPrimitive)
+    ? tileset.maximumScreenSpaceError
+    : tileset.memoryAdjustedScreenSpaceError;
+  if (root.getScreenSpaceError(frameState, true) <= rootScreenSpaceError) {
     return;
   }
 
