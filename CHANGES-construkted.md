@@ -24,6 +24,8 @@ This section gets the tag name `construkted-1.146.0-1` at the next rebase. See
 
 ### Fixes
 
+- Gaussian splat workers pad attribute textures before transfer to avoid a main-thread copy.
+
 - Gaussian splat replacements prepare texture data and sort before the old frame finishes.
   They release old textures before the replacement upload to reduce overlapping GPU allocations.
 

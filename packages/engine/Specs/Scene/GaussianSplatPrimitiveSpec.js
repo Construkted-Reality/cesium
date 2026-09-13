@@ -1,5 +1,6 @@
 import {
   Cesium3DTileset,
+  ContextLimits,
   Event,
   PerspectiveFrustum,
   Math as CesiumMath,
@@ -180,6 +181,31 @@ describe(
       expect(tileset._statistics.texturesByteLength).toBe(100);
       expect(tileset._statistics.geometryByteLength).toBe(20);
       replacement.destroy();
+    });
+
+    it("keeps the worker texture buffer without a main-thread copy", async function () {
+      const { primitive, frame } = createSortFixture();
+      const width = ContextLimits.maximumTextureSize;
+      const data = new Uint32Array(width * 4);
+      const generate = spyOn(
+        GaussianSplatTextureGenerator,
+        "generateFromAttributes",
+      ).and.returnValue(Promise.resolve({ width, height: 1, data }));
+      const pending = {
+        state: "BUILDING",
+        positions: new Float32Array(6),
+        rotations: new Float32Array(8),
+        scales: new Float32Array(6),
+        colors: new Uint8Array(8),
+        numSplats: 2,
+      };
+      primitive._pendingSnapshot = pending;
+      GaussianSplatPrimitive.generateSplatTexture(primitive, frame, pending);
+      await Promise.resolve();
+      expect(generate.calls.mostRecent().args[0].textureWidth).toBe(width);
+      expect(pending.attributeTextureData.data.buffer).toBe(data.buffer);
+      expect(pending.state).toBe("DATA_READY");
+      primitive.destroy();
     });
 
     it("requests frames for selection stability but stops when settled", function () {
