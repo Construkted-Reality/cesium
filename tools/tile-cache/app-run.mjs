@@ -19,6 +19,8 @@ const profile=await mkdtemp(join(tmpdir(),'cache-app-'));
 const report={startedAt:new Date().toISOString(),commit:execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),config,visits:[],errors:[],consoleErrors:[],scripts:[]};
 const save=()=>writeFile(output,`${JSON.stringify(report,null,2)}\n`);
 let context;
+let memoryTimer, pendingMemory;
+report.memorySamples=[];
 const pendingScripts=[];
 report.sourceHashes={};
 for(const file of ['tools/tile-cache/app-run.mjs','tools/tile-cache/app-probe.js','tools/tile-cache/process-memory.mjs','tools/tile-cache/app-recovery.mjs','packages/tile-cache/src/decoded.js','tools/tile-cache/palace-route.json']){report.sourceHashes[file]=createHash('sha256').update(await readFile(file)).digest('hex');}
@@ -28,6 +30,10 @@ try {
  await context.addInitScript({content:`${bundle.outputFiles[0].text}\n(${installAppProbe.toString()})(${JSON.stringify(config)});`});
  const memorySession=await context.browser().newBrowserCDPSession();
  report.memoryBeforePage=await sampleProcessMemory(memorySession);
+ memoryTimer=setInterval(()=>{
+  if(pendingMemory){return;}
+  pendingMemory=sampleProcessMemory(memorySession).then(sample=>report.memorySamples.push(sample)).catch(error=>{report.memorySamplingError=String(error);}).finally(()=>{pendingMemory=undefined;});
+ },1000);
  const page=context.pages()[0];page.on('pageerror',e=>report.errors.push({message:String(e),stack:e.stack}));page.on('console',m=>{if(m.type()==='error'){report.consoleErrors.push(m.text());}});
  page.on('response',response=>{if(response.request().resourceType()==='script'){
   const entry={url:response.url(),status:response.status(),contentType:response.headers()['content-type']};report.scripts.push(entry);
@@ -78,4 +84,4 @@ try {
  }
  report.complete=true;
 } catch(error){report.error=String(error.stack);process.exitCode=1;}
-finally{report.completedAt=new Date().toISOString();await save();await context?.close();await rm(profile,{recursive:true,force:true});}
+finally{clearInterval(memoryTimer);await pendingMemory;report.completedAt=new Date().toISOString();await save();await context?.close();await rm(profile,{recursive:true,force:true});}
