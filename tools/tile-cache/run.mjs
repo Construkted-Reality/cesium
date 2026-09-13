@@ -17,6 +17,8 @@ const repetitions = Number(options.repetitions || 5);
 const software = options.software === "true";
 const backend = software ? "swiftshader" : options.backend || "gl";
 assert.ok(["gl", "vulkan", "swiftshader"].includes(backend), "Unknown backend");
+const wayland = options.wayland === "true";
+assert.ok(!wayland || backend === "gl", "Wayland requires the gl backend");
 const launchArgs = software
   ? ["--use-angle=swiftshader", "--enable-unsafe-swiftshader"]
   : backend === "vulkan"
@@ -42,6 +44,7 @@ assert.ok(
     Number(options.idleMs || 0) >= 0,
   "idleMs must be nonnegative",
 );
+if (wayland) {launchArgs.push("--ozone-platform=wayland", "--enable-gpu");}
 const appServer = await startServer({
   latencyMs: Number(options.latency || 100),
   textureSize: Number(options.textureSize || 512),
@@ -65,6 +68,7 @@ const report = {
     repetitions,
     software,
     backend,
+    wayland,
     launchArgs,
     latencyMs: server.state.latencyMs,
     textureSize: Number(options.textureSize || 512),
@@ -176,7 +180,7 @@ try {
       const profile = await mkdtemp(join(tmpdir(), "cesium-cache-"));
       const launchOptions = {
         channel: "chromium",
-        headless: true,
+        headless: !wayland,
         viewport: report.configuration.viewport,
         deviceScaleFactor: 1,
         args: launchArgs,
@@ -202,8 +206,10 @@ try {
           configuration,
         );
         assert.ok(
-          software ||
-            !/swiftshader|llvmpipe|software/i.test(environment.renderer),
+          typeof environment.renderer === "string" &&
+            environment.renderer.length > 0 &&
+            (software ||
+              !/swiftshader|llvmpipe|software/i.test(environment.renderer)),
           `Hardware GPU required: ${environment.renderer}`,
         );
         const run = {

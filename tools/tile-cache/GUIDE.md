@@ -96,3 +96,10 @@ For a headless NVIDIA host, pass `--backend=vulkan`. The report records the
 backend and browser launch arguments. The renderer check still rejects software
 rendering unless `--software=true` is explicitly supplied. Probe the host with
 `node tools/splat-perf/gpu-probe.mjs` before choosing a backend.
+
+If Vulkan loses its context in Cesium, use `--backend=gl --wayland=true`
+with a running Wayland compositor. Set `XDG_RUNTIME_DIR`, `WAYLAND_DISPLAY`,
+and the host's `__EGL_VENDOR_LIBRARY_FILENAMES` before running the command.
+This launches headed Chromium inside the compositor. On the A4000 test host,
+headless Weston with its GL renderer provides hardware OpenGL rendering.
+A missing renderer also fails the GPU check.
