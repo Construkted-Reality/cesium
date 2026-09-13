@@ -28,6 +28,7 @@ let probes;
 let pipeline;
 let dracoExperiment;
 let decodedResources;
+let localFrame;
 const events = [];
 const renderErrors = [];
 viewer.scene.renderError.addEventListener((...args) =>
@@ -112,6 +113,7 @@ window.harness = {
         Cesium.Cartesian3.fromDegrees(...config.localOrigin),
       );
     }
+    localFrame = tileset.modelMatrix;
     viewer.scene.primitives.add(tileset);
     for (const [name, event] of [
       ["load", tileset.tileLoad],
@@ -156,6 +158,9 @@ window.harness = {
     performance.clearResourceTimings();
     active = { visible: new Set() };
     if (pose) {
+      viewer.camera.frustum.fov = Cesium.Math.toRadians(pose.fov || 60);
+    }
+    if (pose && !pose.position) {
       camera = {
         destination: Cesium.Cartesian3.fromDegrees(
           pose.longitude,
@@ -168,7 +173,46 @@ window.harness = {
           roll: Cesium.Math.toRadians(pose.roll || 0),
         },
       };
-      viewer.camera.frustum.fov = Cesium.Math.toRadians(pose.fov || 60);
+    }
+    if (pose?.position && pose?.target) {
+      const destination = Cesium.Matrix4.multiplyByPoint(
+        localFrame,
+        Cesium.Cartesian3.fromArray(pose.position),
+        new Cesium.Cartesian3(),
+      );
+      const target = Cesium.Matrix4.multiplyByPoint(
+        localFrame,
+        Cesium.Cartesian3.fromArray(pose.target),
+        new Cesium.Cartesian3(),
+      );
+      const direction = Cesium.Cartesian3.normalize(
+        Cesium.Cartesian3.subtract(
+          target,
+          destination,
+          new Cesium.Cartesian3(),
+        ),
+        new Cesium.Cartesian3(),
+      );
+      const vertical = Cesium.Matrix4.multiplyByPointAsVector(
+        localFrame,
+        Cesium.Cartesian3.UNIT_Z,
+        new Cesium.Cartesian3(),
+      );
+      const right = Cesium.Cartesian3.normalize(
+        Cesium.Cartesian3.cross(direction, vertical, new Cesium.Cartesian3()),
+        new Cesium.Cartesian3(),
+      );
+      camera = {
+        destination,
+        orientation: {
+          direction,
+          up: Cesium.Cartesian3.cross(
+            right,
+            direction,
+            new Cesium.Cartesian3(),
+          ),
+        },
+      };
     }
     viewer.camera.setView(
       camera || {
@@ -187,9 +231,22 @@ window.harness = {
     let stableFrames = 0;
     let previousVisible = "";
     let frameVisible = new Set();
-    const removeVisible = tileset.tileVisible.addEventListener((tile) =>
-      frameVisible.add(tileUrl(tile)),
-    );
+    let frameDetails = new Map();
+    let finalDetails = [];
+    const removeVisible = tileset.tileVisible.addEventListener((tile) => {
+      frameVisible.add(tileUrl(tile));
+      frameDetails.set(tileUrl(tile), {
+        url: tileUrl(tile),
+        level: tile.implicitCoordinates?.level,
+        geometricError: tile.geometricError,
+        children: tile.children.length,
+        terminal:
+          tile.hasRenderableContent &&
+          !tile.hasImplicitContent &&
+          tile.children.length === 0,
+        triangles: tile.content?.trianglesLength,
+      });
+    });
     await new Promise((resolve, reject) => {
       const subscription = {};
       const timer = setTimeout(() => {
@@ -225,6 +282,10 @@ window.harness = {
         previousVisible = key;
         active.visible = frameVisible;
         frameVisible = new Set();
+        finalDetails = [...frameDetails.values()].sort((a, b) =>
+          a.url.localeCompare(b.url),
+        );
+        frameDetails = new Map();
         if (stableFrames >= 4) {
           clearTimeout(timer);
           subscription.remove();
@@ -239,6 +300,8 @@ window.harness = {
       renderErrors: [...renderErrors],
       settleMs: performance.now() - started,
       residentBytes: tileset.totalMemoryUsageInBytes,
+      screenSpaceError: tileset.maximumScreenSpaceError,
+      memoryAdjustedScreenSpaceError: tileset.memoryAdjustedScreenSpaceError,
       decoded: decoded?.stats(),
       decodedResources: decodedResources?.stats(),
       probes: probes?.snapshot(),
@@ -246,6 +309,7 @@ window.harness = {
       draco: dracoExperiment?.snapshot(),
       milestones,
       visible: [...active.visible].sort(),
+      tileDetails: finalDetails,
       events: events.slice(eventStart),
       frameMs: frameTimes.slice(frameStart),
       resources: performance
@@ -257,6 +321,43 @@ window.harness = {
     };
     active = undefined;
     return result;
+  },
+  inspectPose() {
+    const inverse = Cesium.Matrix4.inverseTransformation(
+      localFrame,
+      new Cesium.Matrix4(),
+    );
+    const local = (point) => {
+      const p = Cesium.Matrix4.multiplyByPoint(
+        inverse,
+        point,
+        new Cesium.Cartesian3(),
+      );
+      return [p.x, p.y, p.z];
+    };
+    const samples = [];
+    for (const y of [0.25, 0.5, 0.75]) {
+      for (const x of [0.25, 0.5, 0.75]) {
+        const point = viewer.scene.pickPosition(
+          new Cesium.Cartesian2(
+            viewer.canvas.clientWidth * x,
+            viewer.canvas.clientHeight * y,
+          ),
+        );
+        if (point) {
+          samples.push({
+            x,
+            y,
+            position: local(point),
+            distance: Cesium.Cartesian3.distance(
+              viewer.camera.positionWC,
+              point,
+            ),
+          });
+        }
+      }
+    }
+    return { camera: local(viewer.camera.positionWC), samples };
   },
   clearDecodedResources() {
     decodedResources?.clear();

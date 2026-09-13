@@ -148,6 +148,35 @@ pose, selected tile URLs and transferred bytes. `summary.json` contains the
 per-condition timing distributions. The runner saves JSON through an atomic
 rename so readers can copy completed snapshots while measurements continue.
 
+## Eight-view route
+
+Use `--config=tools/tile-cache/palace-route.json` for eight poses repeated twice.
+The route keeps the original front and back views and adds three intermediate
+views plus three facade detail views. Close cameras use local `position` and
+`target` coordinates in metres. Other poses use longitude, latitude and height.
+An optional `route` array specifies pose indices; the default remains `[0, 1, 0]`.
+
+```sh
+node tools/tile-cache/real-run.mjs --config=tools/tile-cache/palace-route.json --conditions=disk --decoded=both --repetitions=3 --output=/tmp/palace-route/results.json
+node tools/tile-cache/real-report.mjs /tmp/palace-route/results.json
+```
+
+The first lap populates the caches. The second lap measures every pose again.
+The runner verifies matching pixels and tile IDs for each repeated pose. It also
+checks that repeated poses make no upstream requests in local-cache conditions.
+Results include every revisit and per-pose distributions in the generated summary.
+
+This route increases the rendering overflow allowance to 1 GiB while retaining
+the one-byte unused-tile target. The old 256 MiB allowance reduced detail at close
+positions. `requireFullDetail` rejects any visit whose memory-adjusted screen-space
+error differs from the requested error. The decoded RAM budget is separate.
+
+Each visit records tile levels, geometric errors, triangle counts and terminal
+nodes of the expanded tile tree. Post-timing depth-buffer samples record surface
+positions and camera distances on a 3 by 3 screen grid. These samples verify the
+close views but do not measure collision clearance in every direction. They and
+screenshots occur after the settled-view timer stops.
+
 ## Pipeline attribution
 
 Add `--pipeline=true` to `real-run.mjs` for diagnostic probes. Run the same

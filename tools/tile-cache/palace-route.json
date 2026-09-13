@@ -1,0 +1,141 @@
+{
+  "name": "Palace of Fine Arts",
+  "page": "https://construkted.com/asset/a6h1xgn5pzd/",
+  "url": "https://s3.us-east-2.wasabisys.com/construkted-assets/a6h1xgn5pzd/tileset/tileset.json",
+  "localOrigin": [
+    0,
+    0,
+    0
+  ],
+  "sse": 16,
+  "overflowBytes": 1073741824,
+  "diskBytes": 1073741824,
+  "memoryBytes": 268435456,
+  "maximumEntryBytes": 67108864,
+  "residentBytes": 536870912,
+  "poses": [
+    {
+      "name": "A-page-saved-view",
+      "longitude": 0.00018805042227454404,
+      "latitude": -0.0011419301678297063,
+      "height": 48.32354538290278,
+      "heading": 352.5907574697315,
+      "pitch": -18.329227965626973,
+      "roll": 359.9999851677337,
+      "fov": 60
+    },
+    {
+      "name": "C-front-detail",
+      "position": [
+        9.529891,
+        -38.574472,
+        19.027769
+      ],
+      "target": [
+        8.917821,
+        -33.867744,
+        17.455481
+      ],
+      "fov": 60
+    },
+    {
+      "name": "D-front-side-overview",
+      "position": [
+        104.85146166899095,
+        -73.4177838529339,
+        48
+      ],
+      "target": [
+        0,
+        0,
+        25
+      ],
+      "fov": 60
+    },
+    {
+      "name": "E-front-side-detail",
+      "position": [
+        27.143375,
+        -19.005996,
+        30.954115
+      ],
+      "target": [
+        23.112177,
+        -16.183321,
+        30.069839
+      ],
+      "fov": 60
+    },
+    {
+      "name": "F-side-overview",
+      "position": [
+        126.05539238556263,
+        22.226966741367082,
+        48
+      ],
+      "target": [
+        0,
+        0,
+        25
+      ],
+      "fov": 60
+    },
+    {
+      "name": "G-side-detail",
+      "position": [
+        29.852525,
+        5.263806,
+        30.446876
+      ],
+      "target": [
+        25.006104,
+        4.409251,
+        29.562601
+      ],
+      "fov": 60
+    },
+    {
+      "name": "H-back-side-overview",
+      "position": [
+        73.41778385293391,
+        104.85146166899095,
+        48
+      ],
+      "target": [
+        0,
+        0,
+        25
+      ],
+      "fov": 60
+    },
+    {
+      "name": "B-opposite-side",
+      "longitude": -0.00018805042227454404,
+      "latitude": 0.0011419301678297063,
+      "height": 48.32354538290278,
+      "heading": 172.5907574697315,
+      "pitch": -18.329227965626973,
+      "roll": 0,
+      "fov": 60
+    }
+  ],
+  "route": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "requireFullDetail": true
+}
