@@ -1,5 +1,5 @@
 import { chromium } from "@playwright/test";
-import { readFile, writeFile, mkdir, mkdtemp, rm } from "node:fs/promises";
+import { readFile, writeFile, mkdir, mkdtemp, rm, rename } from "node:fs/promises";
 import { resolve, dirname, join } from "node:path";
 import { tmpdir, hostname } from "node:os";
 import { execFileSync } from "node:child_process";
@@ -40,7 +40,10 @@ for (const path of [configPath, "tools/tile-cache/real-run.mjs", "tools/tile-cac
   report.sourceHashes[path] = createHash("sha256").update(await readFile(path)).digest("hex");
 }
 const server = await startServer({ latencyMs: 0 });
-const save = () => writeFile(output, `${JSON.stringify(report, null, 2)  }\n`);
+const save = async () => {
+  await writeFile(`${output}.tmp`, `${JSON.stringify(report, null, 2)}\n`);
+  await rename(`${output}.tmp`, output);
+};
 async function configure(page, condition) {
   await page.goto(`${server.url}/tools/tile-cache/harness.html`);
   await page.waitForFunction(() => !!window.harness);

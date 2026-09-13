@@ -135,3 +135,15 @@ Run `node tools/tile-cache/network-check.mjs` to verify the counters against the
 controlled server. Encoded transfer bytes include HTTP overhead and exclude
 unknown bytes from cancelled transfers. All timings include tile selection,
 decoding, upload and four stable frames. They are not isolated decoder timings.
+
+Add `--idleMs=60000` to wait one minute before returning to A. To build a local
+screenshot gallery and summary table from a completed run, use:
+
+```sh
+node tools/tile-cache/real-report.mjs /tmp/palace/results.json
+```
+
+Open the resulting `gallery.html`. It includes each camera screenshot, the exact
+pose, selected tile URLs and transferred bytes. `summary.json` contains the
+per-condition timing distributions. The runner saves JSON through an atomic
+rename so readers can copy completed snapshots while measurements continue.
