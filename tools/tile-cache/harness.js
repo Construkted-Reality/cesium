@@ -38,6 +38,16 @@ viewer.scene.postRender.addEventListener(() => {
 const tileUrl = (tile) => tile._contentResource?.url;
 
 window.harness = {
+  snapshot() {
+    return {
+      events,
+      renderErrors,
+      residentBytes: tileset?.totalMemoryUsageInBytes,
+      tilesLoaded: tileset?.tilesLoaded,
+      statistics: tileset?._statistics,
+      visible: [...(active?.visible || [])],
+    };
+  },
   async enableCache(config) {
     const clientUrl = new URL(
       "../../Build/TileCache/client.js",
@@ -72,6 +82,10 @@ window.harness = {
       },
     );
     if (config.localOrigin) {
+      viewer.clock.shouldAnimate = false;
+      viewer.clock.currentTime = Cesium.JulianDate.fromIso8601(
+        "2026-09-13T12:00:00Z",
+      );
       tileset.modelMatrix = Cesium.Transforms.eastNorthUpToFixedFrame(
         Cesium.Cartesian3.fromDegrees(...config.localOrigin),
       );

@@ -73,7 +73,7 @@ try {
     const ordered = conditions.filter(c => selected.includes(c.name));
     ordered.push(...ordered.splice(0, repetition % ordered.length));
     for (const condition of ordered) {
-      const run = { condition, repetition, visits: [], errors: [] };
+      const run = { condition, repetition, visits: [], errors: [], consoleErrors: [] };
       report.runs.push(run);
       const profile = await mkdtemp(join(tmpdir(), "palace-cache-"));
       let context;
@@ -81,7 +81,13 @@ try {
         context = await chromium.launchPersistentContext(profile, launch);
         const page = context.pages()[0];
         page.on("pageerror", error => run.errors.push(String(error)));
+        page.on("console", message => {
+          if (message.type() === "error" && run.consoleErrors.length < 100) {
+            run.consoleErrors.push(message.text());
+          }
+        });
         const network = await observeNetwork(context, page, { prefix, httpCache: condition.httpCache, profile });
+        run.allNetwork = network.records;
         const started = performance.now();
         run.environment = await configure(page, condition);
         assert.ok(typeof run.environment.renderer === "string" &&
@@ -130,6 +136,11 @@ try {
           evicted: run.evictedAtB, samePixels: run.sameReturnPixels }));
       } catch (error) {
         run.error = String(error.stack);
+        const page = context?.pages()[0];
+        if (page && !page.isClosed()) {
+          run.diagnostic = await page.evaluate(() => window.harness?.snapshot()).catch(String);
+          await page.screenshot({ path: join(dirname(output), `${condition.name}-r${repetition}-failure.png`) }).catch(() => {});
+        }
         process.exitCode = 1;
       } finally {
         await context?.close();
