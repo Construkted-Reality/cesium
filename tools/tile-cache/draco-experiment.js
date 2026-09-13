@@ -64,7 +64,7 @@ export function installDracoExperiment(Cesium, config) {
     const start = performance.now() - epoch;
     const id = serial++;
     const promise = processor.scheduleTask(
-      { ...options, profile: config.profile },
+      { ...options, profile: config.profile, verifyExtraction: config.verify },
       [options.array.buffer],
     );
     if (!promise) {

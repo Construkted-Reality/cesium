@@ -11,6 +11,7 @@ function replaceOnce(before, after) {
 }
 replaceOnce("let draco;", `let draco;
 let stages;
+let verifyExtraction;
 function measured(name, fn) {
   if (!stages) return fn();
   const start = performance.now();
@@ -25,17 +26,30 @@ for (const name of ["decodeIndexArray", "decodeAttribute"]) {
 replaceOnce("dracoDecoder.DecodeBufferToMesh(buffer, dracoGeometry)",
   'measured("codec", () => dracoDecoder.DecodeBufferToMesh(buffer, dracoGeometry))');
 replaceOnce("return decode(parameters, transferableObjects);", `
+  verifyExtraction = parameters.verifyExtraction;
   stages = parameters.profile ? {} : undefined;
   const start = performance.now();
   const result = await decode(parameters, transferableObjects);
   if (stages) {
     result.__dracoTest = { ...stages, total: performance.now() - start,
+      verified: !!verifyExtraction,
       wasmHeapBytes: draco.HEAPU8.buffer.byteLength,
       decodedBytes: result.indexArray.typedArray.byteLength + Object.values(result.attributeData).reduce((sum, a) => sum + a.array.byteLength, 0) };
   }
   stages = undefined;
   return result;`);
+async function buildWorker(name) {
 await build({
   stdin: { contents: source, resolveDir: "packages/engine/Source/Workers", sourcefile: "draco-diagnostic.js" },
-  outfile: "Build/TileCache/draco-legacy.js", bundle: true, format: "iife", platform: "browser", external: ["fs", "path"],
+  outfile: `Build/TileCache/draco-${name}.js`, bundle: true, format: "iife", platform: "browser", external: ["fs", "path"],
 });
+
+}
+await buildWorker("legacy");
+replaceOnce('() => original_decodeIndexArray(...args)', '() => bulk_decodeIndexArray(...args)');
+for (const name of ["decodeQuantizedDracoTypedArray", "decodeDracoTypedArray"]) {
+  replaceOnce(`function ${name}(`, `function original_${name}(`);
+  source += `\nfunction ${name}(...args) { return bulk_${name}(...args); }\n`;
+}
+source += (await readFile("tools/tile-cache/draco-bulk.js", "utf8")).replaceAll("export function", "function");
+await buildWorker("bulk");
