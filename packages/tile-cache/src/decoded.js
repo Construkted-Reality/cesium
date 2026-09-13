@@ -36,6 +36,7 @@ export function retainDecodedResources(Cesium, options) {
   let imageBytes = 0;
   let suspended = false;
   let destroyed = false;
+  let contextAvailable = true;
   const counters = {
     geometry: { hits: 0, admissions: 0, evictions: 0 },
     textures: { hits: 0, admissions: 0, evictions: 0 },
@@ -126,6 +127,7 @@ export function retainDecodedResources(Cesium, options) {
   function unload(loader) {
     const current = cache.cacheEntries[loader.cacheKey];
     if (
+      contextAvailable &&
       !suspended &&
       !destroyed &&
       current?.referenceCount === 1 &&
@@ -155,9 +157,14 @@ export function retainDecodedResources(Cesium, options) {
     }
   }
   function contextLost() {
+    contextAvailable = false;
     clear();
   }
+  function contextRestored() {
+    contextAvailable = true;
+  }
   canvas.addEventListener("webglcontextlost", contextLost);
+  canvas.addEventListener("webglcontextrestored", contextRestored);
   cache.get = get;
   cache.unload = unload;
   const controller = {
@@ -192,8 +199,13 @@ export function retainDecodedResources(Cesium, options) {
       }
       destroyed = true;
       canvas.removeEventListener("webglcontextlost", contextLost);
-      cache.get = originalGet;
-      cache.unload = originalUnload;
+      canvas.removeEventListener("webglcontextrestored", contextRestored);
+      if (cache.get === get) {
+        cache.get = originalGet;
+      }
+      if (cache.unload === unload) {
+        cache.unload = originalUnload;
+      }
       clear();
       installed.delete(cache);
     },

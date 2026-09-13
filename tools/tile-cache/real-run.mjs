@@ -75,6 +75,10 @@ async function visit(page, network, condition, label, pose, start = network.reco
   result.screenshot = `${label}.png`;
   const image = await page.locator("canvas").first().screenshot({ path: join(dirname(output), result.screenshot) });
   result.imageHash = createHash("sha256").update(image).digest("hex");
+  if (result.decodedResources) {
+    assert.ok(result.decodedResources.chargedBytes <= result.decodedResources.maximumBytes);
+    assert.ok(result.decodedResources.uniquePayloadBytes <= result.decodedResources.chargedBytes);
+  }
   assert.deepEqual(result.renderErrors, []);
   assert.ok(!result.events.some(event => event.name === "failed"), "Tiles failed to load");
   return result;
@@ -131,9 +135,17 @@ try {
           assert.equal(run.visits[2].transfer.upstreamRequests, 0, "Warm return must use local data");
           assert.equal(run.visits[2].cache.errors, 0);
         }
+        if (args.clearDecoded === "true" && decodedResources) {
+          run.beforeClear = await visit(page, network, condition, `${condition.name}-r${repetition}-before-clear-B`, asset.poses[1]);
+          run.cleared = await page.evaluate(() => window.harness.clearDecodedResources());
+          assert.equal(run.cleared.entries, 0);
+          run.afterClear = await visit(page, network, condition, `${condition.name}-r${repetition}-after-clear-A`, asset.poses[0]);
+          assert.equal(run.afterClear.imageHash, run.visits[0].imageHash);
+        }
         run.networkErrors = network.errors;
         run.cleanup = await page.evaluate(() => window.harness.dispose());
         assert.equal(run.cleanup.loaders, 0);
+        if (decodedResources) {assert.equal(run.cleanup.decodedResources.uniquePayloadBytes, 0);}
         assert.deepEqual(network.errors, []);
         assert.deepEqual(run.errors, []);
         if (condition.memoryBytes !== undefined) {
@@ -156,6 +168,7 @@ try {
           assert.deepEqual(run.restart.visible, run.visits[0].visible);
           run.restartCleanup = await page.evaluate(() => window.harness.dispose());
           assert.equal(run.restartCleanup.loaders, 0);
+          if (decodedResources) {assert.equal(run.restartCleanup.decodedResources.uniquePayloadBytes, 0);}
           assert.deepEqual(run.blockedRestartRequests, []);
         }
         run.complete = true;

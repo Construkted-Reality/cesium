@@ -260,6 +260,7 @@ window.harness = {
   },
   clearDecodedResources() {
     decodedResources?.clear();
+    return decodedResources?.stats();
   },
   dispose() {
     viewer.scene.primitives.remove(tileset);
