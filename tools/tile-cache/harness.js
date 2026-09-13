@@ -1,4 +1,5 @@
 /* global Cesium */
+import { tracePipeline } from "./pipeline.js";
 import { instrument } from "./instrument.js";
 const viewer = new Cesium.Viewer("view", {
   baseLayer: false,
@@ -23,6 +24,7 @@ let tileset;
 let active;
 let decoded;
 let probes;
+let pipeline;
 const events = [];
 const renderErrors = [];
 viewer.scene.renderError.addEventListener((...args) =>
@@ -57,6 +59,9 @@ window.harness = {
     window.tileCache = await registerTileCache(config);
   },
   async setup(config) {
+    if (config.pipeline && !pipeline) {
+      pipeline = tracePipeline(Cesium, viewer);
+    }
     if (tileset) {
       viewer.scene.primitives.remove(tileset);
     }
@@ -127,6 +132,7 @@ window.harness = {
   async visit(index, { timeoutMs = 30000, camera, pose } = {}) {
     const started = performance.now();
     probes?.reset();
+    pipeline?.begin();
     const eventStart = events.length;
     const frameStart = frameTimes.length;
     performance.clearResourceTimings();
@@ -155,6 +161,11 @@ window.harness = {
         },
       },
     );
+    const milestones = {
+      firstVisibleMs: null,
+      firstLoadedMs: null,
+      lastUnstableMs: 0,
+    };
     let stableFrames = 0;
     let previousVisible = "";
     let frameVisible = new Set();
@@ -174,11 +185,25 @@ window.harness = {
       }, timeoutMs);
       subscription.remove = viewer.scene.postRender.addEventListener(() => {
         const visible = [...frameVisible].sort();
+        const elapsed = performance.now() - started;
+        if (visible.length && milestones.firstVisibleMs === null) {
+          milestones.firstVisibleMs = elapsed;
+        }
+        if (
+          tileset.tilesLoaded &&
+          visible.length &&
+          milestones.firstLoadedMs === null
+        ) {
+          milestones.firstLoadedMs = elapsed;
+        }
         const key = JSON.stringify(visible);
         stableFrames =
           tileset.tilesLoaded && visible.length > 0 && key === previousVisible
             ? stableFrames + 1
             : 0;
+        if (stableFrames === 0) {
+          milestones.lastUnstableMs = elapsed;
+        }
         previousVisible = key;
         active.visible = frameVisible;
         frameVisible = new Set();
@@ -198,6 +223,8 @@ window.harness = {
       residentBytes: tileset.totalMemoryUsageInBytes,
       decoded: decoded?.stats(),
       probes: probes?.snapshot(),
+      pipeline: pipeline?.snapshot(),
+      milestones,
       visible: [...active.visible].sort(),
       events: events.slice(eventStart),
       frameMs: frameTimes.slice(frameStart),
@@ -216,6 +243,7 @@ window.harness = {
     tileset = undefined;
     decoded?.destroy();
     probes?.destroy();
+    pipeline?.destroy();
     return {
       loaders: Object.keys(Cesium.ResourceCache.cacheEntries).length,
       decoded: decoded?.stats(),

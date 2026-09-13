@@ -34,9 +34,9 @@ assert.ok(selected.every(name => conditions.some(c => c.name === name)));
 await mkdir(dirname(output), { recursive: true });
 const report = { startedAt: new Date().toISOString(), host: hostname(),
   commit: execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim(),
-  asset, launch, repetitions, idleMs, sourceHashes: {}, runs: [],
+  asset, launch, repetitions, idleMs, pipeline: args.pipeline === "true", sourceHashes: {}, runs: [],
   measurement: "Direct Wasabi HTTPS. No artificial latency. CDP observes page and Service Worker network sessions. Encoded bytes include response transport overhead. Camera movement is an immediate pose change." };
-for (const path of [configPath, "tools/tile-cache/real-run.mjs", "tools/tile-cache/network.mjs", "tools/tile-cache/harness.js", "Build/CesiumUnminified/Cesium.js", "Build/TileCache/worker.js", "Build/CesiumUnminified/ThirdParty/draco_decoder.wasm", "Build/CesiumUnminified/ThirdParty/basis_transcoder.wasm"]) {
+for (const path of [configPath, "tools/tile-cache/real-run.mjs", "tools/tile-cache/network.mjs", "tools/tile-cache/harness.js", "tools/tile-cache/pipeline.js", "Build/CesiumUnminified/Cesium.js", "Build/TileCache/worker.js", "Build/TileCache/profile-worker.js", "Build/CesiumUnminified/ThirdParty/draco_decoder.wasm", "Build/CesiumUnminified/ThirdParty/basis_transcoder.wasm"]) {
   report.sourceHashes[path] = createHash("sha256").update(await readFile(path)).digest("hex");
 }
 const server = await startServer({ latencyMs: 0 });
@@ -49,13 +49,13 @@ async function configure(page, condition) {
   await page.waitForFunction(() => !!window.harness);
   if (condition.memoryBytes !== undefined) {
     await page.evaluate(config => window.harness.enableCache(config), {
-      workerUrl: "/Build/TileCache/worker.js", urlPrefix: prefix,
+      workerUrl: args.pipeline === "true" ? "/Build/TileCache/profile-worker.js" : "/Build/TileCache/worker.js", urlPrefix: prefix,
       scope: "public-palace-measurement", version: "2026-09-13",
       diskBytes: asset.diskBytes, memoryBytes: condition.memoryBytes,
       maximumEntryBytes: asset.maximumEntryBytes,
     });
   }
-  return page.evaluate(config => window.harness.setup(config), { ...asset, ...condition });
+  return page.evaluate(config => window.harness.setup(config), { ...asset, ...condition, pipeline: args.pipeline === "true" });
 }
 async function visit(page, network, condition, label, pose, start = network.records.length) {
   const before = condition.memoryBytes === undefined ? null : await page.evaluate(() => window.tileCache.stats());

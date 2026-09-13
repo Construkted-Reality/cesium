@@ -23,3 +23,11 @@ await build({
   platform: "browser",
   sourcemap: true,
 });
+await build({
+  entryPoints: ["tools/tile-cache/profile-worker.js"],
+  outfile: "Build/TileCache/profile-worker.js",
+  bundle: true,
+  format: "iife",
+  platform: "browser",
+  define: { "process.env.NODE_ENV": '"production"' },
+});
