@@ -118,7 +118,9 @@ export function tracePipeline(Cesium, viewer) {
     constructor(url, options) {
       const absolute = new URL(url, location.href).href;
       const label = creatingWorker || absolute;
-      const match = label.match(/(decodeDraco|transcodeKTX2)(?:\.js)?$/);
+      const match = label
+        .replace(/draco-(legacy|bulk)\.js$/, "decodeDraco.js")
+        .match(/(decodeDraco|transcodeKTX2)(?:\.js)?$/);
       let workerUrl = url;
       if (match) {
         const script = `

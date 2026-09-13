@@ -1,4 +1,5 @@
 /* global Cesium */
+import { installDracoExperiment } from "./draco-experiment.js";
 import { tracePipeline } from "./pipeline.js";
 import { instrument } from "./instrument.js";
 const viewer = new Cesium.Viewer("view", {
@@ -25,6 +26,7 @@ let active;
 let decoded;
 let probes;
 let pipeline;
+let dracoExperiment;
 const events = [];
 const renderErrors = [];
 viewer.scene.renderError.addEventListener((...args) =>
@@ -61,6 +63,9 @@ window.harness = {
   async setup(config) {
     if (config.pipeline && !pipeline) {
       pipeline = tracePipeline(Cesium, viewer);
+    }
+    if (config.draco && !dracoExperiment) {
+      dracoExperiment = installDracoExperiment(Cesium, config.draco);
     }
     if (tileset) {
       viewer.scene.primitives.remove(tileset);
@@ -133,6 +138,7 @@ window.harness = {
     const started = performance.now();
     probes?.reset();
     pipeline?.begin();
+    dracoExperiment?.begin();
     const eventStart = events.length;
     const frameStart = frameTimes.length;
     performance.clearResourceTimings();
@@ -224,6 +230,7 @@ window.harness = {
       decoded: decoded?.stats(),
       probes: probes?.snapshot(),
       pipeline: await pipeline?.snapshot(),
+      draco: dracoExperiment?.snapshot(),
       milestones,
       visible: [...active.visible].sort(),
       events: events.slice(eventStart),
@@ -243,6 +250,7 @@ window.harness = {
     tileset = undefined;
     decoded?.destroy();
     probes?.destroy();
+    dracoExperiment?.destroy();
     pipeline?.destroy();
     return {
       loaders: Object.keys(Cesium.ResourceCache.cacheEntries).length,
