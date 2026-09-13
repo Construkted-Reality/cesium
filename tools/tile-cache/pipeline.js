@@ -95,21 +95,48 @@ export function tracePipeline(Cesium, viewer) {
   ]) {
     wrap(gl, name, `gl.${name}`);
   }
+  let creatingWorker;
+  function wrapWorkerCreation(name) {
+    const original = Cesium.TaskProcessor.prototype[name];
+    Cesium.TaskProcessor.prototype[name] = function (...args) {
+      const previous = creatingWorker;
+      creatingWorker = this._workerPath;
+      try {
+        return original.apply(this, args);
+      } finally {
+        creatingWorker = previous;
+      }
+    };
+    restore.push(() => {
+      Cesium.TaskProcessor.prototype[name] = original;
+    });
+  }
+  ["scheduleTask", "initWebAssemblyModule"].forEach(wrapWorkerCreation);
   const OriginalWorker = window.Worker;
   window.Worker = class extends OriginalWorker {
     constructor(url, options) {
       const absolute = new URL(url, location.href).href;
-      const match = absolute.match(/\/(decodeDraco|transcodeKTX2)\.js$/);
+      const label = creatingWorker || absolute;
+      const match = label.match(/(decodeDraco|transcodeKTX2)(?:\.js)?$/);
       let workerUrl = url;
       if (match) {
-        const script = `import ${JSON.stringify(absolute)};
+        const script = `
 const starts = new Map();
-const handler = self.onmessage;
 const post = self.postMessage.bind(self);
-self.onmessage = event => {
-  starts.set(event.data.id, performance.timeOrigin + performance.now());
-  return handler(event);
-};
+let handler, wrapped;
+Object.defineProperty(self, "onmessage", {
+  configurable: true,
+  get: () => handler,
+  set: fn => {
+    if (wrapped) self.removeEventListener("message", wrapped);
+    handler = fn;
+    wrapped = fn && (event => {
+      starts.set(event.data.id, performance.timeOrigin + performance.now());
+      return fn.call(self, event);
+    });
+    if (wrapped) self.addEventListener("message", wrapped);
+  }
+});
 self.postMessage = (message, ...args) => {
   const start = starts.get(message.id);
   if (start !== undefined) {
@@ -117,7 +144,8 @@ self.postMessage = (message, ...args) => {
     starts.delete(message.id);
   }
   return post(message, ...args);
-};`;
+};
+${options?.type === "module" ? `await import(${JSON.stringify(absolute)});` : `importScripts(${JSON.stringify(absolute)});`}`;
         workerUrl = URL.createObjectURL(
           new Blob([script], { type: "application/javascript" }),
         );
@@ -155,28 +183,70 @@ self.postMessage = (message, ...args) => {
   restore.push(() => {
     window.Worker = OriginalWorker;
   });
+  const timer = gl.getExtension("EXT_disjoint_timer_query_webgl2");
+  let queries = [];
+  let currentQuery;
   let frameStart;
+  function pollGpu() {
+    const disjoint = timer && gl.getParameter(timer.GPU_DISJOINT_EXT);
+    queries = queries.filter((entry) => {
+      if (!gl.getQueryParameter(entry.query, gl.QUERY_RESULT_AVAILABLE)) {
+        return true;
+      }
+      samples.push({
+        phase: "gpu.frame",
+        start: entry.start,
+        end: entry.end,
+        gpuMs: disjoint
+          ? null
+          : gl.getQueryParameter(entry.query, gl.QUERY_RESULT) / 1e6,
+        disjoint: !!disjoint,
+      });
+      gl.deleteQuery(entry.query);
+      return false;
+    });
+  }
   const before = viewer.scene.preUpdate.addEventListener(() => {
+    pollGpu();
     frameStart = now();
+    if (active && timer) {
+      currentQuery = { query: gl.createQuery(), start: frameStart };
+      gl.beginQuery(timer.TIME_ELAPSED_EXT, currentQuery.query);
+    }
   });
   const after = viewer.scene.postRender.addEventListener(() => {
     if (active) {
       frames.push({ start: frameStart, end: now() });
     }
+    if (currentQuery) {
+      gl.endQuery(timer.TIME_ELAPSED_EXT);
+      currentQuery.end = now();
+      queries.push(currentQuery);
+      currentQuery = undefined;
+    }
   });
   restore.push(before, after);
   return {
     begin() {
+      queries.forEach((entry) => gl.deleteQuery(entry.query));
+      queries = [];
       epoch = performance.now();
       samples = [];
       frames = [];
       active = true;
     },
-    snapshot() {
+    async snapshot() {
       active = false;
+      const deadline = performance.now() + 500;
+      while (queries.length && performance.now() < deadline) {
+        await new Promise((resolve) => setTimeout(resolve, 5));
+        pollGpu();
+      }
       return {
         samples,
         frames,
+        gpuTimerSupported: !!timer,
+        pendingGpuQueries: queries.length,
         note: "Async intervals overlap. Worker execution is receive-to-post elapsed time; queue and main-thread delivery are separate. GL calls measure synchronous submission, not GPU completion.",
       };
     },

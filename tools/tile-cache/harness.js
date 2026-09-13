@@ -223,7 +223,7 @@ window.harness = {
       residentBytes: tileset.totalMemoryUsageInBytes,
       decoded: decoded?.stats(),
       probes: probes?.snapshot(),
-      pipeline: pipeline?.snapshot(),
+      pipeline: await pipeline?.snapshot(),
       milestones,
       visible: [...active.visible].sort(),
       events: events.slice(eventStart),
