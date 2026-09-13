@@ -21,6 +21,8 @@ if (draco) {
   assert.ok(["legacy", "bulk"].includes(draco.extraction));
   assert.ok([1, 2, 4, 8, 16].includes(draco.workers));
 }
+const decodedResources = args.decoded ? { maximumBytes: Number(args.decodedBytes || 512 * 1024 * 1024), geometry: ["geometry", "both"].includes(args.decoded), textures: ["textures", "both"].includes(args.decoded) } : undefined;
+if (decodedResources) {assert.ok(["geometry", "textures", "both"].includes(args.decoded));}
 const prefix = new URL("./", asset.url).href;
 const launch = { channel: "chromium", headless: args.software === "true",
   viewport: { width: 1280, height: 720 }, deviceScaleFactor: 1,
@@ -39,9 +41,9 @@ assert.ok(selected.every(name => conditions.some(c => c.name === name)));
 await mkdir(dirname(output), { recursive: true });
 const report = { startedAt: new Date().toISOString(), host: hostname(),
   commit: execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim(),
-  asset, launch, draco, repetitions, idleMs, pipeline: args.pipeline === "true", sourceHashes: {}, runs: [],
+  asset, launch, draco, decodedResources, repetitions, idleMs, pipeline: args.pipeline === "true", sourceHashes: {}, runs: [],
   measurement: "Direct Wasabi HTTPS. No artificial latency. CDP observes page and Service Worker network sessions. Encoded bytes include response transport overhead. Camera movement is an immediate pose change." };
-for (const path of [...(draco ? [`Build/TileCache/draco-${draco.extraction}.js`, "tools/tile-cache/draco-build.mjs", "tools/tile-cache/draco-bulk.js", "tools/tile-cache/draco-experiment.js"] : []), configPath, "tools/tile-cache/real-run.mjs", "tools/tile-cache/network.mjs", "tools/tile-cache/harness.js", "tools/tile-cache/pipeline.js", "Build/CesiumUnminified/Cesium.js", "Build/TileCache/worker.js", "Build/TileCache/profile-worker.js", "Build/CesiumUnminified/ThirdParty/draco_decoder.wasm", "Build/CesiumUnminified/ThirdParty/basis_transcoder.wasm"]) {
+for (const path of [...(decodedResources ? ["Build/TileCache/decoded-resources.js", "packages/tile-cache/src/decoded.js"] : []),...(draco ? [`Build/TileCache/draco-${draco.extraction}.js`, "tools/tile-cache/draco-build.mjs", "tools/tile-cache/draco-bulk.js", "tools/tile-cache/draco-experiment.js"] : []), configPath, "tools/tile-cache/real-run.mjs", "tools/tile-cache/network.mjs", "tools/tile-cache/harness.js", "tools/tile-cache/pipeline.js", "Build/CesiumUnminified/Cesium.js", "Build/TileCache/worker.js", "Build/TileCache/profile-worker.js", "Build/CesiumUnminified/ThirdParty/draco_decoder.wasm", "Build/CesiumUnminified/ThirdParty/basis_transcoder.wasm"]) {
   report.sourceHashes[path] = createHash("sha256").update(await readFile(path)).digest("hex");
 }
 const server = await startServer({ latencyMs: 0 });
@@ -60,7 +62,7 @@ async function configure(page, condition) {
       maximumEntryBytes: asset.maximumEntryBytes,
     });
   }
-  return page.evaluate(config => window.harness.setup(config), { ...asset, ...condition, draco, pipeline: args.pipeline === "true" });
+  return page.evaluate(config => window.harness.setup(config), { ...asset, ...condition, draco, decodedResources: decodedResources && { ...decodedResources, urlPrefix: prefix }, pipeline: args.pipeline === "true" });
 }
 async function visit(page, network, condition, label, pose, start = network.records.length) {
   const before = condition.memoryBytes === undefined ? null : await page.evaluate(() => window.tileCache.stats());

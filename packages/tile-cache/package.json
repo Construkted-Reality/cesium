@@ -5,7 +5,10 @@
   "type": "module",
   "description": "Opt-in local response caching for Cesium applications",
   "license": "Apache-2.0",
-  "exports": "./src/client.js",
+  "exports": {
+    ".": "./src/client.js",
+    "./decoded": "./src/decoded.js"
+  },
   "dependencies": {
     "idb": "8.0.3",
     "lru-cache": "11.5.2",

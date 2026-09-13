@@ -27,6 +27,7 @@ let decoded;
 let probes;
 let pipeline;
 let dracoExperiment;
+let decodedResources;
 const events = [];
 const renderErrors = [];
 viewer.scene.renderError.addEventListener((...args) =>
@@ -66,6 +67,17 @@ window.harness = {
     }
     if (config.draco && !dracoExperiment) {
       dracoExperiment = installDracoExperiment(Cesium, config.draco);
+    }
+    if (config.decodedResources && !decodedResources) {
+      const moduleUrl = new URL(
+        "../../Build/TileCache/decoded-resources.js",
+        import.meta.url,
+      );
+      const { retainDecodedResources } = await import(moduleUrl.href);
+      decodedResources = retainDecodedResources(Cesium, {
+        ...config.decodedResources,
+        canvas: viewer.canvas,
+      });
     }
     if (tileset) {
       viewer.scene.primitives.remove(tileset);
@@ -228,6 +240,7 @@ window.harness = {
       settleMs: performance.now() - started,
       residentBytes: tileset.totalMemoryUsageInBytes,
       decoded: decoded?.stats(),
+      decodedResources: decodedResources?.stats(),
       probes: probes?.snapshot(),
       pipeline: await pipeline?.snapshot(),
       draco: dracoExperiment?.snapshot(),
@@ -245,16 +258,21 @@ window.harness = {
     active = undefined;
     return result;
   },
+  clearDecodedResources() {
+    decodedResources?.clear();
+  },
   dispose() {
     viewer.scene.primitives.remove(tileset);
     tileset = undefined;
     decoded?.destroy();
     probes?.destroy();
+    decodedResources?.destroy();
     dracoExperiment?.destroy();
     pipeline?.destroy();
     return {
       loaders: Object.keys(Cesium.ResourceCache.cacheEntries).length,
       decoded: decoded?.stats(),
+      decodedResources: decodedResources?.stats(),
     };
   },
 };

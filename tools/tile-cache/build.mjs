@@ -31,3 +31,9 @@ await build({
   platform: "browser",
   define: { "process.env.NODE_ENV": '"production"' },
 });
+
+await build({
+  entryPoints: ["packages/tile-cache/src/decoded.js"],
+  outfile: "Build/TileCache/decoded-resources.js",
+  bundle: true, format: "esm", platform: "browser",
+});
