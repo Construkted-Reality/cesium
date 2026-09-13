@@ -16,7 +16,7 @@ export async function sampleProcessMemory(session) {
   const text=await readFile(`/proc/${pid}/smaps_rollup`,'utf8');
   const field=name=>Number(text.match(new RegExp(`^${name}:\\s*(\\d+)`,'m'))?.[1]||0)*1024;
   const cmd=(await readFile(`/proc/${pid}/cmdline`,'utf8')).split('\0');
-  processes.push({pid,type:cmd.find(a=>a.startsWith('--type='))||'browser',rss:field('Rss'),pss:field('Pss'),privateBytes:field('Private_Clean')+field('Private_Dirty')});
+  processes.push({pid,type:cmd.join(' ').match(/(?:^|\s)(--type=\S+)/)?.[1]||'browser',rss:field('Rss'),pss:field('Pss'),privateBytes:field('Private_Clean')+field('Private_Dirty')});
  }catch{/* Processes may exit between the directory and memory reads. */}}
  const gpu=await execute('nvidia-smi',['--query-gpu=memory.used','--format=csv,noheader,nounits']);
  return {at:Date.now(),processes,pss:processes.reduce((s,p)=>s+p.pss,0),rss:processes.reduce((s,p)=>s+p.rss,0),privateBytes:processes.reduce((s,p)=>s+p.privateBytes,0),deviceUsedMiB:gpu.stdout.trim(),note:'PSS sums this browser process tree. RSS double counts shared pages. GPU usage is device-wide, not isolated to this page.'};
