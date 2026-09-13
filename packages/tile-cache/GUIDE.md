@@ -92,7 +92,8 @@ require a new storage prefix and an explicit migration or purge plan.
 
 ## Verification
 
-Build Cesium with `npx gulp build`, then run:
+Prepare decoder assets with `npx gulp prepare`, build Cesium with
+`npx gulp build`, then run:
 
 ```sh
 node tools/tile-cache/run.mjs --phase=cache --output=/tmp/tile-cache/cache.json

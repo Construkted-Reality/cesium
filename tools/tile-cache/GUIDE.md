@@ -1,6 +1,7 @@
 # Tile cache harness
 
-Run `npm install --ignore-scripts`, `npx husky`, and `npx gulp build` first.
+Run `npm install --ignore-scripts`, `npx husky`, `npx gulp prepare`, and
+`npx gulp build` first. The prepare task installs the decoder assets.
 
 Run the controlled baseline:
 
