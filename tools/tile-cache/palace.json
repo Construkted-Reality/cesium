@@ -1,0 +1,16 @@
+{
+  "name": "Palace of Fine Arts",
+  "page": "https://construkted.com/asset/a6h1xgn5pzd/",
+  "url": "https://s3.us-east-2.wasabisys.com/construkted-assets/a6h1xgn5pzd/tileset/tileset.json",
+  "localOrigin": [0, 0, 0],
+  "sse": 16,
+  "overflowBytes": 268435456,
+  "diskBytes": 1073741824,
+  "memoryBytes": 268435456,
+  "maximumEntryBytes": 67108864,
+  "residentBytes": 536870912,
+  "poses": [
+    { "name": "A-page-saved-view", "longitude": 0.00018805042227454404, "latitude": -0.0011419301678297063, "height": 48.32354538290278, "heading": 352.5907574697315, "pitch": -18.329227965626973, "roll": 359.9999851677337, "fov": 60 },
+    { "name": "B-opposite-side", "longitude": -0.00018805042227454404, "latitude": 0.0011419301678297063, "height": 48.32354538290278, "heading": 172.5907574697315, "pitch": -18.329227965626973, "roll": 0, "fov": 60 }
+  ]
+}

@@ -24,6 +24,10 @@ let active;
 let decoded;
 let probes;
 const events = [];
+const renderErrors = [];
+viewer.scene.renderError.addEventListener((...args) =>
+  renderErrors.push(String(args[1])),
+);
 const frameTimes = [];
 let lastFrame = performance.now();
 viewer.scene.postRender.addEventListener(() => {
@@ -58,8 +62,8 @@ window.harness = {
       config.url || "/tile-data/v1/tileset.json",
       {
         cacheBytes: config.cacheBytes,
-        maximumCacheOverflowBytes: 64 * 1024 * 1024,
-        maximumScreenSpaceError: 16,
+        maximumCacheOverflowBytes: config.overflowBytes ?? 64 * 1024 * 1024,
+        maximumScreenSpaceError: config.sse ?? 16,
         dynamicScreenSpaceError: false,
         foveatedScreenSpaceError: false,
         skipLevelOfDetail: false,
@@ -67,6 +71,11 @@ window.harness = {
         preloadFlightDestinations: false,
       },
     );
+    if (config.localOrigin) {
+      tileset.modelMatrix = Cesium.Transforms.eastNorthUpToFixedFrame(
+        Cesium.Cartesian3.fromDegrees(...config.localOrigin),
+      );
+    }
     viewer.scene.primitives.add(tileset);
     for (const [name, event] of [
       ["load", tileset.tileLoad],
@@ -101,13 +110,28 @@ window.harness = {
       resolutionScale: viewer.resolutionScale,
     };
   },
-  async visit(index, { timeoutMs = 30000, camera } = {}) {
+  async visit(index, { timeoutMs = 30000, camera, pose } = {}) {
     const started = performance.now();
     probes?.reset();
     const eventStart = events.length;
     const frameStart = frameTimes.length;
     performance.clearResourceTimings();
     active = { visible: new Set() };
+    if (pose) {
+      camera = {
+        destination: Cesium.Cartesian3.fromDegrees(
+          pose.longitude,
+          pose.latitude,
+          pose.height,
+        ),
+        orientation: {
+          heading: Cesium.Math.toRadians(pose.heading),
+          pitch: Cesium.Math.toRadians(pose.pitch),
+          roll: Cesium.Math.toRadians(pose.roll || 0),
+        },
+      };
+      viewer.camera.frustum.fov = Cesium.Math.toRadians(pose.fov || 60);
+    }
     viewer.camera.setView(
       camera || {
         destination: new Cesium.Cartesian3(6378437, index * 1000, 0),
@@ -118,28 +142,44 @@ window.harness = {
       },
     );
     let stableFrames = 0;
+    let previousVisible = "";
+    let frameVisible = new Set();
+    const removeVisible = tileset.tileVisible.addEventListener((tile) =>
+      frameVisible.add(tileUrl(tile)),
+    );
     await new Promise((resolve, reject) => {
       const subscription = {};
       const timer = setTimeout(() => {
         subscription.remove();
+        removeVisible();
         reject(
           new Error(
-            `View ${index} did not settle: ${JSON.stringify(events.slice(eventStart))}`,
+            `View ${index} did not settle: ${JSON.stringify({ events: events.slice(eventStart), renderErrors })}`,
           ),
         );
       }, timeoutMs);
       subscription.remove = viewer.scene.postRender.addEventListener(() => {
+        const visible = [...frameVisible].sort();
+        const key = JSON.stringify(visible);
         stableFrames =
-          tileset.tilesLoaded && active.visible.size > 0 ? stableFrames + 1 : 0;
+          tileset.tilesLoaded && visible.length > 0 && key === previousVisible
+            ? stableFrames + 1
+            : 0;
+        previousVisible = key;
+        active.visible = frameVisible;
+        frameVisible = new Set();
         if (stableFrames >= 4) {
           clearTimeout(timer);
           subscription.remove();
+          removeVisible();
           resolve();
         }
       });
     });
     const result = {
       index,
+      pose,
+      renderErrors: [...renderErrors],
       settleMs: performance.now() - started,
       residentBytes: tileset.totalMemoryUsageInBytes,
       decoded: decoded?.stats(),
