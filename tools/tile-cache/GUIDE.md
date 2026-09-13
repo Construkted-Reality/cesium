@@ -254,3 +254,43 @@ clear test adds B, clears the decoded cache, and revisits A to verify reconstruc
 from ordinary cache misses. Browser restarts retain compressed disk responses but
 start with an empty decoded RAM cache. Use `--idleMs=60000` to test a minute-away
 return. Measure control runs without pipeline probes as well as traced runs.
+
+## Live application measurements
+
+`app-run.mjs` opens the public asset page from `palace-route.json` and instruments
+its actual Cesium runtime. It does not substitute the fork engine or register a
+response-cache service worker. Normal browser HTTP caching remains enabled.
+Each run uses a fresh browser profile and follows the eight poses twice.
+
+```sh
+node tools/tile-cache/app-run.mjs --output=/tmp/app-http/results.json
+node tools/tile-cache/app-run.mjs --decoded=geometry --decodedBytes=536870912 --output=/tmp/app-geometry/results.json
+node tools/tile-cache/app-run.mjs --decoded=both --decodedBytes=2147483648 --output=/tmp/app-both/results.json
+node tools/tile-cache/app-run.mjs --gpuBytes=1073741824 --output=/tmp/app-gpu/results.json
+node tools/tile-cache/app-run.mjs --probe=true --recovery=native --output=/tmp/app-recovery/results.json
+```
+
+The runner requires the RTX A4000 Wayland test environment. It records live script
+hashes, runtime tile budgets, final tile identities, canvas PNGs, HTTP transfers,
+worker job counts, decoded payload bytes, and browser process-tree memory.
+Proportional set size (PSS) accounts for shared process pages proportionally.
+One-second samples include loading; their maximum is a sampled high-water value,
+not a guarantee that no shorter peak occurred. GPU memory from `nvidia-smi` is
+whole-device usage. Cesium's resident tile bytes are an estimate of tile resources,
+not total GPU allocation. The decoded payload budget is not a browser RAM limit.
+
+The timer starts at the camera change and waits for stable loaded selection after
+the application's foveated delay. Screenshot and per-view memory reads occur after
+timing. Revisit screenshots and selected tiles must match their first-lap versions.
+The current application requests screen-space error 8; the runner rejects a result
+that reduces this detail. A known Wordfence script response contains HTML and raises
+one parser error before rendering. The runner records it and accepts only that
+specific error with the matching response evidence.
+
+`--recovery=native` triggers `WEBGL_lose_context`, requests restoration, observes the
+result, then reloads the page and compares its first view. `--recovery=assisted` adds
+only a one-shot `preventDefault` listener to permit browser context restoration.
+It does not rebuild the viewer. This diagnostic case must not be described as the
+application's unmodified recovery behavior. A completed report records failed
+automatic recovery as data; `recoveredWithoutReload` must be inspected separately.
+Reload must restore identical pixels. `--probe=true` uses only the first pose.
