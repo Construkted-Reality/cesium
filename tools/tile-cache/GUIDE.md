@@ -91,3 +91,8 @@ then check cross-origin response caching, including external glTF images.
 
 Keep raw measurements and investigation notes on `research/tile-cache-results`.
 Keep implementation on `feature/tile-cache-harness`. Do not push without approval.
+
+For a headless NVIDIA host, pass `--backend=vulkan`. The report records the
+backend and browser launch arguments. The renderer check still rejects software
+rendering unless `--software=true` is explicitly supplied. Probe the host with
+`node tools/splat-perf/gpu-probe.mjs` before choosing a backend.

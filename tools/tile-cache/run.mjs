@@ -15,6 +15,13 @@ const output = resolve(
 );
 const repetitions = Number(options.repetitions || 5);
 const software = options.software === "true";
+const backend = software ? "swiftshader" : options.backend || "gl";
+assert.ok(["gl", "vulkan", "swiftshader"].includes(backend), "Unknown backend");
+const launchArgs = software
+  ? ["--use-angle=swiftshader", "--enable-unsafe-swiftshader"]
+  : backend === "vulkan"
+    ? ["--use-angle=vulkan", "--enable-features=Vulkan", "--ignore-gpu-blocklist", "--enable-gpu"]
+    : ["--use-angle=gl", "--ignore-gpu-blocklist"];
 assert.ok(
   Number.isSafeInteger(repetitions) && repetitions > 0,
   "repetitions must be a positive integer",
@@ -57,6 +64,8 @@ const report = {
   configuration: {
     repetitions,
     software,
+    backend,
+    launchArgs,
     latencyMs: server.state.latencyMs,
     textureSize: Number(options.textureSize || 512),
     viewport: { width: 800, height: 600 },
@@ -170,9 +179,7 @@ try {
         headless: true,
         viewport: report.configuration.viewport,
         deviceScaleFactor: 1,
-        args: software
-          ? ["--use-angle=swiftshader", "--enable-unsafe-swiftshader"]
-          : ["--use-angle=gl", "--ignore-gpu-blocklist"],
+        args: launchArgs,
       };
       let context = await chromium.launchPersistentContext(
         profile,
