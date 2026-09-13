@@ -16,7 +16,7 @@ const output = resolve(
 const repetitions = Number(options.repetitions || 5);
 const software = options.software === "true";
 const backend = software ? "swiftshader" : options.backend || "gl";
-assert.ok(["gl", "vulkan", "swiftshader"].includes(backend), "Unknown backend");
+assert.ok(software || ["gl", "vulkan"].includes(backend), "Unknown backend");
 const wayland = options.wayland === "true";
 assert.ok(!wayland || backend === "gl", "Wayland requires the gl backend");
 const launchArgs = software
