@@ -19,7 +19,7 @@ assert.ok(Number.isFinite(idleMs) && idleMs >= 0);
 const draco = args.draco ? { extraction: args.draco, verify: args.verify === "true", workers: Number(args.workers || 1), profile: args.pipeline === "true" } : undefined;
 if (draco) {
   assert.ok(["legacy", "bulk"].includes(draco.extraction));
-  assert.ok([1, 2, 4].includes(draco.workers));
+  assert.ok([1, 2, 4, 8, 16].includes(draco.workers));
 }
 const prefix = new URL("./", asset.url).href;
 const launch = { channel: "chromium", headless: args.software === "true",

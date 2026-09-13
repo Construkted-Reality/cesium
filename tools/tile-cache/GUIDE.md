@@ -183,7 +183,7 @@ node tools/tile-cache/real-run.mjs --conditions=disk --repetitions=1 --draco=bul
 `--draco=legacy` retains the existing extraction APIs. `--draco=bulk` uses Draco's
 bulk array APIs and copies the result out of WebAssembly memory before freeing
 its temporary allocation. Both variants use the same diagnostic build and
-scheduler. `--workers=1`, `2`, or `4` selects a pool size. The pool preserves the
+scheduler. `--workers=1`, `2`, `4`, `8`, or `16` selects a pool size. The pool preserves the
 original total outstanding-task limit, initializes lazily, and destroys its
 workers during harness cleanup. It applies to mesh buffer views, not point clouds.
 

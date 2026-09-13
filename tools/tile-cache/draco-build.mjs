@@ -38,6 +38,7 @@ replaceOnce("return decode(parameters, transferableObjects);", `
   }
   stages = undefined;
   return result;`);
+replaceOnce("  return true;\n}", "  return { ready: true, wasmHeapBytes: draco.HEAPU8.buffer.byteLength };\n}");
 async function buildWorker(name) {
 await build({
   stdin: { contents: source, resolveDir: "packages/engine/Source/Workers", sourcefile: "draco-diagnostic.js" },

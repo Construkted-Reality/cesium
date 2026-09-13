@@ -13,6 +13,7 @@ export function installDracoExperiment(Cesium, config) {
   let serial = 0;
   let peakOutstanding = 0;
   const initialization = [];
+  const workerHeaps = [];
   function initialize() {
     for (let i = 0; i < config.workers; i++) {
       const processor = new Cesium.TaskProcessor(
@@ -27,9 +28,10 @@ export function installDracoExperiment(Cesium, config) {
             wasmBinaryFile: "ThirdParty/draco_decoder.wasm",
           })
           .then((value) => {
-            if (!value) {
+            if (!value?.ready) {
               throw new Error("Draco initialization failed");
             }
+            workerHeaps[i] = value.wasmHeapBytes;
             return { worker: i, elapsedMs: performance.now() - start };
           }),
       );
@@ -72,6 +74,9 @@ export function installDracoExperiment(Cesium, config) {
     }
     peakOutstanding = Math.max(peakOutstanding, outstanding + 1);
     return promise.then((result) => {
+      if (result.__dracoTest) {
+        workerHeaps[worker] = result.__dracoTest.wasmHeapBytes;
+      }
       records.push({
         id,
         worker,
@@ -90,7 +95,13 @@ export function installDracoExperiment(Cesium, config) {
       peakOutstanding = 0;
     },
     snapshot() {
-      return { config, records, peakOutstanding, workers: workers.length };
+      return {
+        config,
+        records,
+        peakOutstanding,
+        workers: workers.length,
+        workerHeaps: config.profile ? [...workerHeaps] : undefined,
+      };
     },
     destroy() {
       loader.decodeBufferView = original;
