@@ -14,6 +14,8 @@ const asset = JSON.parse(await readFile(configPath, "utf8"));
 const output = resolve(args.output || "/tmp/palace-cache/results.json");
 const repetitions = Number(args.repetitions || 5);
 assert.ok(Number.isSafeInteger(repetitions) && repetitions > 0);
+const idleMs = Number(args.idleMs || 0);
+assert.ok(Number.isFinite(idleMs) && idleMs >= 0);
 const prefix = new URL("./", asset.url).href;
 const launch = { channel: "chromium", headless: args.software === "true",
   viewport: { width: 1280, height: 720 }, deviceScaleFactor: 1,
@@ -32,7 +34,7 @@ assert.ok(selected.every(name => conditions.some(c => c.name === name)));
 await mkdir(dirname(output), { recursive: true });
 const report = { startedAt: new Date().toISOString(), host: hostname(),
   commit: execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim(),
-  asset, launch, repetitions, sourceHashes: {}, runs: [],
+  asset, launch, repetitions, idleMs, sourceHashes: {}, runs: [],
   measurement: "Direct Wasabi HTTPS. No artificial latency. CDP observes page and Service Worker network sessions. Encoded bytes include response transport overhead. Camera movement is an immediate pose change." };
 for (const path of [configPath, "tools/tile-cache/real-run.mjs", "tools/tile-cache/network.mjs", "tools/tile-cache/harness.js", "Build/CesiumUnminified/Cesium.js", "Build/TileCache/worker.js", "Build/CesiumUnminified/ThirdParty/draco_decoder.wasm", "Build/CesiumUnminified/ThirdParty/basis_transcoder.wasm"]) {
   report.sourceHashes[path] = createHash("sha256").update(await readFile(path)).digest("hex");
@@ -95,6 +97,9 @@ try {
         run.browser = context.browser().version();
         run.setupMs = performance.now() - started;
         for (const [step, poseIndex] of [0, 1, 0].entries()) {
+          if (step === 2 && idleMs) {
+            await new Promise(resolve => setTimeout(resolve, idleMs));
+          }
           const pose = asset.poses[poseIndex];
           run.visits.push(await visit(page, network, condition,
             `${condition.name}-r${repetition}-${step}-${pose.name}`, pose,
@@ -105,6 +110,17 @@ try {
         run.sameReturnTiles = JSON.stringify(run.visits[0].visible) === JSON.stringify(run.visits[2].visible);
         run.evictedAtB = run.visits[1].events.filter(event => event.name === "unload").length;
         run.reloadedAtA = run.visits[2].events.filter(event => event.name === "load").length;
+        assert.ok(run.sameReturnPixels, "Returned pose pixels differ");
+        assert.ok(run.sameReturnTiles, "Returned pose selected tiles differ");
+        if (condition.cacheBytes === 1) {
+          assert.ok(run.evictedAtB > 0 && run.reloadedAtA > 0, "Expected eviction and reload");
+        } else {
+          assert.equal(run.reloadedAtA, 0, "Resident condition must retain A");
+        }
+        if (condition.memoryBytes !== undefined) {
+          assert.equal(run.visits[2].transfer.upstreamRequests, 0, "Warm return must use local data");
+          assert.equal(run.visits[2].cache.errors, 0);
+        }
         run.networkErrors = network.errors;
         run.cleanup = await page.evaluate(() => window.harness.dispose());
         assert.equal(run.cleanup.loaders, 0);
@@ -126,6 +142,8 @@ try {
           run.restart = await visit(page, network, condition,
             `${condition.name}-r${repetition}-restart-A`, asset.poses[0], 0);
           run.sameRestartPixels = run.restart.imageHash === run.visits[0].imageHash;
+          assert.ok(run.sameRestartPixels, "Offline restart pixels differ");
+          assert.deepEqual(run.restart.visible, run.visits[0].visible);
           run.restartCleanup = await page.evaluate(() => window.harness.dispose());
           assert.equal(run.restartCleanup.loaders, 0);
           assert.deepEqual(run.blockedRestartRequests, []);
